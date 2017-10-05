@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="linux," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="本篇主要归纳总结Linux下程序编译和安装管理的相关知识点。">
+<meta name="keywords" content="linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux学习札记（四）：程序编译和安装管理">
+<meta property="og:url" content="http://witchiman.github.io/2015/05/01/linux-learn-4/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="本篇主要归纳总结Linux下程序编译和安装管理的相关知识点。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.700Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux学习札记（四）：程序编译和安装管理">
+<meta name="twitter:description" content="本篇主要归纳总结Linux下程序编译和安装管理的相关知识点。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2015/05/01/linux-learn-4/"/>
+
+
+
+
+
+  <title>Linux学习札记（四）：程序编译和安装管理 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2015/05/01/linux-learn-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Linux学习札记（四）：程序编译和安装管理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-05-01T20:13:32+08:00">
+                2015-05-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本篇主要归纳总结Linux下程序编译和安装管理的相关知识点。</p>
+<a id="more"></a>
+<h1 id="程序编写与管理"><a href="#程序编写与管理" class="headerlink" title="程序编写与管理"></a>程序编写与管理</h1><h2 id="gcc命令"><a href="#gcc命令" class="headerlink" title="gcc命令"></a>gcc命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[hui@linux ~]$ gcc -c <span class="comment">#编译程序</span></div><div class="line">[hui@linux ~]$ gcc -O -c fie.c <span class="comment">#根据环境使用最优化编译级别对程序进行编译</span></div><div class="line">[hui@linux ~]$ gcc -o <span class="comment">#连接程序，后加-Wall可输出最多信息</span></div><div class="line">[hui@linux ~]$ gcc sin.c -lxx -L/lib -L/usr/lib <span class="comment">#后两个参数可缺省，-l是加入函数库，m为libxx.so函数库</span></div></pre></td></tr></table></figure>
+<h2 id="make命令"><a href="#make命令" class="headerlink" title="make命令"></a>make命令</h2><blockquote>
+<p>makefile文件规则</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">目标(target): 目标文件 1 目标文件 2</div><div class="line">&lt;tab&gt; gcc -o 欲建立的执行文件 目标文件 1 目标文件 2</div><div class="line"></div><div class="line"><span class="comment">#makefile文件内容</span></div><div class="line">main: c1.o c2.o</div><div class="line">	gcc -o hello c1.o c2.o </div><div class="line">clean:</div><div class="line">	rm -f hello c1.o c2.o</div><div class="line"><span class="comment"># 先清除之前的编译文件再编译</span></div><div class="line">[hui@linux ~]$ make clean main </div><div class="line"></div><div class="line"><span class="comment">#makefile使用变量</span></div><div class="line">LIBS = -lm</div><div class="line">OBJS = main.o haha.o sin_value.o cos_value.o</div><div class="line">main: <span class="variable">$&#123;OBJS&#125;</span></div><div class="line">    gcc -o main <span class="variable">$&#123;OBJS&#125;</span> <span class="variable">$&#123;LIBS&#125;</span></div><div class="line">clean:</div><div class="line">    rm -f main <span class="variable">$&#123;OBJS&#125;</span></div></pre></td></tr></table></figure>
+<blockquote>
+<p>通常一个未编译程序的安装步骤。如果安装在一个独立的目录中，需要将其man page的路径加入到/etc/man.config 里，在Ubuntu为/etc/manpath.config文件</p>
+</blockquote>
+<ul>
+<li>./configure，检测安装环境，生成makefile</li>
+<li>make clean，清除之前留下的编译文件</li>
+<li>make，编译文件生成可执行文件</li>
+<li>make install，安装可执行文件</li>
+</ul>
+<h2 id="比较文件差异"><a href="#比较文件差异" class="headerlink" title="比较文件差异"></a>比较文件差异</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#比较两个文件，并生成一个补丁</span></div><div class="line">[hui@linux ~]$ diff -Naur expatch.old expatch.new &gt; expatch.patch</div><div class="line"><span class="comment">#将补丁更新旧文件</span></div><div class="line">[hui@linux ~]$ patch -p0 &lt; expatch.patch <span class="comment">#-p后数字为文件路径去掉几个“/”</span></div></pre></td></tr></table></figure>
+<h2 id="动态函数库"><a href="#动态函数库" class="headerlink" title="动态函数库"></a>动态函数库</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#假如MySQL 数据库函式库在 /usr/lib/mysql 中，添加其到缓存</span></div><div class="line">[hui@linux ~]$ vi /etc/ld.so.conf   </div><div class="line">include ld.so.conf.d/*.conf</div><div class="line">/usr/lib/mysql <span class="comment">#这一行新增的啦！</span></div><div class="line"></div><div class="line"><span class="comment">#生成动态库</span></div><div class="line">[hui@linux ~]$ gcc -shared -fPIC -o libtest.so test.c</div><div class="line"></div><div class="line"><span class="comment">#查看缓存中的函数库</span></div><div class="line">[hui@linux ~]$ ldconfig -p</div><div class="line"><span class="comment">#查看某个文件的函数库</span></div><div class="line">[hui@linux ~]$ ldd file</div><div class="line"><span class="comment">#找出 /lib/libc.so.6 这个函式的相关其它函式库,加-v参数可查看来源</span></div><div class="line">[hui@linux ~]$ ldd /lib/libc.so.6</div></pre></td></tr></table></figure>
+<h2 id="校验文件完整性"><a href="#校验文件完整性" class="headerlink" title="校验文件完整性"></a>校验文件完整性</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[hui@linux ~]$ wget http:www.lala.com/test.rpm  <span class="comment">#下载文件</span></div><div class="line">[hui@linux ~]$ md5sum test.rpm <span class="comment">#查看文件的md5</span></div><div class="line">5a0c3fcfcd4c3f937644b8cd71a0cf89 test.rpm</div></pre></td></tr></table></figure>
+<h1 id="程序管理"><a href="#程序管理" class="headerlink" title="程序管理"></a>程序管理</h1><h2 id="包管理工具"><a href="#包管理工具" class="headerlink" title="包管理工具"></a>包管理工具</h2><p>在Redhat系统的Linux发行版中主要使用rpm包管理工具，其软件包后缀为rpm。</p>
+<p>rpm命令:</p>
+<ul>
+<li>-i ：install 的意思<ul>
+<li>-v ：察看更细部的安装信息画面</li>
+<li>-h ：以安装信息列显示安装进度</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">[hui@linux ~]$ rpm -ivh file1.rpm file2.rpm <span class="comment">#同时安装两个文件</span></div><div class="line">[hui@linux ~]$ rpm -ivh http://website.name/path/pkgname.rpm <span class="comment">#直接安装网上的文件</span></div><div class="line">[hui@linux ~]$ rpm -Uvh  fil... <span class="comment">#后面的软件都会安装，如有旧版则升级 </span></div><div class="line">[hui@linux ~]$ rpm -Fvh  fil... <span class="comment">#能升级旧版软件</span></div><div class="line">hui@hui-virtual-machine:~$ rpm -q python <span class="comment">#查询某个软件是否安装 </span></div><div class="line">package python is not installed </div><div class="line">[hui@linux ~]$ rpm -ql logrotate <span class="comment">#查看某个软件的目录和文件</span></div><div class="line"></div><div class="line">[hui@linux ~]$ rpm -e logrotate <span class="comment">#卸载某个软件</span></div><div class="line">[hui@linux ~]$ rpm -rebuilddb <span class="comment">#卸载软件后需重建数据库</span></div></pre></td></tr></table></figure>
+<blockquote>
+<p>rpmbuild命令，用以安装SRPM文件<br>参数：</p>
+<ul>
+<li>–rebuild，将SRPM进行编译和打包</li>
+<li>–recompile，将SRPM进行编译和打包后安装 </li>
+</ul>
+</blockquote>
+<p>在Debian系统的Linux发行版中则主要使用apt-get包管理工具,这一系统的安装包后缀为deb。</p>
+<p>apt-get命令</p>
+<ul>
+<li>安装软件，apt-get install </li>
+<li>卸载软件，apt-get remove</li>
+<li>卸载软件及配置文件， apt-get remove –purge</li>
+<li>卸载软件后删除无用的依赖，apt-get autoremove </li>
+<li>查看某一软件包的相关信息， apt-cache show</li>
+</ul>
+<h2 id="查看网络连接"><a href="#查看网络连接" class="headerlink" title="查看网络连接"></a>查看网络连接</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[hui@linux ~]$ netstat -tulp <span class="comment">#查看已经开户的网络服务</span></div><div class="line">[hui@linux ~]$ netstat -lnp <span class="comment">#查看有监听的网络服务</span></div><div class="line">[hui@linux ~]$ netstat -anp <span class="comment">#查看所有联网程序</span></div></pre></td></tr></table></figure>
+<h2 id="systemctl，系统服务管理"><a href="#systemctl，系统服务管理" class="headerlink" title="systemctl，系统服务管理"></a>systemctl，系统服务管理</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[hui@linux ~]$ systemctl list-units --<span class="built_in">type</span>=service <span class="comment">#显示所有已开启的服务</span></div><div class="line">[hui@linux ~]$ systemctl start nfs-server.service   <span class="comment"># 启动nfs服务,重启为restart</span></div><div class="line">[hui@linux ~]$ systemctl <span class="built_in">enable</span> nfs-server.service  <span class="comment"># 设置开机自启动 </span></div><div class="line">[hui@linux ~]$ systemctl <span class="built_in">disable</span> nfs-server.service <span class="comment"># 停止开机自启动 </span></div><div class="line">[hui@linux ~]$ systemctl status nfs-server.service  <span class="comment"># 查看服务当前状态</span></div></pre></td></tr></table></figure>
+<h2 id="登录日志"><a href="#登录日志" class="headerlink" title="登录日志"></a>登录日志</h2><ul>
+<li>/var/log/wtmp，记录登录用户的信息，已经被编码，必须由last命令读出</li>
+<li>/var/log/messages，记录系统发生错误的信息或重要的信息</li>
+<li>/var/log/boot.log，记录开机或服务启动时所显示的启动或关闭的信息</li>
+<li>/var/log/mail.log，记录邮件的使用信息</li>
+<li>/etc/syslogd，syslog配置各个服务记录日志所在路径的文件</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[hui@linux ~]$ sudo vim /etc/rsyslog.conf</div><div class="line">...</div><div class="line"><span class="comment">#所有等级为info或大于info的信息保存到指定路径</span></div><div class="line">*.info /var/<span class="built_in">log</span>/messages </div><div class="line"></div><div class="line"><span class="comment">#重启服务</span></div><div class="line">[hui@linux ~]$ /etc/init.d/rsyslog restart</div></pre></td></tr></table></figure>
+<h2 id="日志维护"><a href="#日志维护" class="headerlink" title="日志维护"></a>日志维护</h2><blockquote>
+<p>登录日志的维护是靠logrotate来进行的，其配置文件为/etc/logrotate.conf和/etc/logrotate.d/</p>
+<p>下的文件,前者为预设，后者存放每个服务建立的相应的配置文件，logrotate可以自动对日志进行截断(或轮循)、压缩以及删除旧的日志文件。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#执行一次 logrotate查看整个流程</span></div><div class="line">[hui@linux ~]$ logrotte -v /etc/logrotate.conf</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux/" rel="tag"># linux</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/04/28/linux-learn-3/" rel="next" title="Linux学习札记（三）：shell的使用和系统管理命令">
+                <i class="fa fa-chevron-left"></i> Linux学习札记（三）：shell的使用和系统管理命令
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/06/23/linux-kernel-compile/" rel="prev" title="Linux内核编译">
+                Linux内核编译 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#程序编写与管理"><span class="nav-number">1.</span> <span class="nav-text">程序编写与管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#gcc命令"><span class="nav-number">1.1.</span> <span class="nav-text">gcc命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#make命令"><span class="nav-number">1.2.</span> <span class="nav-text">make命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#比较文件差异"><span class="nav-number">1.3.</span> <span class="nav-text">比较文件差异</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动态函数库"><span class="nav-number">1.4.</span> <span class="nav-text">动态函数库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#校验文件完整性"><span class="nav-number">1.5.</span> <span class="nav-text">校验文件完整性</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#程序管理"><span class="nav-number">2.</span> <span class="nav-text">程序管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#包管理工具"><span class="nav-number">2.1.</span> <span class="nav-text">包管理工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看网络连接"><span class="nav-number">2.2.</span> <span class="nav-text">查看网络连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#systemctl，系统服务管理"><span class="nav-number">2.3.</span> <span class="nav-text">systemctl，系统服务管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#登录日志"><span class="nav-number">2.4.</span> <span class="nav-text">登录日志</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#日志维护"><span class="nav-number">2.5.</span> <span class="nav-text">日志维护</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

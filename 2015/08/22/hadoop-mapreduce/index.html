@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="bigdata," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="MapReduce是一种分布式计算模型框架，解决海量数据的计算问题。其将整个并行计算过程抽象到两个函数。">
+<meta name="keywords" content="bigdata">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hadoop学习笔记：MapReduce">
+<meta property="og:url" content="http://witchiman.github.io/2015/08/22/hadoop-mapreduce/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="MapReduce是一种分布式计算模型框架，解决海量数据的计算问题。其将整个并行计算过程抽象到两个函数。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop08.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop09.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop10.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop11.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop12.png">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.591Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hadoop学习笔记：MapReduce">
+<meta name="twitter:description" content="MapReduce是一种分布式计算模型框架，解决海量数据的计算问题。其将整个并行计算过程抽象到两个函数。">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop08.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2015/08/22/hadoop-mapreduce/"/>
+
+
+
+
+
+  <title>Hadoop学习笔记：MapReduce | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2015/08/22/hadoop-mapreduce/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Hadoop学习笔记：MapReduce</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-08-22T12:05:33+08:00">
+                2015-08-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>MapReduce是一种分布式计算模型框架，解决海量数据的计算问题。其将整个并行计算过程抽象到两个函数。</p>
+<a id="more"></a>
+<h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>在运行一个mapreduce计算任务时候，任务过程被分为两个阶段：map阶段和reduce阶段，每个阶段都是用键值对（key/value）作为输入（input）和输出（output）。而程序员要做的就是定义好这两个阶段的函数：map函数和reduce函数。</p>
+<ul>
+<li><p>Map: 对一些独立元素组成的列表的每一个元素进行指定的操作，可以高度并行。</p>
+</li>
+<li><p>Reduce: 对一个列表的元素进行合并。<br>一个简单的MapReduce程序只需要指定map()、redue()、input和output，剩下的事由框架完成。</p>
+</li>
+</ul>
+<h3 id="Mapreduce特点"><a href="#Mapreduce特点" class="headerlink" title="Mapreduce特点"></a>Mapreduce特点</h3><ul>
+<li><p>易于编程</p>
+</li>
+<li><p>良好的扩展性</p>
+</li>
+<li><p>高容错性</p>
+</li>
+<li><p>适合PB级以上海量数据的离线处理</p>
+</li>
+</ul>
+<h3 id="相关概念"><a href="#相关概念" class="headerlink" title="相关概念"></a>相关概念</h3><ul>
+<li><p>JobTracker:负责接收用户提交的作业，负责启动、跟踪任务执行。</p>
+</li>
+<li><p>TaskTracker:负责执行由JobTracker分配的任务，管理各个任务在每个节点上的执行情况。</p>
+</li>
+<li><p>Job:用户的每一个计算请求，称为一个作业。</p>
+</li>
+<li><p>Task:每个作业，都需要拆分开来，交由多个服务器来完成，拆分出来的执行单位，就称为任务。分为MapTask和ReduceTask两种。</p>
+</li>
+<li><p>Map Task</p>
+<ul>
+<li><p>Map引擎</p>
+</li>
+<li><p>解析每条数据记录，传递给用户编写的map()   </p>
+</li>
+<li><p>将map()输出数据写入本地磁盘（如果是map-only作业，则直接写入HDFS）</p>
+</li>
+</ul>
+</li>
+<li><p>Reduce Task</p>
+<ul>
+<li><p>Reduce引擎</p>
+</li>
+<li><p>从Map Task上远程读取数据</p>
+</li>
+<li><p>对数据进行排序</p>
+</li>
+<li><p>将数据按照分组传递给用户编写的reduce()</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="执行流程"><a href="#执行流程" class="headerlink" title="执行流程"></a>执行流程</h3><p><strong>MapReduce编程模型</strong></p>
+<p><em>input -&gt; map()-&gt;  reduce()-&gt;  output  侧重算法和数据结构</em><br>​<br><strong>Map任务处理</strong></p>
+<ul>
+<li><p>1)读取文件内容，把每一行解析成key、value对。每一个键值对调用一次map函数。</p>
+</li>
+<li><p>2)写自己的逻辑，对输入的key、value处理，转换成新的key、value输出。</p>
+</li>
+<li><p>3)对输出的key、value进行分区。</p>
+</li>
+<li><p>4)对不同分区的数据，按照key进行排序、分组。相同key的value放到一个集合中。</p>
+</li>
+<li><p>5)(可选)对分组后的数据进行归约。</p>
+</li>
+</ul>
+<p><strong>Reduce任务处理</strong></p>
+<ul>
+<li><p>1)对多个map任务的输出，按照不同的分区，通过网络copy到不同的reduce节点。</p>
+</li>
+<li><p>2)对多个map任务的输出进行合、排序（归并排序）。写reduce函数自己的逻辑，对输入的key、value处理，转换成新的key、value输出。</p>
+</li>
+<li><p>3)把reduce的输出保存到文件中。</p>
+</li>
+</ul>
+<p><strong>蒙地卡罗方法—测试集群MapReduce性能</strong></p>
+<p>hadoop jar hadoop-examples-1.2.1.jar pi 10 100  运行10map，每个map拆分成100个job</p>
+<h3 id="MapReduce程序编写"><a href="#MapReduce程序编写" class="headerlink" title="MapReduce程序编写"></a>MapReduce程序编写</h3><p>在MapReduce中，map和reduce函数遵循如下常规格式</p>
+<ul>
+<li><p>map: (K1, V1)  list(K2, V2)</p>
+</li>
+<li><p>reduce: (K2, list(V2))list(K3, V3)</p>
+</li>
+</ul>
+<p><strong>Mapper的接口：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">map</span><span class="params">( KEY key, VALUE value, Context context)</span> <span class="keyword">throws</span> IOException, </span></div><div class="line"><span class="function">				InterruptedException </span>&#123;</div><div class="line">			<span class="comment">////</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>Reduce的接口：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">reduce</span><span class="params">(KEY key, Iterable&lt;VALUE&gt; values, Context contetxt)</span> </span></div><div class="line"><span class="function">			<span class="keyword">throws</span> IOException, InterruptedException </span>&#123;</div><div class="line"><span class="comment">///</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>Job要引入org.apache.hadoop.mapreduce.Job;FileInputFormat 和FileOutputForma要引入org.apache.hadoop.mapreduce.lib下的包</p>
+</blockquote>
+<h2 id="配置Hadoop-eclipse-plugin"><a href="#配置Hadoop-eclipse-plugin" class="headerlink" title="配置Hadoop-eclipse-plugin"></a>配置Hadoop-eclipse-plugin</h2><p>1.打开Eclipse，windowpreferenceshadoop map/reduce，设置hadoop路径</p>
+<p>2.打开 windowperspectiveopen perspectivemap/reduce</p>
+<p>3.map/reduce locations，执行new hadoop location，编辑。</p>
+<ul>
+<li><p>General</p>
+<ul>
+<li>map/reduce</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">host:hadoop.dragon.org  自己绑定的域名</div><div class="line">port:9001</div></pre></td></tr></table></figure>
+<ul>
+<li>DFS master</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">host:hadoop.dragon.org 位于同一台机器所以同map/reduce</div><div class="line">port:9000</div></pre></td></tr></table></figure>
+<ul>
+<li>location:hadoop 随便设</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">username:hadoop 随便设</div><div class="line">SCKS proxy:保持默认</div></pre></td></tr></table></figure>
+</li>
+<li><p>Advanced parameters</p>
+<ul>
+<li><p>修改hadoop.tmp.dir: /opt/data/tmp  与core-site.xml保持一值</p>
+</li>
+<li><p>修改dfs.permissions:false 连接上才能看到此参数</p>
+</li>
+<li><p>修改dfs.replication:1 伪分布设置副本数为1</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>4.运行还需添加如下jar包</p>
+<p>commons-cli-1.2.jar、commons-logging-1.1.1.jar、 commons-configuration-1.6.jar、<br>commons-lang-2.4.jar、jackson-mapper-asl-1.8.8.jar、jackson-core-asl-1.8.8.jar</p>
+<blockquote>
+<p>推测是配置的插件编译时没引入。</p>
+</blockquote>
+<p>5.此时运行仍会遇到java.io.IOException: Failed to set permission</p>
+<ul>
+<li><p>添加包org.apache.hadoop.fs，导入FileUtil.java文件。注释掉FileUtil.java中的checkReturnValue()方法。添加如下包commons-io-2.1.jar、commons-httpclient-3.0.1.jar</p>
+</li>
+<li><p>或者重新编译。</p>
+</li>
+</ul>
+<center><br><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop08.png" alt=""><br></center>
+
+<h2 id="MapReduce作业运行分析"><a href="#MapReduce作业运行分析" class="headerlink" title="MapReduce作业运行分析"></a>MapReduce作业运行分析</h2><h3 id="mapreduce作业运行整体分析"><a href="#mapreduce作业运行整体分析" class="headerlink" title="mapreduce作业运行整体分析"></a>mapreduce作业运行整体分析</h3><ul>
+<li><p>i.客户端启动一个作业</p>
+</li>
+<li><p>ii.向JobTracker请求一个JobID</p>
+</li>
+<li><p>iii.将运行作业所需的资源文件复制到HDFS上，包括MapReduce程序打包的Jar文件、配置文件和客户端所得的输入划分信息。这些文件都存放在JobTracker专门为该作业创建的文件夹JobID中。输入划分信息告诉了JobTracker应该为作业启动多少个Map任务信息。Jar文件默认有10个副本（由mapred.submit.replication属性控制）</p>
+</li>
+<li><p>iv.JobTracker接收作业后，将其放在一个作业队列里，等待作业调度器对其进行调度，当作业调度器根据自己的算法调度到该任务时，会根据输入划分信息为每个划分创建一个map任务，并将map任务分配给TaskTracker执行。对于map和reduce任务，TaskTracker根据主机数量和内存的大小有固定数量的map槽（即slot,hadoop2.x里为container）和reduce槽。map任务是不能随随便便分配给某个TaskTracker的，有个概念叫数据本地化（Data-Local）。即：将map任务分配给含有该map处理的数据块 TaskTracker上，同时将程序Jar包复制到该TaskTracker上来运行，这叫”运算移动，数据不移动”。而分配reduce任务时并不考虑数据本地化。 </p>
+</li>
+<li><p>v.TaskTracker每隔一段时间会给JobTracker发送一个心跳，告诉JobTracker它依然在运行，同时心跳中还携带着很多的信息，比如当前map任务完成的进度等信息。当JobTracker收到作业的最后一个任务完成信息时，便把该作业设置成”成功”。当JobClient查询状态时，它将得知任务已完成，便显示一条信息给用户。</p>
+</li>
+</ul>
+<h3 id="Map端流程分析"><a href="#Map端流程分析" class="headerlink" title="Map端流程分析"></a>Map端流程分析</h3><ul>
+<li><p>i.每个输入分片会让一个map任务来处理，默认情况下，以HDFS的一个块的大小（默认64M）为一个分片。map输出的结果会暂且放在一个环形内存缓冲区中（默认大小为100M，由io.sort.mb属性控制），当其溢出时（默认为缓冲区大小的80%，由io.sort.spill.percent属性控制），会在本地文件系统中创建一个溢出文件，将该缓冲区中的数据写入这个文件。</p>
+</li>
+<li><p>ii.写入磁盘之前，线程首先根据reduce任务的数目将数据划分为相同数目的分区，一个reduce任务对应一个分区的数据，避免了reduce任务数据分配不均。分区就是对数据进行hash的过程，再对每个分区中的数据进行排序，如果此时设置了Combiner，将会对排序后的结果进行Combine操作，目的是让尽可能少的数据写入到磁盘。</p>
+</li>
+<li><p>iii.当map任务输入到最后一个记录时，可能会有很多的溢出文件，这时需要将这些文件合并，合并的过程中会不断地进行排序和combine操作，这减少了每次写入磁盘的数据量，也减少了下一阶段网络传输的数据量，最后合并成一个已分区且已排序的文件。为了进一步减少网络传输的数据量，可以将数据进行压缩（mapred.compress.map.out设置为true）。</p>
+</li>
+<li><p>iv.JobTracker中保存了整个集群宏观的信息，只要reduce任务向JobTracker获取相对应的map输出位置，就可以将分区中的数据拷贝给相对应的reduce任务。</p>
+</li>
+</ul>
+<h3 id="Reduce端流程分析"><a href="#Reduce端流程分析" class="headerlink" title="Reduce端流程分析"></a>Reduce端流程分析</h3><ul>
+<li><p>i.Reduce会接收到不同map任务传来的数据，并且每个map传来的数据都是有序的。如果reduce端收受的数据量相当小，则直接存储在内存中（缓冲区大小由mapred.job.shuffle.input.buffer。percent属性控制，表示用作此用途的堆空间的百分比），如果数据量超过了该缓冲区大小的一定比例（由mapred.job.shuffle.merge.percent决定），则对数据合并后溢写到磁盘中。</p>
+</li>
+<li><p>ii.随着溢写文件的增多，后台线程会将它们合并成一个更大的有序的文件，这样做是为了给后面的合并节省时间。其实不管在map端还是在reduce端，MapReduce都是反复地执行排序，合并操作。</p>
+</li>
+<li><p>iii.合并的过程中会产生许多的中间文件(写入磁盘)，但MapReduce会让写入磁盘的数据尽可能地少，并且最后一次合并的结果并没有写入磁盘，而是直接输入到reduce函数。</p>
+</li>
+</ul>
+<h3 id="Map-shuffle-phase"><a href="#Map-shuffle-phase" class="headerlink" title="Map shuffle phase"></a>Map shuffle phase</h3><center><br><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop09.png" alt=""><br></center>
+
+<p><strong>Shuffle</strong> 指从map task输出到reduce task 输入这段过程。</p>
+<p>在map task执行时，它的输入数据来源于HDFS的block，map task只读取split。split与block的对应关系可能是多对一，默认是一对一。在WordCount里假设，输入数据是”aaa”这样的字符串。</p>
+<p>mapper运行之后的输出是这样一个key/value对：key为”aaa”，value是1。map端只做加1的操作，在reduce task里才去合并结果集。例子中的job 有3个reduce task,当前的”aaa”将由哪个reduce去做，是需要现在决定的。</p>
+<p>MapReduce提供Partitioner接口，作用就是根据key或value及reduce的数量来决定当前的输出数据最终应该将由哪个reduce task 处理。默认对key hash后再以 reduce task数量取模。默认方式只是为了平均reduce的处理能力，如果用户自己对Partitioner有需求，可以自定义并设置到job上。</p>
+<p>在WordCount例子中，”aaa”经过Partitioner后返回0，也就是这对值应当将由第一个reducer来处理接下来，需要将数据写入内存缓冲区中，缓冲区的作用是批量收集map结果，减少磁盘IO的影响。key/value对以及Partition的结果都会被写入缓冲区。写入之前，key与value值都会被序列化成字节数组。</p>
+<p><strong>内存缓冲区有大小限制，默认是100MB。</strong>当map task的输出结果很多时，可能撑爆内存，所以需要在一定条件下将缓冲区的数据临时写入磁盘，然后重新利用这块缓冲区。<strong>这个从内存往磁盘写数据的过程被称为spill，即溢写。</strong>溢写是由单独线程来完成的，不影响入缓冲区写map结果的线程。溢写线程启动时不应该阻止map的结果输出所以整个缓冲区有个溢写的比例spill.percent。比例默认是0.8，即当缓冲区的数据已经达到阈值（buffer size <em> spill percent = 100MB </em> 0.8 = 80MB）,溢写线程启动，锁定这80MB的内存，执行溢写过程。Map task的输出结果还可以往剩下的20MB内存中写，互不影响。</p>
+<p><strong>当溢写线程启动后，需要对这80MB空间内的key做排序（sort）。</strong>排序是MapReduce模型默认的行为，这里的排序也是对序列化的字节做的排序。</p>
+<p>因为<strong>map task的输出是需要发送到不同的reduce端去</strong>，而内存缓冲区没有对将发送到相同reduce端的数据做合并，这种合并应该是体现在磁盘文件中的。如果有很多个key/value对需要发送到某个reduce端去，那么需要将这些key/value值拼接到一块，减少与partition相关的索引记录。</p>
+<p><strong>每次溢写会在磁盘上生成一个溢写文件</strong>，如果map的输出结果真的很大，有多次这样的溢写发生时，磁盘上相应的就会有多个溢写文件存在。当map task真正完成时，内存缓冲区中的数据也全部溢写到磁盘中形成一个溢写文件。最终磁盘中至少有一个这样的溢写文件存在(如果map的输出结果很少，当map执行完成后，只会生产一个溢写文件)，因为最终的文件只有一个。所以要将这些文件归并到一起，即merge。有相同key的value merge成group。</p>
+<p><strong>group:对于”aaa”就是类似于：”{“aaa”, [5, 8, 2, … ] }“</strong>，数组中的值就是从不同溢写文件中读取出来的，然后把这些值加起来。由于merge是将多个溢写文件合并到一个文件，所以可能也有相同的key存在，在这个过程中如果client设置过Combiner也会使用Combiner来合并相同的key。<br>map端的工作结束后，最终生成的这个文件也存放在TaskTracker可以管理的某个本地目录内。每个reduce task不断地通过RPC从JobTracker那里获取map task是否完成的信息如果reduce task得到通知，获知某台TaskTracker上的map task执行完成，Shuffle的后半段开始启动。</p>
+<center><br><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop10.png" alt=""><br></center>
+
+
+<h3 id="环形缓冲区"><a href="#环形缓冲区" class="headerlink" title="环形缓冲区"></a>环形缓冲区</h3><ul>
+<li><p>kvoffsets缓冲区，也叫偏移量索引数组，用于保存key/value信息在位置索引kvindices中的偏移量。当kvoffsets的使用率超过io.sort.spill.percent(默认80%)后，便会触发一次SpillThread线程的“溢写”操作，也就是开始一次Spill阶段的操作。</p>
+</li>
+<li><p>kvindices缓冲区，也叫位置索引数据，用于保存key/value在数据缓冲区kvbuffer中的起始位置。</p>
+</li>
+<li><p>kvbuffer即数据缓冲区，用于保存实际的key/value的值。默认情况下该缓冲区最多可以使用io.sort.mb的95%,当kvbuffer使用率超过io.sort.spill.percent(默认80%)后，便会发出一次SpillThread线程的“溢写”操作，也就是开始一次Spill阶段的操作。</p>
+</li>
+</ul>
+<center><br><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop11.png" alt=""><br></center>
+
+<h3 id="Reduce-shuffle-phase"><a href="#Reduce-shuffle-phase" class="headerlink" title="Reduce shuffle phase"></a>Reduce shuffle phase</h3><p>reduce task 在执行之前的工作就是不断地取当前job里每个map task的最终结果，然后不断地进行merge操作，最终形成一个reduce task的输入文件。</p>
+<ul>
+<li><p>copy过程，简单地取数据。Reduce 进程启动一些数据copy线程（Fethcer），通过HTTP方式请求map task所在的TaskTracker获map task的输出文件。由于map task已经结束，这些文件由TaskTracker管理在本地磁盘中。</p>
+</li>
+<li><p>merge阶段。这里的merge如map端的merge动作，只是数组中存放的是不同map端copy来的数值。copy过来的数据会先放入内存缓冲区中，这里的缓冲区大小要比map端的更为灵活，它基于JVM的heap size设置，因为shuffle阶段Reducer不运行，所以应该把大部分内存都给shuffle用。</p>
+</li>
+<li><p>merge有三种形式：内存到内存、内存到磁盘和磁盘到磁盘。默认第一种形式不启用，当内存中的数据量到达一定阈值，就启动内存到磁盘的merge。与map端类似，这也是溢写过程，如果设置了combiner，也是会启用的，然后在磁盘生成众多的溢写文件。第二种merge方式一直在运行，直到没有map端的数据时才结束，然后启动第三种磁盘到磁盘的merge方式生成最终的那个文件。</p>
+</li>
+<li><p>reducer输入文件。不断地merge后，最后会生成一个”最终文件”。这个文件存放于内存或磁盘中。对于我们来说，我们希望它存放于内存之中，直接作为reducer的输入，但默认情况下，这个文件是存放于磁盘中的。当reducer的输入文件已定，整个shuffle才最终结束。然后就是Reduce执行，把结果放到HDFS上。</p>
+</li>
+</ul>
+<blockquote>
+<p>对MapReduce的调优在很大程度上就是对MapReduce shuffle的性能的调优。</p>
+</blockquote>
+<h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><ul>
+<li><p>1)在Hadoop中所有的Key/value类型必须实现Writable接口，有两个方法，分别用读（反序列化操作）和写（序列化操作）。</p>
+<p>所有的Key,必须实现Comparable接口，在MapReduce过程中需要对Key/value对进行反复的排序，默认情况下依据Key排序的，要实现comparaTo()方法。</p>
+<p>对此，Hadoop中有一个兼顾两者的接口WritableComprable。</p>
+</li>
+<li><p>2)由于key需要序列化、反序列化和比较，对Java对象需要重写以下几个方法。</p>
+<ul>
+<li><p>equals()</p>
+</li>
+<li><p>hashCode()</p>
+</li>
+<li><p>toString()</p>
+</li>
+</ul>
+</li>
+<li><p>3)数据类型，必须有一个默认的无参的构造方法，为了方便反射，进行创建对象。</p>
+</li>
+<li><p>4)在自定义数据类型中，建议使用Java原生数据类型，最好不要使用Hadoop对原生类型封装好的类型。<br>//后为封装的类型</p>
+</li>
+<li><p>5)数据类型可实现RawComprarator接口，该接口允许直接比较数据流中的记录，</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PairWritable</span> <span class="keyword">implements</span> <span class="title">WritableComparable</span>&lt;<span class="title">PairWritable</span>&gt; </span>&#123;</div><div class="line">	privte String name; <span class="comment">//Text</span></div><div class="line">	<span class="keyword">private</span> Integer age; <span class="comment">//IntWritable</span></div><div class="line">	</div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="title">PairWritable</span><span class="params">()</span> </span>&#123;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>无须把数据反序列化为对象，这样便避免了新建对象的额外开销。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//获得IntWritable的comparator</span></div><div class="line">RawComprator&lt;IntWritable&gt; </div><div class="line">comparator = WritableComparator.get(IntWritable.class);</div><div class="line"><span class="comment">//这个comparator可用于比较两个IntWritable对象</span></div><div class="line">IntWritable w1 = <span class="keyword">new</span> IntWritable(<span class="number">163</span>);</div><div class="line">IntWritable w2 = <span class="keyword">new</span> IntWritable(<span class="number">67</span>);</div><div class="line">assertThat(comparator.compare(w1, w2),greaterThan(<span class="number">0</span>));</div><div class="line"><span class="comment">//其序列化表示：</span></div><div class="line"><span class="keyword">byte</span>[] b1 = serialize(w1);</div><div class="line"><span class="keyword">byte</span>[] b2 = serialize(w2);</div><div class="line">assertThat(comparator.compare(b1, <span class="number">0</span>, b1.length, b2, <span class="number">0</span>, b2.length), greaterThan(<span class="number">0</span>));`</div></pre></td></tr></table></figure>
+<ul>
+<li><p>6)对于自定义Comparator类，需要以下几步：</p>
+<ul>
+<li><p>推荐Comparator类定义在数据类型内部，静态内部类，实现WritableComparator类。</p>
+</li>
+<li><p>重写默认无参构造方法，方法内必须调用父类有参构造方法:</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">Comparator</span><span class="params">()</span> </span>&#123;</div><div class="line">  <span class="keyword">super</span>.(MyWritable.class);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li><p>重载父类的compare()方法，依据具体功能进行覆写。</p>
+</li>
+<li><p>向WritableComparator类中注册自定义的Comparator类:</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> &#123;</div><div class="line">	WritableComparator.define(PairWritable.class, <span class="keyword">new</span> Comparator() );</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>7)通常情况下，实现一个静态方法read(DataInput)，用以构造数据类型的实例对象，方法内部调用readFileds(DataInput)方法。</p>
+<p>Hadoop mapreduce data type 中所有的key，必须实现WritableComparator接口。</p>
+</li>
+<li><p>8)NullWritable和ObjectWritable</p>
+<ul>
+<li><p><strong>NullWritable</strong>是Writable的一个特殊类型，它的序列化长度为0。它并不从数据流中读取数据，也不写入数据。它充当占位符，如果希望存储一系列数值，与key/value相对，NullWritable也可以用作在SequenceFile中的键。它是一个不可变的单实例类型:通过调用NullWritable.get()方法可以获取这个实例。</p>
+</li>
+<li><p><strong>ObjectWritable</strong>是对Java基本类型（String, Enum, Writable，null或这些类型组成的数组）的一个通用封装，它在Hadoop RPC中用于对方法的参数和返回类型进行封装和解封装。当一个字段包含多个类型时，ObjectWritable是非常有用的。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="Mapper类和Reducer类"><a href="#Mapper类和Reducer类" class="headerlink" title="Mapper类和Reducer类"></a>Mapper类和Reducer类</h2><h3 id="Mapper类"><a href="#Mapper类" class="headerlink" title="Mapper类"></a>Mapper类</h3><p><strong>API文档</strong></p>
+<ul>
+<li><p>1)InputSplit 输入分片，InputFormat输入格式化</p>
+</li>
+<li><p>2)对Mapper 输出数据进行 Sorted排序和Group分组</p>
+</li>
+<li><p>3)对Mapper输出数据依据Reducer个数进行分区Partition</p>
+</li>
+<li><p>4)对Mapper输出数据进行Combiner</p>
+</li>
+</ul>
+<p><strong>方法：</strong></p>
+<ul>
+<li><p>第一类，protected类型，用户根据实际需要进行重写</p>
+<ul>
+<li><p>1)setup:每个任务执行前执行一次，对Map Tast进行一些预处理</p>
+</li>
+<li><p>2)map：每次接受一个key/value对并对其进行处理，再分发处理</p>
+</li>
+<li><p>3)cleanup:每个任务执行结束调用一次，对Map Task进行一些处理后的工作</p>
+</li>
+</ul>
+</li>
+<li><p>第二类，运行的方法</p>
+<p>run()方法，是Mapper类的入口，相当于Map Task的驱动，方法内部调用了setup()、map()、cleanup()。</p>
+</li>
+</ul>
+<h3 id="Reducer类"><a href="#Reducer类" class="headerlink" title="Reducer类"></a>Reducer类</h3><p><strong>功能说明</strong> </p>
+<ul>
+<li><p>获取map()方法输出的中间结果</p>
+</li>
+<li><p>将中间结果中的value按照Key划分组（group），而group按照key排序，形成了<key, (collection="" of="" values)="">的结构，此时key是唯一的</key,></p>
+</li>
+<li><p>处理group中的所有value，相同key的value组合。最终key对应的value唯一，<key, value="">序对形成。</key,></p>
+</li>
+</ul>
+<h2 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h2><h3 id="案例1：TopKey"><a href="#案例1：TopKey" class="headerlink" title="案例1：TopKey"></a>案例1：TopKey</h3><p><strong>算法实现</strong></p>
+<ul>
+<li><p>某个文件中革某列数据的最值（最大或最小）</p>
+</li>
+<li><p>某个文件中某列数据的Top Key值（最大或最小）</p>
+</li>
+<li><p>文件中某列数据的Top Key值（最大或最小）</p>
+</li>
+<li><p>统计和TopKey</p>
+</li>
+</ul>
+<p><strong>数据格式：</strong><br>​<br>    语言类别 歌曲名称 收藏次数 播放次数 歌手名称</p>
+<p><strong>需求：</strong></p>
+<pre><code>统计前十首播放次数最多的歌曲名称和次数
+</code></pre><h2 id="案例2：手机上网流量统计"><a href="#案例2：手机上网流量统计" class="headerlink" title="案例2：手机上网流量统计"></a>案例2：手机上网流量统计</h2><ul>
+<li><p>1)分析业务需求：用户使用手机上网，存在流量的消耗。流量包括两个部分: 上行流量（发送信息流量）；下行流量（接收信息流量）。每种流量在网络传输过程中，有两种形式的说明：包的大小，流量的大小。使用手机上网，以手机号为唯一标识符进行记录。<br>需要的字段：手机号码、上行数据包数、下行数据包数、上行总流量和下行总流量</p>
+</li>
+<li><p>2)自定义数据类型：<br>DataWritable 实现WritableComparable接口。</p>
+</li>
+<li><p>3)分析MapReduce写法，哪些业务逻辑在Map阶段执行，哪些业务逻辑在Reduce阶段执行。</p>
+</li>
+<li><p>4)Map阶段：从文件中获取数据，抽取需要的五个字段，输出的Key为手机号码，输出的value为数据流量的类型DataWritable对象。<br>Reduce：阶段将相同手机号码的value中的数据流量进行相加，得出手机流量的总数（数据包和数据流量）。输出到文件，以制表符分开。</p>
+</li>
+<li><p>5)测试。</p>
+</li>
+</ul>
+<h2 id="MapReduce配置和其它"><a href="#MapReduce配置和其它" class="headerlink" title="MapReduce配置和其它"></a>MapReduce配置和其它</h2><h3 id="MapReduce配置"><a href="#MapReduce配置" class="headerlink" title="MapReduce配置"></a>MapReduce配置</h3><p><strong>最小配置的MapReduce</strong>，读取输入文件中的内容，输出到定制目录的输出文件夹中，此时文件中的内容为</p>
+<ul>
+<li><p>Key: 输入文件每行内容的起始位置</p>
+</li>
+<li><p>Value: 输入文件每行的原内容</p>
+</li>
+</ul>
+<p>输同文件的内容就是：Key + \t + value</p>
+<h2 id="依据模板类编写WordCount"><a href="#依据模板类编写WordCount" class="headerlink" title="依据模板类编写WordCount"></a>依据模板类编写WordCount</h2><ul>
+<li><p>1)修改名称（MapReduce类的名称，Mapper类的名称和Reducer类的名称）</p>
+</li>
+<li><p>2)依据实际业务逻辑，修改Mapper类和Reducer类的Key/Value输入参数的类型</p>
+</li>
+<li><p>3)修改驱动Driver部分Job的参数设置（Mapper类和Reducer类的输出）</p>
+</li>
+<li><p>4)在Mapper类中编写实际的业务逻辑（setup()、map()、cleanup()）</p>
+</li>
+<li><p>5)在Reducer类中编写实际的业务逻辑（setup()、map()、cleanup()）</p>
+</li>
+<li><p>6)检查并修改驱动Driver代码（模板类的run()方法）</p>
+</li>
+<li><p>7)设置输入输出路径，进行MR测试。</p>
+</li>
+</ul>
+<h3 id="打印信息"><a href="#打印信息" class="headerlink" title="打印信息"></a>打印信息</h3><ul>
+<li><p>告知输入路径下有几个文件需要进行处理</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">INFO input.FileInputFormat: Total input paths to process : 1</div></pre></td></tr></table></figure>
+</li>
+<li><p>加载本地的Hadoop文件，默认的情况下，在Hadoop 1.x中存放于$HADOOP_HOME/c++/Linux-amd64-64/lib/</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">INFO util.NativeCodeLoader: Loaded the native-hadoop library</div></pre></td></tr></table></figure>
+</li>
+<li><p>加载本地的Snappy压缩算法的库存，默认情况下，Linux是没有相应的库存，需要用户进行配置<br>INFO util.NativeCodeLoader: Loaded the native-hadoop library</p>
+</li>
+</ul>
+<p><strong>运行JOB的相关进度信息</strong></p>
+<ul>
+<li><p>运行JOB的ID</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">INFO mapred.JobClient: Running job: job_201509071500_0001</div></pre></td></tr></table></figure>
+</li>
+<li><p>JOB运行时的Map Task和Reduce Task的运行进度</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">INFO mapred.JobClient:  map 0% reduce 0%</div><div class="line">INFO mapred.JobClient:  map 100% reduce 0%</div><div class="line">INFO mapred.JobClient:  map 100% reduce 100</div></pre></td></tr></table></figure>
+</li>
+<li><p>JOB运行完成</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">INFO mapred.JobClient: Job complete: job_201509071500_0001</div></pre></td></tr></table></figure>
+</li>
+<li><p>显示整个JOB运行过程，各类计数器Counter 的值，一共有29种五大类</p>
+</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">INFO mapred.JobClient: Counters: 29</div><div class="line">INFO mapred.JobClient:   Map-Reduce Framework</div><div class="line">INFO mapred.JobClient:     Spilled Records=40</div><div class="line">INFO mapred.JobClient:     Map output materialized bytes=296</div><div class="line">INFO mapred.JobClient:     Reduce input records=20</div><div class="line">INFO mapred.JobClient:     Virtual memory (bytes) snapshot=3885604864</div><div class="line">INFO mapred.JobClient:     Map input records=5</div><div class="line">INFO mapred.JobClient:     SPLIT_RAW_BYTES=115</div><div class="line">INFO mapred.JobClient:     Map output bytes=250</div><div class="line">INFO mapred.JobClient:     Reduce shuffle bytes=296</div><div class="line">INFO mapred.JobClient:     Physical memory (bytes) snapshot=248688640</div><div class="line">INFO mapred.JobClient:     Reduce input groups=20</div><div class="line">INFO mapred.JobClient:     Combine output records=20</div><div class="line">INFO mapred.JobClient:     Reduce output records=20</div><div class="line">INFO mapred.JobClient:     Map output records=20</div><div class="line">INFO mapred.JobClient:     Combine input records=20</div><div class="line">INFO mapred.JobClient:     CPU time spent (ms)=1560</div><div class="line">INFO mapred.JobClient:     Total committed heap usage (bytes)=160501760</div><div class="line">INFO mapred.JobClient:   File Input Format Counters </div><div class="line">INFO mapred.JobClient:     Bytes Read=176</div><div class="line">INFO mapred.JobClient:   FileSystemCounters</div><div class="line">INFO mapred.JobClient:     HDFS_BYTES_READ=291</div><div class="line">INFO mapred.JobClient:     FILE_BYTES_WRITTEN=110289</div><div class="line">INFO mapred.JobClient:     FILE_BYTES_READ=296</div><div class="line">INFO mapred.JobClient:     HDFS_BYTES_WRITTEN=210</div><div class="line">INFO mapred.JobClient:   Job Counters </div><div class="line">INFO mapred.JobClient:     Launched map tasks=1</div><div class="line">INFO mapred.JobClient:     Launched reduce tasks=1</div><div class="line">INFO mapred.JobClient:     SLOTS_MILLIS_REDUCES=10015</div><div class="line">INFO mapred.JobClient:     Total time spent by all reduces waiting after reserving slots (ms)=0</div><div class="line">INFO mapred.JobClient:     SLOTS_MILLIS_MAPS=8636</div><div class="line">INFO mapred.JobClient:     Total time spent by all maps waiting after reserving slots (ms)=0</div><div class="line">INFO mapred.JobClient:     Data-local map tasks=1</div><div class="line">INFO mapred.JobClient:   File Output Format Counters </div><div class="line">INFO mapred.JobClient:     Bytes Written=210</div></pre></td></tr></table></figure>
+<h2 id="计数器"><a href="#计数器" class="headerlink" title="计数器"></a>计数器</h2><p>MapReduce计数器为我们提供一个窗口，用于观察MapReduce Job运行期的各种细节</p>
+<ul>
+<li><p>Map-Reduce Framework包含了相当多的Job执行细节数据，一般情况下record表示行数据，byte表示行数据所占字节</p>
+</li>
+<li><p>File Input Format Counters 和File Output Format Counters对应，包含输入输出文件大小的信息。</p>
+</li>
+<li><p>FileSystemCounters</p>
+</li>
+</ul>
+<center><br><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop12.png" alt=""><br></center>
+
+
+<ul>
+<li>Job Counters,描述与job调度相关的统计 </li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Counter</th>
+<th>Map</th>
+<th>Reduce</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data-local map tasks</td>
+<td>0</td>
+<td>0</td>
+<td>67</td>
+</tr>
+<tr>
+<td>FALLOW_SLOTS_MILLIS_MAPS</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>FALLOW_SLOTS_MILLIS_REDUCES</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>SLOTS_MILLIS_MAPS</td>
+<td>0</td>
+<td>0</td>
+<td>1,210,936</td>
+</tr>
+<tr>
+<td>SLOTS_MILLIS_REDUCES</td>
+<td>0</td>
+<td>0</td>
+<td>1,628,224</td>
+</tr>
+<tr>
+<td>Launched map tasks</td>
+<td>0</td>
+<td>0</td>
+<td>67</td>
+</tr>
+<tr>
+<td>Launched reduce tasks</td>
+<td>0</td>
+<td>0</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p>Data-local map tasks </p>
+<p>Job在被调度时，如果启动了一个data-local(源文件的幅本在执行map task的taskTracker本地)</p>
+</li>
+<li><p>FALLOW_SLOTS_MILLIS_MAPS </p>
+<p>当前job为某些map task的执行保留了slot，总共保留的时间是多少 </p>
+</li>
+<li><p>FALLOW_SLOTS_MILLIS_REDUCES </p>
+<p>当前job为某些reduce task的执行保留了slot，总共保留的时间是多少 </p>
+</li>
+<li><p>SLOTS_MILLIS_MAPS </p>
+<p>所有map task占用slot的总时间，包含执行时间和创建/销毁JVM的时间    </p>
+</li>
+<li><p>SLOTS_MILLIS_REDUCES </p>
+<p>所有reduce task占用slot的总时间，包含执行时间和创建/销毁JVM的时间</p>
+</li>
+<li><p>Launched map tasks </p>
+<p>此job启动了多少个map task    </p>
+</li>
+<li><p>Launched reduce tasks     </p>
+<p>此job启动了多少个reduce task </p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/bigdata/" rel="tag"># bigdata</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/08/20/hadoop-introduction/" rel="next" title="Hadoop学习笔记：Hadoop简介、配置及HDFS的应用">
+                <i class="fa fa-chevron-left"></i> Hadoop学习笔记：Hadoop简介、配置及HDFS的应用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/09/27/poem-mid-autumn/" rel="prev" title="中秋有感">
+                中秋有感 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简述"><span class="nav-number">1.</span> <span class="nav-text">简述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Mapreduce特点"><span class="nav-number">1.1.</span> <span class="nav-text">Mapreduce特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#相关概念"><span class="nav-number">1.2.</span> <span class="nav-text">相关概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#执行流程"><span class="nav-number">1.3.</span> <span class="nav-text">执行流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MapReduce程序编写"><span class="nav-number">1.4.</span> <span class="nav-text">MapReduce程序编写</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置Hadoop-eclipse-plugin"><span class="nav-number">2.</span> <span class="nav-text">配置Hadoop-eclipse-plugin</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MapReduce作业运行分析"><span class="nav-number">3.</span> <span class="nav-text">MapReduce作业运行分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mapreduce作业运行整体分析"><span class="nav-number">3.1.</span> <span class="nav-text">mapreduce作业运行整体分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Map端流程分析"><span class="nav-number">3.2.</span> <span class="nav-text">Map端流程分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reduce端流程分析"><span class="nav-number">3.3.</span> <span class="nav-text">Reduce端流程分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Map-shuffle-phase"><span class="nav-number">3.4.</span> <span class="nav-text">Map shuffle phase</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#环形缓冲区"><span class="nav-number">3.5.</span> <span class="nav-text">环形缓冲区</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reduce-shuffle-phase"><span class="nav-number">3.6.</span> <span class="nav-text">Reduce shuffle phase</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据类型"><span class="nav-number">4.</span> <span class="nav-text">数据类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mapper类和Reducer类"><span class="nav-number">5.</span> <span class="nav-text">Mapper类和Reducer类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Mapper类"><span class="nav-number">5.1.</span> <span class="nav-text">Mapper类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reducer类"><span class="nav-number">5.2.</span> <span class="nav-text">Reducer类</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#案例"><span class="nav-number">6.</span> <span class="nav-text">案例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#案例1：TopKey"><span class="nav-number">6.1.</span> <span class="nav-text">案例1：TopKey</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#案例2：手机上网流量统计"><span class="nav-number">7.</span> <span class="nav-text">案例2：手机上网流量统计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MapReduce配置和其它"><span class="nav-number">8.</span> <span class="nav-text">MapReduce配置和其它</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MapReduce配置"><span class="nav-number">8.1.</span> <span class="nav-text">MapReduce配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#依据模板类编写WordCount"><span class="nav-number">9.</span> <span class="nav-text">依据模板类编写WordCount</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#打印信息"><span class="nav-number">9.1.</span> <span class="nav-text">打印信息</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#计数器"><span class="nav-number">10.</span> <span class="nav-text">计数器</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

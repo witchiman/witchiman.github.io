@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="algorithm," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="现代计算机和网络使我们能够访问海量的信息。查找是在大量的信息中寻找一个特定的信息元素。高效地检索这些信息的能力是处理它们的重要前提。本文简单概括性的介绍了常见的七种查找算法，说是七种，其实二分查找、插值查找以及斐波那契查找都可以归为一类——插值查找。插值查找和斐波那契查找是在二分查找的基础上的优化查找算法。">
+<meta name="keywords" content="algorithm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="常见的查找算法（上）">
+<meta property="og:url" content="http://witchiman.github.io/2017/07/09/seven-sort-algorithm1/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="现代计算机和网络使我们能够访问海量的信息。查找是在大量的信息中寻找一个特定的信息元素。高效地检索这些信息的能力是处理它们的重要前提。本文简单概括性的介绍了常见的七种查找算法，说是七种，其实二分查找、插值查找以及斐波那契查找都可以归为一类——插值查找。插值查找和斐波那契查找是在二分查找的基础上的优化查找算法。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://img.blog.csdn.net/20150323100632467?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2hlbmJvMjAzMA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.856Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="常见的查找算法（上）">
+<meta name="twitter:description" content="现代计算机和网络使我们能够访问海量的信息。查找是在大量的信息中寻找一个特定的信息元素。高效地检索这些信息的能力是处理它们的重要前提。本文简单概括性的介绍了常见的七种查找算法，说是七种，其实二分查找、插值查找以及斐波那契查找都可以归为一类——插值查找。插值查找和斐波那契查找是在二分查找的基础上的优化查找算法。">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20150323100632467?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2hlbmJvMjAzMA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2017/07/09/seven-sort-algorithm1/"/>
+
+
+
+
+
+  <title>常见的查找算法（上） | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2017/07/09/seven-sort-algorithm1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">常见的查找算法（上）</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-09T08:15:23+08:00">
+                2017-07-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>现代计算机和网络使我们能够访问海量的信息。查找是在大量的信息中寻找一个特定的信息元素。高效地检索这些信息的能力是处理它们的重要前提。本文简单概括性的介绍了常见的七种查找算法，说是七种，其实二分查找、插值查找以及斐波那契查找都可以归为一类——插值查找。插值查找和斐波那契查找是在二分查找的基础上的优化查找算法。</p>
+<a id="more"></a>
+<blockquote>
+<p>原文：<a href="http://www.cnblogs.com/maybe2030/p/4715035.html，这里在原文基础上加以补充修改。" target="_blank" rel="external">http://www.cnblogs.com/maybe2030/p/4715035.html，这里在原文基础上加以补充修改。</a></p>
+</blockquote>
+<p><strong> 查找定义:</strong>根据给定的某个值，在查找表中确定一个其关键字等于给定值的数据元素（或记录）。</p>
+<h2 id="查找算法分类"><a href="#查找算法分类" class="headerlink" title="查找算法分类"></a>查找算法分类</h2><h3 id="静态查找和动态查找"><a href="#静态查找和动态查找" class="headerlink" title="静态查找和动态查找"></a>静态查找和动态查找</h3><p>静态或者动态都是针对查找表而言的。动态表指查找表中有删除和插入操作的表。</p>
+<h3 id="无序查找和有序查找。"><a href="#无序查找和有序查找。" class="headerlink" title="无序查找和有序查找。"></a>无序查找和有序查找。</h3><ul>
+<li><p>无序查找：被查找数列有序无序均可；</p>
+</li>
+<li><p>有序查找：被查找数列必须为有序数列。</p>
+</li>
+</ul>
+<h3 id="平均查找长度（Average-Search-Length，ASL"><a href="#平均查找长度（Average-Search-Length，ASL" class="headerlink" title="平均查找长度（Average Search Length，ASL)"></a>平均查找长度（Average Search Length，ASL)</h3><p>需和指定key进行比较的关键字的个数的期望值，称为查找算法在查找成功时的平均查找长度。</p>
+<p>对于含有n个数据元素的查找表，查找成功的平均查找长度为：ASL = Pi*Ci的和。</p>
+<blockquote>
+<p>Pi：查找表中第i个数据元素的概率。<br>Ci：找到第i个数据元素时已经比较过的次数。</p>
+</blockquote>
+<h2 id="顺序查找"><a href="#顺序查找" class="headerlink" title="顺序查找"></a>顺序查找</h2><p><strong>说明：顺序查找适合于存储结构为顺序存储或链接存储的线性表。</strong></p>
+<p><strong>基本思想：</strong>顺序查找也称为线形查找，属于无序查找算法。从数据结构线形表的一端开始，顺序扫描，依次将扫描到的结点关键字与给定值k相比较，若相等则表示查找成功；若扫描结束仍没有找到关键字等于k的结点，表示查找失败。</p>
+<p><strong>复杂度分析：</strong>　</p>
+<p>查找成功时的平均查找长度为：（假设每个数据元素的概率相等） ASL = 1/n(1+2+3+…+n) = (n+1)/2 ;<br>当查找不成功时，需要n+1次比较，时间复杂度为O(n); 所以，<strong>顺序查找的时间复杂度为O(n</strong>)。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//顺序查找</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">SequenceSearch</span><span class="params">(<span class="keyword">int</span> a[], <span class="keyword">int</span> value, <span class="keyword">int</span> n)</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    <span class="keyword">int</span> i;</div><div class="line">    <span class="keyword">for</span>(i=<span class="number">0</span>; i&lt;n; i++)</div><div class="line">        <span class="keyword">if</span>(a[i]==value)</div><div class="line">            <span class="keyword">return</span> i;</div><div class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="二分查找"><a href="#二分查找" class="headerlink" title="二分查找"></a>二分查找</h2><p><strong>说明：元素必须是有序的，如果是无序的则要先进行排序操作。</strong></p>
+<p><strong>基本思想：</strong>也称为是折半查找，属于有序查找算法。用给定值k先与中间结点的关键字比较，中间结点把线形表分成两个子表，若相等则查找成功；若不相等，再根据k与该中间结点关键字的比较结果确定下一步查找哪个子表，这样递归进行，直到查找到或查找结束发现表中没有这样的结点。</p>
+<p><strong>复杂度分析：</strong>最坏情况下，关键词比较次数为log2(n+1)，且<strong>期望时间复杂度为O(log2n)</strong>；</p>
+<blockquote>
+<p> 注：<strong>折半查找的前提条件是需要有序表顺序存储，对于静态查找表，一次排序后不再变化，折半查找能得到不错的效率。但对于需要频繁执行插入或删除操作的数据集来说，维护有序的排序会带来不小的工作量，那就不建议使用。——《大话数据结构》</strong></p>
+</blockquote>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//二分查找，非递归</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">BinarySearch1</span><span class="params">(<span class="keyword">int</span> a[], <span class="keyword">int</span> value, <span class="keyword">int</span> n)</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    <span class="keyword">int</span> low, high, mid;</div><div class="line">    low = <span class="number">0</span>;</div><div class="line">    high = n<span class="number">-1</span>;</div><div class="line">    <span class="keyword">while</span>(low&lt;=high)</div><div class="line">    &#123;</div><div class="line">        mid = (low+high)/<span class="number">2</span>;</div><div class="line">        <span class="keyword">if</span>(a[mid]==value)</div><div class="line">            <span class="keyword">return</span> mid;</div><div class="line">        <span class="keyword">if</span>(a[mid]&gt;value)</div><div class="line">            high = mid<span class="number">-1</span>;</div><div class="line">        <span class="keyword">if</span>(a[mid]&lt;value)</div><div class="line">            low = mid+<span class="number">1</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">//二分查找，递归</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">BinarySearch2</span><span class="params">(<span class="keyword">int</span> a[], <span class="keyword">int</span> value, <span class="keyword">int</span> low, <span class="keyword">int</span> high)</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    <span class="keyword">int</span> mid = low+(high-low)/<span class="number">2</span>;</div><div class="line">    <span class="keyword">if</span>(a[mid]==value)</div><div class="line">        <span class="keyword">return</span> mid;</div><div class="line">    <span class="keyword">if</span>(a[mid]&gt;value)</div><div class="line">        <span class="keyword">return</span> BinarySearch2(a, value, low, mid<span class="number">-1</span>);</div><div class="line">    <span class="keyword">if</span>(a[mid]&lt;value)</div><div class="line">        <span class="keyword">return</span> BinarySearch2(a, value, mid+<span class="number">1</span>, high);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="插值查找"><a href="#插值查找" class="headerlink" title="插值查找"></a>插值查找</h2><p>在介绍插值查找之前，首先考虑一个新问题，为什么上述算法一定要是折半，而不是折四分之一或者折更多呢？</p>
+<p>打个比方，在英文字典里面查“apple”，你下意识翻开字典是翻前面的书页还是后面的书页呢？如果再让你查“zoo”，你又怎么查？很显然，这里你绝对不会是从中间开始查起，而是有一定目的的往前或往后翻。</p>
+<p>同样的，比如要在取值范围1 ~ 10000 之间 100 个元素从小到大均匀分布的数组中查找5， 我们自然会考虑从数组下标较小的开始查找。</p>
+<p>经过以上分析，折半查找这种查找方式，不是自适应的（也就是说是傻瓜式的）。二分查找中查找点计算如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mid=(low+high)/<span class="number">2</span>, 即mid=low+<span class="number">1</span>/<span class="number">2</span>*(high-low);</div></pre></td></tr></table></figure>
+<p>通过类比，我们可以将查找的点改进为如下：　　</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mid=low+(key-a[low])/(a[high]-a[low])*(high-low)，</div></pre></td></tr></table></figure>
+<p>也就是将上述的比例参数1/2改进为自适应的，根据关键字在整个有序表中所处的位置，让mid值的变化更靠近关键字key，这样也就间接地减少了比较次数。</p>
+<p><strong>基本思想：</strong>基于二分查找算法，将查找点的选择改进为自适应选择，可以提高查找效率。当然，差值查找也属于有序查找。</p>
+<blockquote>
+<p>注：<strong>对于表长较大，而关键字分布又比较均匀的查找表来说，插值查找算法的平均性能比折半查找要好的多。反之，数组中如果分布非常不均匀，那么插值查找未必是很合适的选择。</strong></p>
+</blockquote>
+<p><strong>复杂度分析：查找成功或者失败的时间复杂度均为O(log2(log2n))。</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//插值查找</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">InsertionSearch</span><span class="params">(<span class="keyword">int</span> a[], <span class="keyword">int</span> value, <span class="keyword">int</span> low, <span class="keyword">int</span> high)</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    <span class="keyword">int</span> mid = low+(value-a[low])/(a[high]-a[low])*(high-low);</div><div class="line">    <span class="keyword">if</span>(a[mid]==value)</div><div class="line">        <span class="keyword">return</span> mid;</div><div class="line">    <span class="keyword">if</span>(a[mid]&gt;value)</div><div class="line">        <span class="keyword">return</span> InsertionSearch(a, value, low, mid<span class="number">-1</span>);</div><div class="line">    <span class="keyword">if</span>(a[mid]&lt;value)</div><div class="line">        <span class="keyword">return</span> InsertionSearch(a, value, mid+<span class="number">1</span>, high);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="斐波那契查找"><a href="#斐波那契查找" class="headerlink" title="斐波那契查找"></a>斐波那契查找</h2><p>在介绍斐波那契查找算法之前，我们先介绍一下很它紧密相连并且大家都熟知的一个概念——黄金分割。</p>
+<p>黄金比例又称黄金分割，是指事物各部分间一定的数学比例关系，即将整体一分为二，较大部分与较小部分之比等于整体与较大部分之比，其比值约为1:0.618或1.618:1。</p>
+<p>0.618被公认为最具有审美意义的比例数字，这个数值的作用不仅仅体现在诸如绘画、雕塑、音乐、建筑等艺术领域，而且在管理、工程设计等方面也有着不可忽视的作用。因此被称为黄金分割。</p>
+<p>大家记不记得斐波那契数列：1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89…….（从第三个数开始，后边每一个数都是前两个数的和）。然后我们会发现，随着斐波那契数列的递增，前后两个数的比值会越来越接近0.618，利用这个特性，我们就可以将黄金比例运用到查找技术中。</p>
+<center><br><img src="http://img.blog.csdn.net/20150323100632467?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2hlbmJvMjAzMA==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""><br></center>
+
+<p><strong>基本思想：</strong>也是二分查找的一种提升算法，通过运用黄金比例的概念在数列中选择查找点进行查找，提高查找效率。同样地，斐波那契查找也属于一种有序查找算法。</p>
+<p>相对于折半查找，一般将待比较的key值与第mid=（low+high）/2位置的元素比较，比较结果分三种情况：</p>
+<ul>
+<li>=，mid位置的元素即为所求</li>
+<li>>，low=mid+1;</li>
+<li>&lt;，high=mid-1。</li>
+</ul>
+<p>斐波那契查找与折半查找很相似，他是根据斐波那契序列的特点对有序表进行分割的。他要求开始表中记录的个数为某个斐波那契数小1，即n=F(k)-1;</p>
+<p> 开始将key值与第F(k-1)位置的记录进行比较(即mid=low+F(k-1)-1),比较结果也分为三种</p>
+<ul>
+<li>=，mid位置的元素即为所求</li>
+<li>>，low=mid+1,k-=2;</li>
+</ul>
+<blockquote>
+<p>说明：low=mid+1说明待查找的元素在[mid+1,high]范围内，k-=2 说明范围[mid+1,high]内的元素个数为n-(F(k-1))= Fk-1-F(k-1)=Fk-F(k-1)-1=F(k-2)-1个，所以可以递归的应用斐波那契查找。</p>
+</blockquote>
+<ul>
+<li>&lt;，high=mid-1,k-=1。</li>
+</ul>
+<blockquote>
+<p> 说明：low=mid+1说明待查找的元素在[low,mid-1]范围内，k-=1 说明范围[low,mid-1]内的元素个数为F(k-1)-1个，所以可以递归的应用斐波那契查找。</p>
+</blockquote>
+<p><strong>复杂度分析：最坏情况下，时间复杂度为O(log2n)，且其期望复杂度也为O(log2n)。</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 斐波那契查找.cpp </span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"stdafx.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;memory&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span>  <span class="meta-string">&lt;iostream&gt;</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="keyword">const</span> <span class="keyword">int</span> max_size=<span class="number">20</span>;<span class="comment">//斐波那契数组的长度</span></div><div class="line"></div><div class="line"><span class="comment">/*构造一个斐波那契数组*/</span> </div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">Fibonacci</span><span class="params">(<span class="keyword">int</span> * arr)</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    arr[<span class="number">0</span>]=<span class="number">0</span>;</div><div class="line">    arr[<span class="number">1</span>]=<span class="number">1</span>;</div><div class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">2</span>;i&lt;max_size;++i)</div><div class="line">        arr[i]=arr[i<span class="number">-1</span>]+arr[i<span class="number">-2</span>];</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/*定义斐波那契查找法*/</span>  </div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">FibonacciSearch</span><span class="params">(<span class="keyword">int</span> *a, <span class="keyword">int</span> n, <span class="keyword">int</span> key)</span>  <span class="comment">//a为要查找的数组,n为要查找的数组长度,key为要查找的关键字</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">  <span class="keyword">int</span> low=<span class="number">0</span>;</div><div class="line">  <span class="keyword">int</span> high=n<span class="number">-1</span>;</div><div class="line">  </div><div class="line">  <span class="keyword">int</span> F[max_size];</div><div class="line">  Fibonacci(F);<span class="comment">//构造一个斐波那契数组F </span></div><div class="line"></div><div class="line">  <span class="keyword">int</span> k=<span class="number">0</span>;</div><div class="line">  <span class="keyword">while</span>(n&gt;F[k]<span class="number">-1</span>)<span class="comment">//计算n位于斐波那契数列的位置</span></div><div class="line">      ++k;</div><div class="line"></div><div class="line">  <span class="keyword">int</span>  * temp;<span class="comment">//将数组a扩展到F[k]-1的长度</span></div><div class="line">  temp=<span class="keyword">new</span> <span class="keyword">int</span> [F[k]<span class="number">-1</span>];</div><div class="line">  <span class="built_in">memcpy</span>(temp,a,n*<span class="keyword">sizeof</span>(<span class="keyword">int</span>));</div><div class="line"></div><div class="line">  <span class="keyword">for</span>(<span class="keyword">int</span> i=n;i&lt;F[k]<span class="number">-1</span>;++i)</div><div class="line">     temp[i]=a[n<span class="number">-1</span>];</div><div class="line">  </div><div class="line">  <span class="keyword">while</span>(low&lt;=high)</div><div class="line">  &#123;</div><div class="line">    <span class="keyword">int</span> mid=low+F[k<span class="number">-1</span>]<span class="number">-1</span>;</div><div class="line">    <span class="keyword">if</span>(key&lt;temp[mid])</div><div class="line">    &#123;</div><div class="line">      high=mid<span class="number">-1</span>;</div><div class="line">      k-=<span class="number">1</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(key&gt;temp[mid])</div><div class="line">    &#123;</div><div class="line">     low=mid+<span class="number">1</span>;</div><div class="line">     k-=<span class="number">2</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">else</span></div><div class="line">    &#123;</div><div class="line">       <span class="keyword">if</span>(mid&lt;n)</div><div class="line">           <span class="keyword">return</span> mid; <span class="comment">//若相等则说明mid即为查找到的位置</span></div><div class="line">       <span class="keyword">else</span></div><div class="line">           <span class="keyword">return</span> n<span class="number">-1</span>; <span class="comment">//若mid&gt;=n则说明是扩展的数值,返回n-1</span></div><div class="line">    &#125;</div><div class="line">  &#125;  </div><div class="line">  <span class="keyword">delete</span> [] temp;</div><div class="line">  <span class="keyword">return</span> <span class="number">-1</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    <span class="keyword">int</span> a[] = &#123;<span class="number">0</span>,<span class="number">16</span>,<span class="number">24</span>,<span class="number">35</span>,<span class="number">47</span>,<span class="number">59</span>,<span class="number">62</span>,<span class="number">73</span>,<span class="number">88</span>,<span class="number">99</span>&#125;;</div><div class="line">    <span class="keyword">int</span> key=<span class="number">100</span>;</div><div class="line">    <span class="keyword">int</span> index=FibonacciSearch(a,<span class="keyword">sizeof</span>(a)/<span class="keyword">sizeof</span>(<span class="keyword">int</span>),key);</div><div class="line">    <span class="built_in">cout</span>&lt;&lt;key&lt;&lt;<span class="string">" is located at:"</span>&lt;&lt;index;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="分块查找"><a href="#分块查找" class="headerlink" title="分块查找"></a>分块查找</h2><p>分块查找又称索引顺序查找，它是顺序查找的一种改进方法。</p>
+<p><strong>算法思想：</strong>将n个数据元素”按块有序”划分为m块（m ≤ n），每块含有N/m个元素。每一块中的结点不必有序，但块与块之间必须”按块有序”；即第1块中任一元素的关键字都必须小于第2块中任一元素的关键字；而第2块中任一元素又都必须小于第3块中的任一元素，……</p>
+<p><strong>算法流程：</strong></p>
+<ul>
+<li>step1 ，先选取各块中的最大关键字构成一个索引表；</li>
+<li>step2 ，查找分两个部分：先对索引表进行二分查找或顺序查找，以确定待查记录在哪一块中；然后，在已确定的块中用顺序法进行查找。</li>
+</ul>
+<p><strong>时间复杂度分析，时间复杂度跟分块的大小有关，为O(log(m)+N/m)</strong> </p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*分块查找*/</span></div><div class="line"><span class="comment">//索引表  </span></div><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">IndexTable</span> </span></div><div class="line"><span class="class">&#123;</span>  </div><div class="line">    <span class="keyword">int</span> max;      <span class="comment">//每个块内的最大元素  </span></div><div class="line">    <span class="keyword">int</span> index;  <span class="comment">//块的下标</span></div><div class="line">&#125;;  </div><div class="line">  </div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">IndexOrderSearch</span><span class="params">(IndexTable *indexTable,<span class="keyword">int</span> *arr, <span class="keyword">int</span> n, <span class="keyword">int</span> m, <span class="keyword">int</span> value)</span></span></div><div class="line"><span class="function">  <span class="comment">// indexTable为索引表,arr为原数组,n为数组大小，m为块大小  </span></span></div><div class="line"><span class="function"></span>&#123;  </div><div class="line">    <span class="keyword">int</span> L = (n+m<span class="number">-1</span>)/m;  <span class="comment">// L为块数</span></div><div class="line">    <span class="keyword">int</span> i = <span class="number">0</span>;  </div><div class="line">    <span class="keyword">while</span>(i &lt; L &amp;&amp; indexTable[i].max &lt; value)  </div><div class="line">        i++;  </div><div class="line">    <span class="keyword">if</span>(i == L)  </div><div class="line">        <span class="keyword">return</span> <span class="number">-1</span>;  </div><div class="line">    <span class="keyword">else</span>  </div><div class="line">    &#123;  </div><div class="line">        <span class="keyword">int</span> j = indexTable[i].index;  </div><div class="line">        <span class="keyword">for</span>(j; j&lt;indexTable[i].index + m;j++)  </div><div class="line">            <span class="keyword">if</span>(arr[j] == value)  </div><div class="line">                <span class="keyword">return</span> j;         </div><div class="line">    &#125;  </div><div class="line">    <span class="keyword">return</span> <span class="number">-1</span>;  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>参考：</p>
+<ul>
+<li><a href="http://blog.csdn.net/u010025211/article/details/46635183" target="_blank" rel="external">查找算法系列之简单查找：顺序查找、二分查找、分块查找</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/algorithm/" rel="tag"># algorithm</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/20/common-encrypt-algorithms/" rel="next" title="常见的加密算法">
+                <i class="fa fa-chevron-left"></i> 常见的加密算法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/09/seven-sort-algorithm2/" rel="prev" title="常见的查找算法（中）树表查找">
+                常见的查找算法（中）树表查找 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#查找算法分类"><span class="nav-number">1.</span> <span class="nav-text">查找算法分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#静态查找和动态查找"><span class="nav-number">1.1.</span> <span class="nav-text">静态查找和动态查找</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#无序查找和有序查找。"><span class="nav-number">1.2.</span> <span class="nav-text">无序查找和有序查找。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#平均查找长度（Average-Search-Length，ASL"><span class="nav-number">1.3.</span> <span class="nav-text">平均查找长度（Average Search Length，ASL)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#顺序查找"><span class="nav-number">2.</span> <span class="nav-text">顺序查找</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二分查找"><span class="nav-number">3.</span> <span class="nav-text">二分查找</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插值查找"><span class="nav-number">4.</span> <span class="nav-text">插值查找</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#斐波那契查找"><span class="nav-number">5.</span> <span class="nav-text">斐波那契查找</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分块查找"><span class="nav-number">6.</span> <span class="nav-text">分块查找</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

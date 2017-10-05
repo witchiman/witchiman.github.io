@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="go," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="Go语言里的标准库里没有线程池的概念，不过我们可以利用Go强大的并发特性自己构建，而且在其它语言里也有成熟的设计模型可供借鉴，这里我们参考Java的线程池模型实现部分功能。 另外，确切地说，这里的线程并非真正意义上的线程，用“协程”这个概念称呼更为合适。">
+<meta name="keywords" content="go">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言里线程池的实现">
+<meta property="og:url" content="http://witchiman.github.io/2017/06/10/go-threadpool/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="Go语言里的标准库里没有线程池的概念，不过我们可以利用Go强大的并发特性自己构建，而且在其它语言里也有成熟的设计模型可供借鉴，这里我们参考Java的线程池模型实现部分功能。 另外，确切地说，这里的线程并非真正意义上的线程，用“协程”这个概念称呼更为合适。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.544Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Go语言里线程池的实现">
+<meta name="twitter:description" content="Go语言里的标准库里没有线程池的概念，不过我们可以利用Go强大的并发特性自己构建，而且在其它语言里也有成熟的设计模型可供借鉴，这里我们参考Java的线程池模型实现部分功能。 另外，确切地说，这里的线程并非真正意义上的线程，用“协程”这个概念称呼更为合适。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2017/06/10/go-threadpool/"/>
+
+
+
+
+
+  <title>Go语言里线程池的实现 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2017/06/10/go-threadpool/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Go语言里线程池的实现</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-10T12:31:13+08:00">
+                2017-06-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Go语言里的标准库里没有线程池的概念，不过我们可以利用Go强大的并发特性自己构建，而且在其它语言里也有成熟的设计模型可供借鉴，这里我们参考Java的线程池模型实现部分功能。</p>
+<p>另外，确切地说，这里的线程并非真正意义上的线程，用“协程”这个概念称呼更为合适。</p>
+<a id="more"></a>
+<h3 id="Future的定义"><a href="#Future的定义" class="headerlink" title="Future的定义"></a>Future的定义</h3><p>首先我需要实现一个Future的接口， 它是一个任务执行的载体。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Future <span class="keyword">interface</span> &#123;</div><div class="line">	Run() error</div><div class="line">	Success()</div><div class="line">	Failed(error)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>以后，每个要执行的任务都要实现这个接口的方法。</p>
+<p>下面我们来通过具体的代码实现这些方法。</p>
+<h3 id="Future的具体实现"><a href="#Future的具体实现" class="headerlink" title="Future的具体实现"></a>Future的具体实现</h3><p>我们通过两个具体的结构体实现接口。</p>
+<p>第一个结构体的作用，是在它初始化的时候给它传进一个整型数组和一个权重值，在它执行时，把这个整型数组的每个元素都乘以这个权重值再输出。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> NumTask <span class="keyword">struct</span> &#123;</div><div class="line">	Name <span class="keyword">string</span></div><div class="line">	Elements []<span class="keyword">int</span></div><div class="line">	Weight <span class="keyword">int</span></div><div class="line">	IsStop <span class="keyword">bool</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n NumTask)</span> <span class="title">Run</span><span class="params">()</span> <span class="title">error</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(n.Elements) == <span class="number">0</span> &#123;</div><div class="line">		<span class="keyword">return</span> errors.New(<span class="string">"The args should not be null!"</span>)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">for</span> index, element := <span class="keyword">range</span> n.Elements &#123;</div><div class="line">		n.Elements[index] = element*n.Weight</div><div class="line">&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n NumTask)</span><span class="title">Success</span><span class="params">()</span></span>  &#123;</div><div class="line">	<span class="keyword">for</span> _,element := <span class="keyword">range</span> n.Elements &#123;</div><div class="line">		fmt.Printf(<span class="string">"The element in task %s is: %d\n"</span>,n.Name, element)</div><div class="line">	&#125;</div><div class="line">	fmt.Println(n.Name, <span class="string">"has done!"</span>)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n NumTask)</span><span class="title">Failed</span><span class="params">(err error)</span></span>  &#123;</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		beego.Error(n.Name, err)</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>第二个结构体的作用，是在初始化时传入一个字符串，在它执行时，把字符串里的字母全部转化成小写字母再输出。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">type</span> LowerTask <span class="keyword">struct</span> &#123;</div><div class="line">	Name <span class="keyword">string</span></div><div class="line">	Content <span class="keyword">string</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n LowerTask)</span> <span class="title">Run</span><span class="params">()</span> <span class="title">error</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> n.Content == <span class="string">""</span> &#123;</div><div class="line">		<span class="keyword">return</span> errors.New(<span class="string">"The args should not be null!"</span>)</div><div class="line">	&#125;</div><div class="line">	 n.Content = strings.ToLower(n.Content)</div><div class="line"></div><div class="line">	<span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n LowerTask)</span><span class="title">Success</span><span class="params">()</span></span>  &#123;</div><div class="line">	fmt.Println(n.Content)</div><div class="line">	fmt.Println(n.Name, <span class="string">"has done!"</span>)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(n LowerTask)</span><span class="title">Failed</span><span class="params">(err error)</span></span>  &#123;</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		beego.Error(n.Name, err)</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="Executor的实现"><a href="#Executor的实现" class="headerlink" title="Executor的实现"></a>Executor的实现</h3><p>Executor的结构很简单，我们力求精简，里面只有一个成员 tasks, 它是一个通道类型，它存储了以后我们要执行的任务。 </p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Executor <span class="keyword">struct</span> &#123;</div><div class="line">	tasks <span class="keyword">chan</span> Future</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>NewExecutor 函数返回一个初始化后的Executor，这里固定成可以存储10个Future。</p>
+<p>通过Executor 的Submit 方法可以提交一个任务，当任务提交完后，调用Executor 的Start 方法后，Executor 会不断轮循任务队列，依次执行所有 的任务。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *Executor)</span> <span class="title">Submit</span><span class="params">(future Future)</span></span>  &#123;</div><div class="line">	e.tasks &lt;- future</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *Executor)</span> <span class="title">Start</span><span class="params">()</span></span> &#123;</div><div class="line">	<span class="keyword">for</span> &#123;</div><div class="line">		<span class="keyword">select</span> &#123;</div><div class="line">		<span class="keyword">case</span> task := &lt;- e.tasks:</div><div class="line">			<span class="keyword">go</span> e.exec(task)</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewExecutor</span><span class="params">()</span> *<span class="title">Executor</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> &amp;Executor&#123;tasks: <span class="built_in">make</span>(<span class="keyword">chan</span> Future, <span class="number">10</span>)&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在 Executor 的Start 方法中，会通过它另外一个方法exec 再调用每个Future的Run 方法。 </p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *Executor)</span> <span class="title">exec</span><span class="params">(future Future)</span></span> &#123;</div><div class="line">	<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		<span class="keyword">if</span> err:=<span class="built_in">recover</span>(); err!=<span class="literal">nil</span> &#123;&#125;</div><div class="line">		fmt.Errorf(<span class="string">"Task execute error!"</span>)</div><div class="line">	&#125;()</div><div class="line">	err := future.Run()</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		future.Failed(err)</div><div class="line">	&#125; <span class="keyword">else</span> &#123;</div><div class="line">		future.Success()</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>当Future 的Run 方法 执行失败后，有错误返回，会继续调用Future的Failed方法；如果没有错误返回，则调用Future的Success 方法。</p>
+<h3 id="启动Executor-执行任务"><a href="#启动Executor-执行任务" class="headerlink" title="启动Executor 执行任务"></a>启动Executor 执行任务</h3><p>​    在main 函数里执行代码。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	exec := executor.NewExecutor();</div><div class="line">	future1 := executor.NumTask&#123;</div><div class="line">		Name: 		<span class="string">"Number task"</span>,</div><div class="line">		Elements: 	[]<span class="keyword">int</span>&#123;<span class="number">1</span> , <span class="number">2</span>, <span class="number">3</span> ,<span class="number">4</span>&#125;,</div><div class="line">		Weight:   	<span class="number">3</span>,</div><div class="line">	&#125;</div><div class="line">	exec.Submit(future1)</div><div class="line">	future2 := executor.LowerTask&#123;</div><div class="line">		Name: 		<span class="string">"String convert task"</span>,</div><div class="line">		Content: 	<span class="string">"I am just thirsty!"</span>,</div><div class="line">	&#125;</div><div class="line">	exec.Submit(future2)</div><div class="line">	exec.Start()</div><div class="line">&#125;</div><div class="line"><span class="comment">//output:</span></div><div class="line"><span class="comment">//        I am just thirsty!</span></div><div class="line"><span class="comment">//        String convert task has done!</span></div><div class="line"><span class="comment">//        The element in task Number task is: 3</span></div><div class="line"><span class="comment">//        The element in task Number task is: 6</span></div><div class="line"><span class="comment">//        The element in task Number task is: 9</span></div><div class="line"><span class="comment">//        The element in task Number task is: 12</span></div><div class="line"><span class="comment">//        Number task has done!</span></div></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/go/" rel="tag"># go</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/02/go-interface/" rel="next" title="Go语言interface的介绍">
+                <i class="fa fa-chevron-left"></i> Go语言interface的介绍
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/06/15/multi-develop/" rel="prev" title="多人协作开发代码提交流程">
+                多人协作开发代码提交流程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Future的定义"><span class="nav-number">1.</span> <span class="nav-text">Future的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Future的具体实现"><span class="nav-number">2.</span> <span class="nav-text">Future的具体实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Executor的实现"><span class="nav-number">3.</span> <span class="nav-text">Executor的实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动Executor-执行任务"><span class="nav-number">4.</span> <span class="nav-text">启动Executor 执行任务</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

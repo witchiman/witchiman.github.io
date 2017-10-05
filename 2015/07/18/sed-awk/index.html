@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="linux,文本处理," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="sed 和 awk 是linux上两个文本处理工具，两者的功能比较相似，相比sed， awk的功能更为强大一些，但使用上也更加复杂。">
+<meta name="keywords" content="linux,文本处理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="文本处理工具sed和awk">
+<meta property="og:url" content="http://witchiman.github.io/2015/07/18/sed-awk/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="sed 和 awk 是linux上两个文本处理工具，两者的功能比较相似，相比sed， awk的功能更为强大一些，但使用上也更加复杂。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.840Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="文本处理工具sed和awk">
+<meta name="twitter:description" content="sed 和 awk 是linux上两个文本处理工具，两者的功能比较相似，相比sed， awk的功能更为强大一些，但使用上也更加复杂。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2015/07/18/sed-awk/"/>
+
+
+
+
+
+  <title>文本处理工具sed和awk | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2015/07/18/sed-awk/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">文本处理工具sed和awk</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-07-18T15:13:51+08:00">
+                2015-07-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>sed 和 awk 是linux上两个文本处理工具，两者的功能比较相似，相比sed， awk的功能更为强大一些，但使用上也更加复杂。</p>
+<a id="more"></a>
+<h2 id="sed"><a href="#sed" class="headerlink" title="sed"></a>sed</h2><p>sed是一种流编辑器，它可以分析标准输入流的的数据， 然后将数据经过处理后，再输出到标准输出，能够完美的配合正则表达式使用。处理时，把当前处理的行存储在临时缓冲区中，称为“模式空间”（pattern space），接着用sed命令处理缓冲区中的内容，处理完成后，把缓冲区的内容送往屏幕。接着处理下一行，这样不断重复，直到文件末尾。文件内容并没有改变，除非你使用重定向存储输出。sed主要用来自动编辑一个或多个文件；简化对文件的反复操作；编写转换程序等。</p>
+<h3 id="显示文本内容，删除指定行"><a href="#显示文本内容，删除指定行" class="headerlink" title="显示文本内容，删除指定行"></a>显示文本内容，删除指定行</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#将 /etc/passwd 的内容列出并打印行号，同时删除2~39行</span></div><div class="line">[root@linux ~]<span class="comment">#  sed -n '2,39d' /etc/passwd</span></div><div class="line">     1	root:x:0:0:root:/root:/bin/bash</div><div class="line">     40 stad:x:120:65534::/var/lib/nfs:/bin/<span class="literal">false</span></div></pre></td></tr></table></figure>
+<h3 id="在指定位置插入行"><a href="#在指定位置插入行" class="headerlink" title="在指定位置插入行"></a>在指定位置插入行</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#在第二行后(亦即是加在第三行)加上'add here'</span></div><div class="line">[root@linux ~]<span class="comment"># sed -n '2a add here' /etc/passwd #把2a换成2i，则为加到第二行前</span></div><div class="line">     1	root:x:0:0:root:/root:/bin/bash</div><div class="line">     2	daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin</div><div class="line">add here</div></pre></td></tr></table></figure>
+<h3 id="替换指定行"><a href="#替换指定行" class="headerlink" title="替换指定行"></a>替换指定行</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#取代第2-7行的内容为指定字符串</span></div><div class="line">[root@linux ~]<span class="comment"># sed  -n '2,7c something changes' /etc/passwd</span></div><div class="line">    1 root:x:0:0:root:/root:/bin/bash</div><div class="line">something changes</div></pre></td></tr></table></figure>
+<h3 id="显示指定行"><a href="#显示指定行" class="headerlink" title="显示指定行"></a>显示指定行</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#仅列出第 5-6 行内容</span></div><div class="line">[root@linux ~]<span class="comment"># sed -n '5,6p' /etc/passwd</span></div><div class="line">    5 lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin</div><div class="line">    6 sync:x:5:0:sync:/sbin:/bin/sync</div></pre></td></tr></table></figure>
+<h3 id="显示含有指定关键词的行"><a href="#显示含有指定关键词的行" class="headerlink" title="显示含有指定关键词的行"></a>显示含有指定关键词的行</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#仅显示包含“game”的行</span></div><div class="line">[root@linux ~]<span class="comment"># sed -n '/game/p' file</span></div><div class="line"></div><div class="line"><span class="comment">#只打印那些发生替换的行,加后缀'p'</span></div><div class="line">[root@linux ~]<span class="comment"># sed -n 's/book/game/p' file</span></div><div class="line">    1 game book book</div><div class="line">    5 dfan hehe game</div><div class="line">    8 and i and we game</div></pre></td></tr></table></figure>
+<h3 id="替换文本内容-可通过使用正则表达式提高替换的效率"><a href="#替换文本内容-可通过使用正则表达式提高替换的效率" class="headerlink" title="替换文本内容,可通过使用正则表达式提高替换的效率"></a>替换文本内容,可通过使用正则表达式提高替换的效率</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">[root@linux ~]<span class="comment"># sed 's/Li/Wang/' file # 只替换每一行中的第一个“foo”字串</span></div><div class="line">[root@linux ~]<span class="comment"># sed 's/Li/Wang/4' file # 只替换每一行中的第四个“foo”字串</span></div><div class="line">[root@linux ~]<span class="comment"># sed 's/Li/Wang/g' file # 将每一行中的所有“foo”都换成“bar”</span></div><div class="line">[root@linux ~]<span class="comment"># sed 's/Li/Wang/gp' file # 以上都会显示所有的行,'p'后缀除了所有内容还会打印出发生替换的行</span></div><div class="line">Wang is a very funny guy.</div><div class="line">Wang is a very funny guy.</div><div class="line">every one love him. And Wang is very clever.</div><div class="line">every one love him. And Wang is very clever. </div><div class="line">Do you?</div><div class="line">[root@linux ~]<span class="comment"># sed -n 's/Li/Wang/gp' file # '-n'参数只打印出发生替换的行,并不显示所有内容</span></div><div class="line">Wang is a very funny guy.</div><div class="line">And Wang is very clever. We all think Wang is cool.</div><div class="line"></div><div class="line"><span class="comment">##一些复杂的例子</span></div><div class="line"><span class="comment">#删除文件中所有开头是test的行： </span></div><div class="line">[root@linux ~]<span class="comment"># sed '/^test/d' file</span></div><div class="line"><span class="comment">#正则表达式 \w\+ 匹配每一个单词，使用 [&amp;] 替换它，&amp; 对应于之前所匹配到的单词</span></div><div class="line">[root@linux ~]<span class="comment"># echo this is a test line | sed 's/\w\+/[&amp;]/g' </span></div><div class="line">[this] [is] [a] [<span class="built_in">test</span>] [line]</div><div class="line"><span class="comment">#love被标记为\1，同理匹配到的第二个结果即为\2.所有loveable会被替换成lovers，并打印出来： </span></div><div class="line">[root@linux ~]<span class="comment"># sed -n 's/\(love\)able/\1rs/p' file</span></div><div class="line"></div><div class="line"><span class="comment">#-e选项允许在同一行里执行多条命令.</span></div><div class="line"><span class="comment">#下面sed表达式的第一条命令删除1至5行，第二条命令用check替换test。命令的执行顺序对结果有影响。如果两个命令都是替换命令，那么第一个替换命令将影响第二个替换命令的结果</span></div><div class="line">[root@linux ~]<span class="comment"># sed -e '1,5d' -e 's/test/check/' file</span></div></pre></td></tr></table></figure>
+<h2 id="awk"><a href="#awk" class="headerlink" title="awk"></a>awk</h2><p>   awk是一个强大的文本分析工具,可以把文本逐行读入,以空格为默认的分隔符将每行切片,切开的部分再进行各种分析处理.相较于 sed 常常作用于一整个行的处理，awk 则比较倾向于一行当中分成数个字段来处理。</p>
+<h3 id="基本用法，-n-为awk里的内置变量，-0-表示所有列-1-表示第一列-2-表示第二列-依次类推"><a href="#基本用法，-n-为awk里的内置变量，-0-表示所有列-1-表示第一列-2-表示第二列-依次类推" class="headerlink" title="基本用法，\$n 为awk里的内置变量，\$0 表示所有列,\$1 表示第一列,\$2 表示第二列,依次类推"></a>基本用法，\$n 为awk里的内置变量，\$0 表示所有列,\$1 表示第一列,\$2 表示第二列,依次类推</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#显示最近登录的5个账户名,</span></div><div class="line">[root@linux ~]<span class="comment"># last -n 5|awk '&#123;print $1&#125;' </span></div><div class="line"></div><div class="line"><span class="comment">#显示/etc/passd的账户名和对应的shell,两者以tab分隔,-F 指定分隔域符为":"</span></div><div class="line">[root@linux ~]<span class="comment"># cat /etc/passwd | awk -F ':' '&#123;print $1"\t"$7&#125;'</span></div></pre></td></tr></table></figure>
+<h3 id="函数使用"><a href="#函数使用" class="headerlink" title="函数使用"></a>函数使用</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#在开始和结尾处添加信息</span></div><div class="line">[root@linux ~]<span class="comment"># cat /etc/passwd | awk -F ':' 'BEGIN &#123;print "name,shell"&#125; &#123;print $1","$7&#125; END &#123;print "blue,/bin/nosh"&#125;'</span></div></pre></td></tr></table></figure>
+<h3 id="搜索内容"><a href="#搜索内容" class="headerlink" title="搜索内容"></a>搜索内容</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#搜索/etc/passwd文件内有root关键字的所有行</span></div><div class="line">[root@linux ~]<span class="comment"># awk -F: '/root/' /etc/passwd</span></div><div class="line"><span class="comment">#搜索/etc/passwd文件内所有root关键字的所有行,并显示对应shell</span></div><div class="line">[root@linux ~]<span class="comment"># awk -F: '/root/&#123;print $7&#125;' /etc/passwd</span></div></pre></td></tr></table></figure>
+<h3 id="其它内置变量"><a href="#其它内置变量" class="headerlink" title="其它内置变量"></a>其它内置变量</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#统计/etc/passwd文件名,每行的行号,每行的行数,对应行的完整内容.FILENAME是内置变量名,值为处理文件名,NF为浏览记录的域的个数,NR为浏览的记录数</span></div><div class="line">[root@linux ~]<span class="comment"># awk -F ':' '&#123;print "filename:" FILENAME ",linenumber:" NR ",columns:" NF ",linecontent:" $0&#125;' /etc/passwd</span></div><div class="line"><span class="comment">#可使用printf替代print,从而使代码更为简洁</span></div><div class="line">[root@linux ~]<span class="comment">#  awk  -F ':'  '&#123;printf("filename:%10s,linenumber:%s,columns:%s,linecontent:%s\n",FILENAME,NR,NF,$0)&#125;' /etc/passwd</span></div></pre></td></tr></table></figure>
+<h3 id="自定义变量"><a href="#自定义变量" class="headerlink" title="自定义变量"></a>自定义变量</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#变量和赋值，除了awk的内置变量，awk还可以自定义变量。下面统计/etc/passwd的账户人数，count是自定义的变量</span></div><div class="line">[root@linux ~]<span class="comment"># awk 'BEGIN &#123;count=0;print "[start]user count is ", count&#125; &#123;count=count+1;print $0;&#125; END&#123;print "[end]user count is ", count&#125;' /etc/passwd</span></div><div class="line">[start]user count is  0</div><div class="line">root:x:0:0:root:/root:/bin/bash</div><div class="line">...</div><div class="line">[end]user count is  40</div><div class="line"><span class="comment">#统计某个文件夹的文件占用的字节数</span></div><div class="line">[root@linux ~]<span class="comment"># ls -l | awk 'BEGIN&#123;size=0;&#125; &#123;size=size+$5&#125; END&#123;print "[end]size is ", size&#125;'  </span></div><div class="line">[end]size is  8657198</div><div class="line"><span class="comment">#以M为单位显示,不包含子文件夹</span></div><div class="line">[root@linux ~]<span class="comment"># ls -l |awk 'BEGIN &#123;size=0;&#125; &#123;size=size+$5;&#125; END&#123;print "[end]size is ", size/1024/1024,"M"&#125;' </span></div><div class="line">[end]size is  8.25889 M</div></pre></td></tr></table></figure>
+<h3 id="条件语句和循环语句"><a href="#条件语句和循环语句" class="headerlink" title="条件语句和循环语句"></a>条件语句和循环语句</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#条件语句，统计某个文件夹下的文件占用的字节数,过滤4096大小的文件(一般都是文件夹):</span></div><div class="line">[root@linux ~]<span class="comment"># ls -l |awk 'BEGIN &#123;size=0;print "[start]size is ", size&#125; &#123;if($5!=4096)&#123;size=size+$5;&#125;&#125; END&#123;print "[end]size is ", size/1024/1024,"M"&#125;' </span></div><div class="line">[end]size is  8.22339 M</div><div class="line"><span class="comment">#循环语句，利用数组显示/etc/passwd的账户</span></div><div class="line">[root@linux ~]<span class="comment"># awk -F ':' 'BEGIN &#123;count=0;&#125; &#123;name[count] = $1;count++;&#125;; END&#123;for (i = 0; i &lt; NR; i++) print i, name[i]&#125;' /etc/passwd</span></div><div class="line">0 root</div><div class="line">1 daemon</div><div class="line">2 bin</div><div class="line">3 sys</div><div class="line">4 sync</div><div class="line">5 games</div><div class="line">......</div></pre></td></tr></table></figure>
+<p>参考资料: </p>
+<ul>
+<li><p><a href="http://www.iteye.com/topic/587673" target="_blank" rel="external">http://www.iteye.com/topic/587673</a></p>
+</li>
+<li><p><a href="http://www.cnblogs.com/ggjucheng/archive/2013/01/13/2858470.html" target="_blank" rel="external">http://www.cnblogs.com/ggjucheng/archive/2013/01/13/2858470.html</a></p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux/" rel="tag"># linux</a>
+          
+            <a href="/tags/文本处理/" rel="tag"># 文本处理</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/06/23/linux-kernel-compile/" rel="next" title="Linux内核编译">
+                <i class="fa fa-chevron-left"></i> Linux内核编译
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/07/24/ssh-err-log/" rel="prev" title="配置SSH过程中遇到的几个问题">
+                配置SSH过程中遇到的几个问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#sed"><span class="nav-number">1.</span> <span class="nav-text">sed</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#显示文本内容，删除指定行"><span class="nav-number">1.1.</span> <span class="nav-text">显示文本内容，删除指定行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在指定位置插入行"><span class="nav-number">1.2.</span> <span class="nav-text">在指定位置插入行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#替换指定行"><span class="nav-number">1.3.</span> <span class="nav-text">替换指定行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#显示指定行"><span class="nav-number">1.4.</span> <span class="nav-text">显示指定行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#显示含有指定关键词的行"><span class="nav-number">1.5.</span> <span class="nav-text">显示含有指定关键词的行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#替换文本内容-可通过使用正则表达式提高替换的效率"><span class="nav-number">1.6.</span> <span class="nav-text">替换文本内容,可通过使用正则表达式提高替换的效率</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#awk"><span class="nav-number">2.</span> <span class="nav-text">awk</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本用法，-n-为awk里的内置变量，-0-表示所有列-1-表示第一列-2-表示第二列-依次类推"><span class="nav-number">2.1.</span> <span class="nav-text">基本用法，\$n 为awk里的内置变量，\$0 表示所有列,\$1 表示第一列,\$2 表示第二列,依次类推</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#函数使用"><span class="nav-number">2.2.</span> <span class="nav-text">函数使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#搜索内容"><span class="nav-number">2.3.</span> <span class="nav-text">搜索内容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其它内置变量"><span class="nav-number">2.4.</span> <span class="nav-text">其它内置变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自定义变量"><span class="nav-number">2.5.</span> <span class="nav-text">自定义变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#条件语句和循环语句"><span class="nav-number">2.6.</span> <span class="nav-text">条件语句和循环语句</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

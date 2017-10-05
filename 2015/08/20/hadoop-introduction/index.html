@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="bigdata," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="Hadoop实现了一个分布式文件系统（Hadoop Distributed File System），简称HDFS。Hadoop的框架最核心的设计就是：HDFS和MapReduce。HDFS为海量的数据提供了存储，则MapReduce为海量的数据提供了计算。">
+<meta name="keywords" content="bigdata">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hadoop学习笔记：Hadoop简介、配置及HDFS的应用">
+<meta property="og:url" content="http://witchiman.github.io/2015/08/20/hadoop-introduction/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="Hadoop实现了一个分布式文件系统（Hadoop Distributed File System），简称HDFS。Hadoop的框架最核心的设计就是：HDFS和MapReduce。HDFS为海量的数据提供了存储，则MapReduce为海量的数据提供了计算。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop01.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop02.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop03.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop04.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop05.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop06.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop07.png">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.575Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hadoop学习笔记：Hadoop简介、配置及HDFS的应用">
+<meta name="twitter:description" content="Hadoop实现了一个分布式文件系统（Hadoop Distributed File System），简称HDFS。Hadoop的框架最核心的设计就是：HDFS和MapReduce。HDFS为海量的数据提供了存储，则MapReduce为海量的数据提供了计算。">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop01.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2015/08/20/hadoop-introduction/"/>
+
+
+
+
+
+  <title>Hadoop学习笔记：Hadoop简介、配置及HDFS的应用 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2015/08/20/hadoop-introduction/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Hadoop学习笔记：Hadoop简介、配置及HDFS的应用</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-08-20T23:02:25+08:00">
+                2015-08-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Hadoop实现了一个分布式文件系统（Hadoop Distributed File System），简称HDFS。Hadoop的框架最核心的设计就是：HDFS和MapReduce。HDFS为海量的数据提供了存储，则MapReduce为海量的数据提供了计算。</p>
+<a id="more"></a>
+<h2 id="Sqoop"><a href="#Sqoop" class="headerlink" title="Sqoop:"></a>Sqoop:</h2><p> Sqoop将关系型数据库中的数据与HDFS(HDFS文件，HBase中的表，Hive中的表)上的数据进行相互导入导出。 </p>
+<ul>
+<li><p>ETL:  提取-&gt;转换-&gt;加载</p>
+<p>从数据库中获取数据，并进行一系列的数据清理和清洗筛选，将合格的数据进行转换成一定合格的数据进行存储，将格式化的数据存储到HDFS文件系统上，以供计算框架进行数据分析和数据挖掘。</p>
+</li>
+<li><p>格式化数据：</p>
+<ul>
+<li>TSV格式：每行数据之间以【制表符\t】进行分割</li>
+<li>CSV格式：每行数据之间以【逗号】进行分割</li>
+</ul>
+</li>
+<li><p>Flume:收集各个应用系统和框架的日志，并将其放到HDFS分布式文件系统的相应制定的目录下。</p>
+</li>
+</ul>
+<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p>对于分布式系统和框架的架构来说，一般分为两部分。第一部分：管理层，用于管理应用层的，第二部分：应用层（工作的）。</p>
+<center><br><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop01.png" alt=""><br></center>
+
+<center><br><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop02.png" alt=""><br></center>
+
+<p>Hadoop的五个守护进程：</p>
+<p><strong>HDFS:</strong></p>
+<ul>
+<li><p>NameNode: 属于管理层，用于管理数据的存储</p>
+</li>
+<li><p>SecondaryNameNode: 也属于管理层，辅助NameNode进行管理</p>
+</li>
+<li><p>DataNode: 属于应用层，用户进行数据的存储，被NameNode进行管理，要定时的向NameNode进行工作汇报，执行NameNode分配的分发的任务。</p>
+</li>
+</ul>
+<p><strong>MapReduce 分布式的并行计算框架</strong></p>
+<ul>
+<li><p>JobTracker : 属于管理层，管理集群资源和对任务进行资源高度，监控任务的执行。</p>
+</li>
+<li><p>TaskTracker : 属于应用层，执行JobTracker分配分发的任务，并向JobTracker汇报工作情况。</p>
+</li>
+</ul>
+<center><br><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop03.png" alt=""><br></center>
+
+<p>NameNode,存储文件的元数据</p>
+<ul>
+<li><p>文件名称</p>
+</li>
+<li><p>文件的目录结构</p>
+</li>
+<li><p>文件的属性（权限，副本数，文件的生成时间）</p>
+</li>
+<li><p>文件对应的Block块存储在DataNode上</p>
+</li>
+</ul>
+<center><br><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop04.png" alt=""><br></center>
+
+<h2 id="Hadoop安装部署模式"><a href="#Hadoop安装部署模式" class="headerlink" title="Hadoop安装部署模式"></a>Hadoop安装部署模式</h2><ul>
+<li><p>单机模式: 只有一个JVM进程，没有分布式，不使用HDFS，通常用于调试。</p>
+</li>
+<li><p>伪分布式模式: 只有一台机器，每个Hadoop守护进程都是一个独立的JVM进程，通常用于调试。</p>
+</li>
+<li><p>完全分布式模式: 运行于多台机机器上，真实环境。</p>
+</li>
+</ul>
+<h3 id="设置普通用户无密码sudo权限"><a href="#设置普通用户无密码sudo权限" class="headerlink" title="设置普通用户无密码sudo权限"></a>设置普通用户无密码sudo权限</h3><ul>
+<li><p>编辑/etc/sudoers文件。</p>
+</li>
+<li><p>vi /etc/sudoers”,输入”i”进入编辑模式，</p>
+</li>
+<li><p>找到这一 行：”root ALL=(ALL) ALL”在起下面添加”xxx ALL=(ALL) ALL”(这里的xxx是你的用户名)，然后保存（就是先按一 下Esc键，然后输入”:wq”）退出。</p>
+</li>
+</ul>
+<h2 id="安装环境"><a href="#安装环境" class="headerlink" title="安装环境"></a>安装环境</h2><h3 id="1）安装JDK"><a href="#1）安装JDK" class="headerlink" title="1）安装JDK"></a>1）安装JDK</h3><ul>
+<li><p>第一步，解压/opt/software/jdk-6u45-linux-x64.bin到/opt/modules/</p>
+</li>
+<li><p>第二步，配置环境变量</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">export</span> JAVA_HOME=/opt/modules/jdk1.6.0_45</div><div class="line"><span class="built_in">export</span> PATH=<span class="variable">$JAVA_HOME</span>/bin:<span class="variable">$PATH</span></div></pre></td></tr></table></figure>
+<p>  以root用户登录，执行以下命令，使配置生效</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#source /etc/profile</span></div></pre></td></tr></table></figure>
+<p>  卸载自带JDK。</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">yum -y remove java-*.*</div></pre></td></tr></table></figure>
+<p>  查看目前系统的JDK:</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">rpm -qa | grep jdk</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="2）安装hadoop"><a href="#2）安装hadoop" class="headerlink" title="2）安装hadoop"></a>2）安装hadoop</h3><ul>
+<li><p>第一步，解压 #tar -zxvf hadoop-1.2.1-bin.tar.gz</p>
+</li>
+<li><p>第二步，移动 #mv hadoop-1.2.1 /opt/modules</p>
+</li>
+<li><p>第三步，配置环境变量，编辑【/etc/profile】文件，添加如下内容</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#HADOOP</span></div><div class="line"><span class="built_in">export</span> HADOOP_HOME=/opt/modules/hadoop-1.2.1</div><div class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:/opt/modules/hadoop-1.2.1/bin</div><div class="line"><span class="built_in">export</span> HADOOP_HOME_WARN_SUPPRESS=1   <span class="comment">#添加此项消除hadoop home is deprected的警告</span></div></pre></td></tr></table></figure>
+<p>  以root用户登录，执行以下命令，使配置生效</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#source /etc/profile</span></div></pre></td></tr></table></figure>
+</li>
+<li><p>第四步 测试 Hadoop</p>
+</li>
+<li><p>第五步 配置hadoop中的JDK安装路径 </p>
+<p>  vim /opt/modules/hadoop-1.2.1/conf/hadoop-env.sh</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">export</span> JAVA_HOME=/opt/modules/jdk1.*.*</div></pre></td></tr></table></figure>
+</li>
+<li><p>第六步 测试MapReduce 程序 </p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$mkdir</span> /opt/data/input</div><div class="line"><span class="variable">$cp</span> /opt/modules/hadoop-1.2.1/conf/*.xml /opt/data/input</div><div class="line"><span class="variable">$hadoop</span>  jar  /opt/modules/hadoop-1.2.1/hadoop-examples-1.2.1.jar  grep input output <span class="string">'dfs[a-z.]+'</span></div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="Hadoop组件依赖关系，配置Hadoop"><a href="#Hadoop组件依赖关系，配置Hadoop" class="headerlink" title="Hadoop组件依赖关系，配置Hadoop"></a>Hadoop组件依赖关系，配置Hadoop</h2><center><br><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop05.png" alt=""><br></center>
+
+<ul>
+<li><p>关闭防火墙 centOS7的默认防火墙和之前不同。</p>
+</li>
+<li><p>关闭selinux</p>
+<p>  vim  /etc/sysconfig/selinux </p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">SELINUX=<span class="built_in">disable</span></div></pre></td></tr></table></figure>
+</li>
+<li><p>设置永久hostname</p>
+<p> vim /etc/sysconfig/network</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">NETWORKING=yes</div><div class="line">HOSTNAME=centOS</div></pre></td></tr></table></figure>
+</li>
+<li><p>IP与hostname绑定</p>
+<p>vim /etc/hosts</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">192.168.41.111 hadoop.dragon.org</div></pre></td></tr></table></figure>
+</li>
+<li><p>设置SSH密钥登录  –所有守护进程彼此通过SSH协议进行通道</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">ssh-keygen –t rsa</div><div class="line"><span class="built_in">cd</span> .ssh</div><div class="line">cp id_rsa.pub authorized_keys</div></pre></td></tr></table></figure>
+<p>  分别 ssh登录 localhost centOS hadoop.dragon.org 192.168.41.111。</p>
+</li>
+<li><p>mkdir /opt/data/tem  配置文件需要建立此目录</p>
+</li>
+<li><p>修改conf下目录配置文件</p>
+<p>  配置core-site.xml  </p>
+  <figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span>  指定namenode主机名与端口号</div><div class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>fs.default.name<span class="tag">&lt;/<span class="name">name</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>hdfs://hadoop.dragon.org:9000<span class="tag">&lt;/<span class="name">value</span>&gt;</span>		</div><div class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>hadoop.tom.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>/opt/data/tmp<span class="tag">&lt;/<span class="name">value</span>&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>  配置hdfs-site.xml</p>
+  <figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span>   ---设置HDFS的副本数</div><div class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.replication<span class="tag">&lt;/<span class="name">name</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>1<span class="tag">&lt;/<span class="name">value</span>&gt;</span>   --默认是3，伪分布设置成1</div><div class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.permissions<span class="tag">&lt;/<span class="name">name</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>false<span class="tag">&lt;/<span class="name">value</span>&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>  配置mapred-site.xml</p>
+  <figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span>    </div><div class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span>          <span class="comment">&lt;!--定jobtracker的主机和端口号--&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>mapred.job.tracker<span class="tag">&lt;/<span class="name">name</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>hadoop.dragon.org:9001<span class="tag">&lt;/<span class="name">value</span>&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>  配置slaves修改成自己设置的域名（指定DataNode和TaskTracker）:hadoop.dragon.org</p>
+<p>  配置masters（指定SecondaryNameNode的位置）:hadoop.dragon.org</p>
+</li>
+<li><p>格式化NameNode启动守护进程，依次开启和关闭</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hadoop namenode -format</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="Hadoop-启动方式及日志、测试"><a href="#Hadoop-启动方式及日志、测试" class="headerlink" title="Hadoop 启动方式及日志、测试"></a>Hadoop 启动方式及日志、测试</h2><h3 id="Hadoop启动方式"><a href="#Hadoop启动方式" class="headerlink" title="Hadoop启动方式"></a>Hadoop启动方式</h3><ul>
+<li><p>第一种：</p>
+<p>  $start-dfs.sh   依次启动namendoedatanode secondarynamenode<br>   $jps  可查看开启的java进程</p>
+<p>  $start-mapred.sh 启动jobtrackertasktracker</p>
+<p>  $stop-mappred.sh  依次关闭jobtracker tasktracker</p>
+<p>  $stop-dfs.sh   依次关闭 namenode datanode secondarynamenode</p>
+</li>
+<li><p>第二种:</p>
+<p>  $start-all.sh</p>
+<p>  $stop-all.sh</p>
+</li>
+<li><p>第三种：分别开启和关闭五个守护进程,开启和关闭顺序相反</p>
+<p>  $hadoop-daemon.sh start namenode</p>
+<p>  $ 。。。</p>
+<p>  $hadoop-daemon.sh stop namenode</p>
+<p>  hadoop-daemons.sh使用方式和hadoop-daemon.sh类似，不同之处是同时可以启动多台机器上的某个守护进程</p>
+</li>
+</ul>
+<h3 id="日志"><a href="#日志" class="headerlink" title="日志"></a>日志</h3><ul>
+<li><p>以log结尾的日志</p>
+<p>  通过log4日志记录格式进行记录的日志，采用的日常滚动文件后缀策略来命名文件，内容比较全。</p>
+</li>
+<li><p>以out结尾的日志</p>
+<p>  记录标准输出和标准错误的日志，内容比较少，默认的情况，系统保留最新的5个日志文件。</p>
+</li>
+<li><p>修改conf目录下的hadoop-env.sh中export HADOOP_LOG_DIR可指定日志文件的保存路径。</p>
+</li>
+<li><p>日志的格式</p>
+<p>  例如hadoop-root-namenode-centOS.log，分五个部分，用横线隔开，分别表示框架名－开启守护进程的用户名－守护进程名－hostname（运行守护进程的机器名称）－日志格式</p>
+</li>
+</ul>
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><h4 id="HDFS测试"><a href="#HDFS测试" class="headerlink" title="HDFS测试"></a>HDFS测试</h4><p>对HDFS文件系统进行查看文件，对文件或者文件的基本操作。（通过命令行的方式交互）</p>
+<p><em>hadoop [–config confdir] COMMAND 默认使用conf目录下的配置</em></p>
+<p>查看文件系统命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">hadoop –config /opt/modules/hadoop-1.2.1/conf/ fs</div><div class="line"><span class="variable">$hadoop</span> fs -lsr  /   			<span class="comment">#查看</span></div><div class="line"><span class="variable">$hadoop</span> fs –mkdir  /wc    	<span class="comment">#创建wc目录</span></div><div class="line"><span class="variable">$hadoop</span> fs –mkdir  /wc/intput  </div><div class="line"><span class="variable">$hadoop</span> fs –put /opt/modules/hadoop-1.2.1/conf/*.xml  /wc/input <span class="comment">#上传测试文件</span></div></pre></td></tr></table></figure>
+<h4 id="MapReduce程序的测试，单词频率统计WordCount程序。"><a href="#MapReduce程序的测试，单词频率统计WordCount程序。" class="headerlink" title="MapReduce程序的测试，单词频率统计WordCount程序。"></a>MapReduce程序的测试，单词频率统计WordCount程序。</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$hadoop</span> jar hadoop-examples-1.2.1.jar wordcount  /wc/input /wc/output</div></pre></td></tr></table></figure>
+<p>运行jar程序，并指定输入输出路径，输出路径由程序自动创建。</p>
+<p>打开 hadoop.dragon.org:50030 查看运行状态，打开hadoop.dragon.org:5000查看运行结果。</p>
+<p>命令行下查看结果 $ hadoop fs -text /wc/output/part-r-00000 (-cat参数功能同此)</p>
+<center><br><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop06.png" alt=""><br></center>
+
+<p>​</p>
+<h2 id="分析启动shell脚本"><a href="#分析启动shell脚本" class="headerlink" title="分析启动shell脚本"></a>分析启动shell脚本</h2><h3 id="查看start-all-sh脚本"><a href="#查看start-all-sh脚本" class="headerlink" title="查看start-all.sh脚本"></a>查看start-all.sh脚本</h3><ul>
+<li><p>此shell脚本仅仅在主节点上执行。</p>
+</li>
+<li><p>首先启动DFS文件系统的守护进程，再启动MapReduce框架的守护进程。</p>
+</li>
+<li><p>启动HDFS文件守护进程时，调用start-dfs.sh Shell脚本，启动MapReduce守护进程时，调用start-mapred.sh Shell脚本。</p>
+</li>
+</ul>
+<h3 id="查看start-dfs-sh脚本"><a href="#查看start-dfs-sh脚本" class="headerlink" title="查看start-dfs.sh脚本"></a>查看start-dfs.sh脚本</h3><ul>
+<li><p>此脚本运行在DFS文件系统上的主节点上。</p>
+</li>
+<li><p>如果先启动DataNode守护进程，没有启动NameNode守护进程，DataNode日志文件一直出现连接NameNode错误信息。</p>
+</li>
+<li><p>NameNode启动，调用的是hadoop-daemon.sh脚本，DataNode和SecondaryNameNode启动调用的是hadoop-daemon.sh脚本。</p>
+</li>
+<li><p>在启动SecondaryNameNode服务时，通过指定参数【–hosts masters】指定哪些机器上运行SecondaryNameNode服务，由此也验证了配置文件【masters】配置的IP地址为SecondaryNameNode服务地址。 </p>
+</li>
+</ul>
+<center><br><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/hadoop07.png" alt=""><br></center>
+
+<h2 id="HDFS架构"><a href="#HDFS架构" class="headerlink" title="HDFS架构"></a>HDFS架构</h2><h3 id="NameNode"><a href="#NameNode" class="headerlink" title="NameNode"></a>NameNode</h3><p>NameNode存储元数据，元数据存在内存之中，保存文件、block和DataNode之间的映射关系。其是一个中心服务器，一个单一节点，负责管理文件系统的名字空间，以及客户端对文件的访问。    </p>
+<p>NameNode负责文件元数据的操作，DataNode负责处理文件内容的读写请求。 数据流不经过NameNode。</p>
+<p>读取文件时NameNode尽量让用户读取最近的副本，其全权管理数据块的复制，它周期性地从集群中的每个DataNode接收心中信号和块状态报告（Blockreport），块状态报告包含了一个该DataNode上所有数据块的列表。</p>
+<p>两个重要文件</p>
+<ul>
+<li><p>fsimage:元数据镜像文件（保存文件的目录树）</p>
+</li>
+<li><p>edits:元数据操作日志（针对目录树的修改操作）</p>
+</li>
+</ul>
+<p>元数据镜像</p>
+<ul>
+<li><p>内存中保存一份最新的</p>
+</li>
+<li><p>内存中的镜像=fsimage+edits</p>
+</li>
+</ul>
+<p>定期合并fsimage与edits</p>
+<ul>
+<li><p>edits文件过大将导致NameNode重启速度慢</p>
+</li>
+<li><p>SecondaryNameNode负责定期合并它们</p>
+</li>
+</ul>
+<h3 id="DataNode"><a href="#DataNode" class="headerlink" title="DataNode"></a>DataNode</h3><p>DataNode 存储文件内容，文件内容保存在硬盘之上，维护了blockid到DataNode本地文件的映射关系。</p>
+<p>一个数据块在DataNode以文件存储在磁盘上，包括两个文件，一个是数据本身，一个是元数据（包括块的长度、块数据的校验和以及时间戳）。</p>
+<h3 id="SecondaryNameNode"><a href="#SecondaryNameNode" class="headerlink" title="SecondaryNameNode"></a>SecondaryNameNode</h3><ul>
+<li><p>并非NameNode的热备；</p>
+</li>
+<li><p>辅助NameNode，分担其工作量；</p>
+</li>
+<li><p>定期合并fsimage和fsedits，推送给NameNode；</p>
+</li>
+<li>在紧急情况下，可辅助恢复NameNode</li>
+</ul>
+<h3 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h3><p>文件切分；</p>
+<ul>
+<li><p>与NameNode交互，获取文件位置信息；</p>
+</li>
+<li><p>与DataNode交互，读取或者写入数据；</p>
+</li>
+<li><p>管理HDFS和访问HDFS。</p>
+</li>
+</ul>
+<h3 id="错误及处理措施"><a href="#错误及处理措施" class="headerlink" title="错误及处理措施"></a>错误及处理措施</h3><h4 id="常见的三种错误情况"><a href="#常见的三种错误情况" class="headerlink" title="常见的三种错误情况"></a>常见的三种错误情况</h4><p>文件损坏、网络或者机器失效和NameNode挂掉</p>
+<h4 id="保障可靠性的措施"><a href="#保障可靠性的措施" class="headerlink" title="保障可靠性的措施"></a>保障可靠性的措施</h4><p>文件完整性</p>
+<ul>
+<li><p>CRC32效验</p>
+</li>
+<li><p>用其它副本取代损坏文件</p>
+</li>
+</ul>
+<p>Heartbeat</p>
+<ul>
+<li>DataNode定期向NameNode发送Heartbeat</li>
+</ul>
+<p>元数据信息</p>
+<ul>
+<li><p>FSImage(文件系统镜像)、Editlog(操作日志)</p>
+</li>
+<li><p>多份存储，当NameNode损坏后可以手动还原</p>
+</li>
+</ul>
+<h4 id="副本放置策略"><a href="#副本放置策略" class="headerlink" title="副本放置策略"></a>副本放置策略</h4><p>Hadoop 0.17之前 </p>
+<ul>
+<li><p>副本1：同机架本机外的不同节点</p>
+</li>
+<li><p>副本2：同机架的另一个节点</p>
+</li>
+<li><p>副本3：不同机架的的另一个节点</p>
+</li>
+<li><p>其它副本随机挑选</p>
+</li>
+</ul>
+<p>Hadoop 0.17之后 </p>
+<ul>
+<li><p>副本1：同Client的节点上</p>
+</li>
+<li><p>副本2：不同机架中的节上</p>
+</li>
+<li><p>副本3：同第二个副本的机架中的另一个节点</p>
+</li>
+<li><p>其它副本:随机挑选</p>
+</li>
+</ul>
+<h4 id="数据损坏处理（corruption）"><a href="#数据损坏处理（corruption）" class="headerlink" title="数据损坏处理（corruption）"></a>数据损坏处理（corruption）</h4><p>DataNode读取block时，会计算checksum，如果与创建时的值不同，说明已经损坏。NameNode标记其已经损坏，并复制block。DataNode默认在其文件创建三周后难其checksum。<br>​    </p>
+<h2 id="HDFS常用shell命令及API"><a href="#HDFS常用shell命令及API" class="headerlink" title="HDFS常用shell命令及API"></a>HDFS常用shell命令及API</h2><h3 id="常用shell命令"><a href="#常用shell命令" class="headerlink" title="常用shell命令"></a>常用shell命令</h3><ul>
+<li><p>$ hadoop fs -lsr  /    查看/目录下的文件</p>
+</li>
+<li><p>$ hadoop fs -lsr  /tmp   查看tmp目录下的所有文件</p>
+</li>
+<li><p>$ hadoop fs -mkdir /opt/data/test  创建hdfs目录</p>
+</li>
+<li><p>$ hadoop fs -put /test/01.data  /opt/data/test    上传文件到指定目录,可同时上传多个文件</p>
+</li>
+<li><p>$hadoop fs –text /opt/data/test/01.data 查看文件内容</p>
+</li>
+<li><p>$ hadoop fs -mv /opt/data/test/01.data /opt/data/test/01.data.bak   重命名</p>
+</li>
+<li><p>$ hadoop fs -cp  /opt/data/test/01.data.bak  /opt/data/test/01.data  拷贝</p>
+</li>
+<li><p>$ hadoop fs -rm   /opt/data/test/01.data.bak  删除</p>
+</li>
+<li><p>$ hadoop fs -rmr /opt/data/test  删除目录及目录下的文件</p>
+</li>
+<li><p>$ hadoop fs -get /wc/input/co*.xml  /   获取文件放到/目录下</p>
+</li>
+<li><p>$ hadoop fs -getmerge  /hdfs  /0.data  从HDFS获取/hdfs下的文件并合并成一个放到本地</p>
+</li>
+</ul>
+<h3 id="HDFS-API"><a href="#HDFS-API" class="headerlink" title="HDFS API"></a>HDFS API</h3><p>使用HDFS URL API操作</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">InputStream in = <span class="keyword">null</span>;</div><div class="line"><span class="keyword">try</span> &#123;</div><div class="line">	in = <span class="keyword">new</span> URL(path).openStream();</div><div class="line">&#125;<span class="keyword">finally</span> &#123;</div><div class="line">	IOUtils.closeStream(in);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>使用HDFS FileSystem API操作</p>
+<p>须引入hdfs-site.xml和core-site.xml</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">operator()&#123;</div><div class="line">	<span class="comment">//step1 得到Configuration对象</span></div><div class="line">	<span class="comment">//step2得到FileSystem对象</span></div><div class="line">	<span class="comment">//step3进行文件操作</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/bigdata/" rel="tag"># bigdata</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/07/24/ssh-err-log/" rel="next" title="配置SSH过程中遇到的几个问题">
+                <i class="fa fa-chevron-left"></i> 配置SSH过程中遇到的几个问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/08/22/hadoop-mapreduce/" rel="prev" title="Hadoop学习笔记：MapReduce">
+                Hadoop学习笔记：MapReduce <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Sqoop"><span class="nav-number">1.</span> <span class="nav-text">Sqoop:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构"><span class="nav-number">2.</span> <span class="nav-text">架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hadoop安装部署模式"><span class="nav-number">3.</span> <span class="nav-text">Hadoop安装部署模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#设置普通用户无密码sudo权限"><span class="nav-number">3.1.</span> <span class="nav-text">设置普通用户无密码sudo权限</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装环境"><span class="nav-number">4.</span> <span class="nav-text">安装环境</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1）安装JDK"><span class="nav-number">4.1.</span> <span class="nav-text">1）安装JDK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2）安装hadoop"><span class="nav-number">4.2.</span> <span class="nav-text">2）安装hadoop</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hadoop组件依赖关系，配置Hadoop"><span class="nav-number">5.</span> <span class="nav-text">Hadoop组件依赖关系，配置Hadoop</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hadoop-启动方式及日志、测试"><span class="nav-number">6.</span> <span class="nav-text">Hadoop 启动方式及日志、测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hadoop启动方式"><span class="nav-number">6.1.</span> <span class="nav-text">Hadoop启动方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#日志"><span class="nav-number">6.2.</span> <span class="nav-text">日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试"><span class="nav-number">6.3.</span> <span class="nav-text">测试</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#HDFS测试"><span class="nav-number">6.3.1.</span> <span class="nav-text">HDFS测试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MapReduce程序的测试，单词频率统计WordCount程序。"><span class="nav-number">6.3.2.</span> <span class="nav-text">MapReduce程序的测试，单词频率统计WordCount程序。</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析启动shell脚本"><span class="nav-number">7.</span> <span class="nav-text">分析启动shell脚本</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#查看start-all-sh脚本"><span class="nav-number">7.1.</span> <span class="nav-text">查看start-all.sh脚本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看start-dfs-sh脚本"><span class="nav-number">7.2.</span> <span class="nav-text">查看start-dfs.sh脚本</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HDFS架构"><span class="nav-number">8.</span> <span class="nav-text">HDFS架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#NameNode"><span class="nav-number">8.1.</span> <span class="nav-text">NameNode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DataNode"><span class="nav-number">8.2.</span> <span class="nav-text">DataNode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SecondaryNameNode"><span class="nav-number">8.3.</span> <span class="nav-text">SecondaryNameNode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Client"><span class="nav-number">8.4.</span> <span class="nav-text">Client</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#错误及处理措施"><span class="nav-number">8.5.</span> <span class="nav-text">错误及处理措施</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#常见的三种错误情况"><span class="nav-number">8.5.1.</span> <span class="nav-text">常见的三种错误情况</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#保障可靠性的措施"><span class="nav-number">8.5.2.</span> <span class="nav-text">保障可靠性的措施</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#副本放置策略"><span class="nav-number">8.5.3.</span> <span class="nav-text">副本放置策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据损坏处理（corruption）"><span class="nav-number">8.5.4.</span> <span class="nav-text">数据损坏处理（corruption）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HDFS常用shell命令及API"><span class="nav-number">9.</span> <span class="nav-text">HDFS常用shell命令及API</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#常用shell命令"><span class="nav-number">9.1.</span> <span class="nav-text">常用shell命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HDFS-API"><span class="nav-number">9.2.</span> <span class="nav-text">HDFS API</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

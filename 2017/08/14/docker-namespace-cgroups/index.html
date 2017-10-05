@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="docker," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="Docker通过利用Linux 内核中的namespace机制和cgroups机制分别实现了资源隔离和资源限制，同时通过写时复制（COW，copy-on-write）实现了高效的文件操作。下面主要介绍下namespace和cgroup的相关知识点。">
+<meta name="keywords" content="docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker：资源隔离和资源限制">
+<meta property="og:url" content="http://witchiman.github.io/2017/08/14/docker-namespace-cgroups/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="Docker通过利用Linux 内核中的namespace机制和cgroups机制分别实现了资源隔离和资源限制，同时通过写时复制（COW，copy-on-write）实现了高效的文件操作。下面主要介绍下namespace和cgroup的相关知识点。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/e7707a480b6a97dfe881b1deb80433956c796a3d/images/cgroups1.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/e7707a480b6a97dfe881b1deb80433956c796a3d/images/cgroups2.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/e7707a480b6a97dfe881b1deb80433956c796a3d/images/cgroups3.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/e7707a480b6a97dfe881b1deb80433956c796a3d/images/cgroups4.png">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.450Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Docker：资源隔离和资源限制">
+<meta name="twitter:description" content="Docker通过利用Linux 内核中的namespace机制和cgroups机制分别实现了资源隔离和资源限制，同时通过写时复制（COW，copy-on-write）实现了高效的文件操作。下面主要介绍下namespace和cgroup的相关知识点。">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/e7707a480b6a97dfe881b1deb80433956c796a3d/images/cgroups1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2017/08/14/docker-namespace-cgroups/"/>
+
+
+
+
+
+  <title>Docker：资源隔离和资源限制 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2017/08/14/docker-namespace-cgroups/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Docker：资源隔离和资源限制</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-14T14:25:23+08:00">
+                2017-08-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Docker通过利用Linux 内核中的namespace机制和cgroups机制分别实现了资源隔离和资源限制，同时通过写时复制（COW，copy-on-write）实现了高效的文件操作。下面主要介绍下namespace和cgroup的相关知识点。</p>
+<a id="more"></a>
+<h2 id="namespace资源隔离"><a href="#namespace资源隔离" class="headerlink" title="namespace资源隔离"></a>namespace资源隔离</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>大家在使用Linux时，可以通过chroot切换根目录，隔离文件系统。如果是在分布式环境下进行通信和定位，必然要有独立的IP、端口和路由等，这便是网络的隔离。与此同时，主机还必须要有自己的hostname。要想在不同程序之间传输数据，不同进程之间还需要进程间通信，进程通信也需要隔离。自然还涉及到权限的隔离，每个进程都拥有各自的进程号，所以还需要进程的隔离。</p>
+<p>所以，要想完成一个容器的隔离，需要做六项隔离。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">namespace</th>
+<th style="text-align:left">系统调用参数</th>
+<th style="text-align:left">隔离内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">UTS</td>
+<td style="text-align:left">CLONE_NEWUTS</td>
+<td style="text-align:left">主机名与域名</td>
+</tr>
+<tr>
+<td style="text-align:left">IPC</td>
+<td style="text-align:left">CLONE_NEWIPC</td>
+<td style="text-align:left">信号量、消息队列和共享内存</td>
+</tr>
+<tr>
+<td style="text-align:left">PID</td>
+<td style="text-align:left">CLONE_NEWPID</td>
+<td style="text-align:left">进程编号</td>
+</tr>
+<tr>
+<td style="text-align:left">Network</td>
+<td style="text-align:left">CLONE_NEWNET</td>
+<td style="text-align:left">网络设备、网络栈和端口等</td>
+</tr>
+<tr>
+<td style="text-align:left">Mount</td>
+<td style="text-align:left">CLONE_NEWNS</td>
+<td style="text-align:left">挂载点（文件系统）</td>
+</tr>
+<tr>
+<td style="text-align:left">User</td>
+<td style="text-align:left">CLONE_NEWUSER</td>
+<td style="text-align:left">用户和用户组</td>
+</tr>
+</tbody>
+</table>
+<p>实际上，Linux内核实现namespace的一个主要目的，就是实现轻量化（容器）服务。在同一个namespce下的进程可以感彼此的变化，而对外界的进程一无所知。这样就可以让容器产生错觉，仿佛自己置身于一个独立的系统环境中，以达到独立和隔离的目的。</p>
+<h3 id="Linux相关API"><a href="#Linux相关API" class="headerlink" title="Linux相关API"></a>Linux相关API</h3><p>namespace的API包括clone()、setns()、以及unshare()，还有/proc下的部分文件。为了确定隔离的到底是哪六项namespace，在使用这些API时，通过需要指定以下六个参数中的一个或多个，通过|操作来实现。</p>
+<ul>
+<li>使用clone()来创建一个独立的namespace的进程，是最常见的做法，也是Docker使用namespace最基本的方法。</li>
+<li>查看/proc/[pid]/ns文件，用户可以在该目录下，看到指向不同namespace号的文件。如果两个进程指向的namespace编号相同，就说明它们在同一个namespace下，否则便在不同的namespace中。在该目录下设置这个链接的另外一个作用是，一旦这些链接文件被打开，只要被打开的文件描述符存在，那么就算该namcespace下的所有进程都已经结束，这个namespace也会一直存在，后续进程也可以再加入进来。在Docker中，通过文件描述符定位和加入一个存在的namespace是最基本的方式。</li>
+<li>通过setns()加入一个已经存在的namespace，Docker中的exec命令可以在已经运行着的容器中执行一个新的命令，就需要用到此方法。通过setns()系统调用，进程从原先的namespace加入某个已经存在的namespace。通过为了不影响进程的调用者，也为了使新进程加入的pid namespace生效，会在setns()函数执行后使用clone()创建子进程继续执行命令，在原先的进程结束运行。</li>
+<li>通过unshare()在原先进程上进行namespace隔离，它与clone()很像，不同的是，unshare()运行在原先的进程上，不需要启动一个新进程。不需要启动新进程就可以起到隔离的效果，相当于跳出原先的namespace进行操作，这样就可以在原进程进行一些隔离的操作。Linux中自带的unshare命令，就是通过unshare()系统调用实现的。注：目前Docker并没有使用这个系统调用。</li>
+</ul>
+<h3 id="UTS-namespace"><a href="#UTS-namespace" class="headerlink" title="UTS namespace"></a>UTS namespace</h3><p>UTS(UNIX Time-sharing System) namespace提供了主机名和域名的隔离，这样每个Docker容器就可以拥有独立的主机名和域名，在网络上可以被视作一个独立的节点，而非宿主机上的一个进程。Docker中，每个镜像基本都以自身所提供的服务名称来命名镜像的hostname，且不会对宿主机产生任何影响，其原理主就是利用了UTS namespace。</p>
+<blockquote>
+<p>clone进程时，不加CLONE_NEWUTS，主机名也会发生改变，其实这是使用了sethostname函数，主机名才发生了改变。这只是在利用bash登录时读取了一次UTS，退出时就会还原。</p>
+</blockquote>
+<h3 id="IPC-namespace"><a href="#IPC-namespace" class="headerlink" title="IPC namespace"></a>IPC namespace</h3><p>进程间通信（IPC, Inner-Process Communication）涉及的IPC资源包括常见的信号量、消息队列和共享内存。申请IPC资源就申请了一个全局唯一的32位ID，所以IPC namespace中实际上包含了系统IPC标识符及实现POSIX消息队列的文件系统。在同一个IPC namespace下的进程彼此可见，不同IPC namespace下的进程则互相不可见。</p>
+<p>目前使用IPC namespace机制的系统不多，其中比较有名的有PostgreSQL。Docker当前也使用IPC namespace实现了容器与宿主机、容器之间的IPC隔离。</p>
+<h3 id="PID-namespace"><a href="#PID-namespace" class="headerlink" title="PID namespace"></a>PID namespace</h3><p>PID namespace隔离非常实用，它对进程PID重新标号，即两个不同namespace下的进程可以有相同的PID。每个PID namespace都有自己的计数程序。内核为所有的PID namespace维护了一个树状结构，最顶层的是系统初始时创建的，被称为root namespace。它创建的新PID namespace被称为child namespace（树的节点），而原先的PID namespace 就是新创建的PID namespace的parent namespace（树的父节点）。通过这种方式，不同的PID namespace会形成一个层级体系。所属的父节点可以看到子节点中的进程，并可以通过信号等方式对子节点的进程产生影响。反过来，子节点却不能看到父节点PID namespace中的任何内容。</p>
+<ul>
+<li><p>每个PID namespace中的第一个进程PID 1，都会像传统Linux中的init进程一样拥有特权，起特殊作用。</p>
+</li>
+<li><p>一个namespace中的进程，不可能通过kill或ptrace影响父节点或者兄弟节点中的进程，因为其他节点的PID在这个namespace中没有任何意义。</p>
+</li>
+<li><p>在root namespace中可以看到所有的进程，并且递归包含所有子节点中的进程。</p>
+</li>
+</ul>
+<blockquote>
+<p>通过clone函数，传入CLONE_NEWPIC位，新建子进程，在子进程中可以通过执行ps或top之类的命令，发现所有父进程的PID，这是因为还没有对文件系统挂载点进行隔离。ps或top命令调用的是真实系统下的/proc文件内容。</p>
+</blockquote>
+<p>在容器中，启动的第一个进程也具有类似于init进程的功能，维护所有后续启动进程的运行状态。内核还为PID namespace中的init进程赋予了其他特权，如信号屏蔽。如果init中没有编写处理某个信号的代码逻辑，那么与init在同一个PID namespace下的进程（即使拥有超级权限）发送给它的信号都会被屏蔽。这个功能的主要作用就是防止init被误杀。父节点中的进程发送信号给子进程，如果不是SIGKILL（销毁进程）或SIGTOP（暂停进程）也会被忽略。但如果发送SIGKILL或SIGTOP，子节点的init会强制执行（无法通过代码捕捉进行特殊处理），即父节点中的进程有权终止子节点中的进程。</p>
+<h3 id="mount-namespacce"><a href="#mount-namespacce" class="headerlink" title="mount namespacce"></a>mount namespacce</h3><p>mount namespace通过隔离文件系统挂载点对隔离文件系统提供支持，它是历史上第一个Linux namespace，所以标识位比较特殊，就是CLONE_NEWNS。隔离后，不同mount namespace中的文件结构发生变化也互不影响。可以通过/proc/[pid]/mounts查看到所有挂载在当前namespace中的文件系统，还可以通过/proc/[pid]/mountstats看到mount namespace中文件设备的统计信息，包括挂载文件的名字、文件系统类型、挂载位置等。</p>
+<p>进程在创建mount namespace时，会把当前的文件结构复制给新的namespace。新namespace中的所有mount操作都只影响自身的文件系统，对外界不会产生任何影响。这种做法非常严格地实现了隔离，但对某些情况可能并不适用。比如父节点namespace中的进程挂载了一张CD-ROM，这时子节点namespace复制的目录结构是无法自动挂载上这张CD-ROM的，因为这种操作会影响到父节点的文件系统。后来引入的挂载传播解决了这一问题，挂载传播定义了挂载对象之间的关系，这样的关系包括共享关系和从属关系，系统用这些关系决定任何挂载对象的挂载事件如何传播到其他挂载对象。</p>
+<ul>
+<li><p>共享关系。如果两个挂载对象具有共享关系，那么一个挂载对象中的挂载事件传播到另一个挂载对象，反之亦然。</p>
+</li>
+<li><p>从属关系。如果两个挂载对象形成从属关系，那么一个挂载对象中的挂载事件会传播到另一个挂载对象，但是反之不行；在这种关系中，从属对象是事件的接收者。</p>
+</li>
+</ul>
+<h3 id="network-namespace"><a href="#network-namespace" class="headerlink" title="network namespace"></a>network namespace</h3><p>network namespace主要提供了关于网络资源的隔离，包括网络设备、IPv4和IPv6协议栈、IP路由表、防火墙、/proc/net目录、/sys/class/net目录、套接字等。一个物理的网络设备最多存在于一个network namespace中，可以通过创建veth pair（虚拟网络设备：有两端，类似于管道，如果数据从一端传入另一端也能接收到，反之亦然）在不同的network namespace间创建通道，以达到通信目的。</p>
+<p>一般情况下，物理网络设备都分配在最初的root namespace(表示系统默认的namespace)中。但是如果有多块物理网卡，也可以把其中一块或多块分配给新创建的network namespace。需要注意的是，当新创建的network namespace被释放时（所有内部的进程都终止并且namespace文件没有被挂载或打开），在这个namespace中的物理网卡会返回到root namespace，而非创建该进程的父进程所在的network namespace。</p>
+<p>至于network namespace，指的未必是真正的网络隔离，而是把网络独立出来，给外部用户一种透明的感觉，仿佛在与一个独立网络实体进行通信。为了达到该目的，容器的经典做法就是创建一个veth pair，一端放置在新的namespace中，通常命名为eth0，一端放在原先的namespace中连接物理网络设备，再通过把多个设备接入网桥或者进行路由转发，来实现通信目的。Docker daemon进程在宿主机上负责创建这个veth pair，把一端绑定到docker0 网桥上，另一端接入新建 的network namespace进程中。这个过程执行期间，Docker daemon和容器中的初始化进程就通过Linux中的pipe 进行通信。在veth pair创建之前，容器中的初始化进程在管道的另一端循环等待，直到另一端传来Docker关于veth 设备的信息，并关闭管道，初始化进程才结束等待的过程，并把它的eth0 启动起来。</p>
+<h3 id="user-namespace"><a href="#user-namespace" class="headerlink" title="user namespace"></a>user namespace</h3><p>user namespace主要隔离了安全相关的标识符和属性，包括用户ID、用户组ID、root目录、key以及特殊权限。一个普通用户的进程通过clone()创建的新进程在新usr namespace中可以拥有不同的用户和用户组。这意味着一个进程在容器外属于一个没有特权的普通用户，但是它创建的容器进程却属于拥有所有权限的超级用户，这个技术为容器提供极大的自由。</p>
+<p>Linux中，特权用户的user ID就是0,演示的最后将看到user ID非0的进程启动user namespace后user ID可以变为0。</p>
+<h2 id="cgroups-资源限制"><a href="#cgroups-资源限制" class="headerlink" title="cgroups 资源限制"></a>cgroups 资源限制</h2><h3 id="概述-1"><a href="#概述-1" class="headerlink" title="概述"></a>概述</h3><p>cgroups是control groups的缩写，是Linux内核提供的一种可以限制、记录、隔离进程组（process groups）所使用的物理资源（如：cpu,memory,IO等等）的机制。最初由google的工程师提出，后来被整合进Linux内核。cgroups也是LXC为实现虚拟化所使用的资源管理手段，可以说没有cgroups就没有LXC。官方定义：<strong>cgroups是Linux内核提供的一种机制，这种机制可以根据需求把一系列任务及其子任务整合（或分离）到按资源划分等级的不同组内，从而为系统资源管理提供一个统一的框架。</strong></p>
+<p>cgroups有如下4个特点：</p>
+<ul>
+<li><p>cgroups 的API以一个伪文件系统的方式实现，用户态的程序可以通过文件操作实现cgroups的组织管理。</p>
+</li>
+<li><p>cgroups的组织管理操作单元可以细粒度到线程级别，另外用户可以创建和销毁cgroup，从而实现资源再分配和管理。</p>
+</li>
+<li><p>所有资源管理的功能都以子系统的方式实现，接口统一。</p>
+</li>
+<li><p>子任务创建之初与其父任务处于同一个cgroups的控制组。</p>
+</li>
+</ul>
+<p>本质上来说，cgroups是内核附加在程序上的一系列钩子，通过程序运行时对资源调度触发相应的钩子以达到资源追踪和限制的目的。</p>
+<p>作用：</p>
+<ul>
+<li><p>资源限制：cgroups可以对任务使用的资源总额进行限制。如设定应用运行时使用内存上限，一旦超过这个配额就发出OOM（Out of Memory）提示。</p>
+</li>
+<li><p>优先级分配：通过分配的CPU时间片数量及磁盘IO带宽大小，实际上就相当于控制了任务运行的优先级。</p>
+</li>
+<li><p>资源统计：cgroups可以统计系统的资源使用量，如CPU使用时长、内存用量等，这个功能非常适用于计费。</p>
+</li>
+<li><p>任务控制：cgroups可以对任务执行挂起、恢复等操作。</p>
+</li>
+</ul>
+<h3 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h3><ul>
+<li><p>task(任务)：在cgroups的术语中，任务表示一个进程或线程。</p>
+</li>
+<li><p>cgroup(控制组)：cgroups中的资源控制都以cgroup为单位实现。cgroup表示按某种资源控制标准划分而成的任务组，包含一个或多个子系统。一个任务可以加入某个cgroup，也可以从某个cgroup迁移到另外一个cgroup。</p>
+</li>
+<li><p>subsystem(子系统)：cgroups中的子系统就是一个资源调度控制器，比如CPU子系统可以控制CPU时间分配，内存子系统可以限制cgroup内存使用量。</p>
+</li>
+<li><p>hierarchy(层级)：层级由一系列cgroup以一个树状结构排列而成，每个层级通过绑定对应的子系统进行资源控制。层级中的cgroup节点可以包含零或多个子节点，子节点继承父节点挂载的子系统，整个操作系统可以有多个层级。</p>
+</li>
+</ul>
+<h3 id="cgroups、任务、子系统、层级四者间的关系及其基本规则"><a href="#cgroups、任务、子系统、层级四者间的关系及其基本规则" class="headerlink" title="cgroups、任务、子系统、层级四者间的关系及其基本规则"></a>cgroups、任务、子系统、层级四者间的关系及其基本规则</h3><p>传统的Unix任务管理，实际上是先启动init任务作为根节点，再由init节点创建子任务作为子节点，而每个子节点又可以创建新的子节点，如此往复，形成一个树状结构。而系统中的多个cgroup也构成类似的树状结构，子节点从父节点继承属性。</p>
+<p>它们最大的不同在于，系统中的多个cgroup构成的层级并非单根结构，可以允许存在多个。如果任务模型是由init作为根节点构成的一棵树，那么系统中的多个cgroup则是由多个层级构成的森林。这样做的目的很好理解，如果只有一个层级，那么所有的任务都将被迫绑定其上的所有子系统，这会给某些任务造成不必要的限制。在Docker中，每个子系统独自构成一个层级，这样做非常易于管理。</p>
+<p>其基本规则如下：</p>
+<ul>
+<li>规则1：同一个层级可以附加一个或多个子系统。如下图所示，CPU和Memory的子系统附加到了一个层级。</li>
+</ul>
+<p><centre><br><img src="https://raw.githubusercontent.com/witchiman/GitDemo/e7707a480b6a97dfe881b1deb80433956c796a3d/images/cgroups1.png" alt=""><br></centre></p>
+<ul>
+<li>规则2：一个子系统可以附加到多个层级，当且仅当目标层级只有唯一一个子系统时，下图中的小圏中的数字表示子系统附加的时间顺序，CPU子系统附加到层级A的同时不能再附加到层级B，因为层级B已经附加了内存子系统。如果层级B没有附加过内存子系统，那么CPU子系统同时附加到两个层级是允许的。</li>
+</ul>
+<p><centre><br><img src="https://raw.githubusercontent.com/witchiman/GitDemo/e7707a480b6a97dfe881b1deb80433956c796a3d/images/cgroups2.png" alt=""><br></centre></p>
+<ul>
+<li>规则3：系统每次新建一个层级，该系统上的所有任务默认加入这个新建层级的初始化cgroup，这个cgroup也被称为root cgroup。对于创建的每个层级，任务只能存在于其中一个cgroup中，即一个任务不能存在于同一个层级的不同cgroup中，但一个任务可以存在于不同层级中的多个cgroup中。如果操作时把一个任务添加到同一个层级中的另一个cgroup中，则会将它从第一个cgroup中移除。如下图中可以看到，httpd任务已经加入到层级A中的/cg1，而不能加入同一个层级的/cg2，但是可以加入层级B中的/cg3。</li>
+</ul>
+<p><centre><br><img src="https://raw.githubusercontent.com/witchiman/GitDemo/e7707a480b6a97dfe881b1deb80433956c796a3d/images/cgroups3.png" alt=""><br></centre></p>
+<ul>
+<li>规则4：任务在fork/clone自身时创建的子任务默认与原任务在同一个cgroup中，但是子任务允许被移动到不同的cgroup中。即fork/clone完成后，父子任务间cgroup方面是互不影响的。下图中小圈中的数字表示任务出现的时间顺序，当httpd刚fork出另一个httpd时，两者在同一个层级中的同一个cgroup中。但是随后如果ID为4840的httpd需要移动到其他cgroup也是可以的，因为父子间已经独立。总结起来就是：初始化时子任务与父任务在同一个cgroup，但是这种关系随后可以改变。</li>
+</ul>
+<p><centre><br><img src="https://raw.githubusercontent.com/witchiman/GitDemo/e7707a480b6a97dfe881b1deb80433956c796a3d/images/cgroups4.png" alt=""><br></centre></p>
+<h3 id="子系统简介"><a href="#子系统简介" class="headerlink" title="子系统简介"></a>子系统简介</h3><p>子系统实际上就是cgroups的资源控制系统，每种子系统独立地控制一种资源，目前Docker使用如下九种子系统，其中，net_cls子系统在内核中已经广泛实现，但是Docker尚未采用。</p>
+<ul>
+<li><p>blkio：可以为块设备设定输入/输出限制，比如物理驱动设备（包括磁盘、固态硬盘、USB等）。</p>
+</li>
+<li><p>cpu：使用调度程序控制任务对CPU的使用。</p>
+</li>
+<li><p>cpuacct：自动生成cgroup 中任务对CPU资源使用情况的报告。</p>
+</li>
+<li><p>cpuset：可以为cgroup的任务分配独立的CPU（此处针对多处理器系统）和内存。</p>
+</li>
+<li><p>devices：可以开启或关闭cgroup中任务对设备的访问。</p>
+</li>
+<li><p>freezer：可以挂起或恢复cgroup中的任务。</p>
+</li>
+<li><p>memory:可以设定cgroup中任务对内存用量的限定，并且自动生成这些任务对内存资源使用情况的报告。</p>
+</li>
+<li><p>perf_event：使用后cgroup中的任务可以进行统一的性能测试。</p>
+</li>
+<li><p>net_cls：Docker没有直接使用它，它通过使用等级识别符标记网络数据包，从而允许Linux流量控制程序（Traffic Controller，TC）识别从具体cgroup中生成的数据包。</p>
+</li>
+</ul>
+<blockquote>
+<p>Docker本身并没有对cgroup做增强，容器用户一般也不需要直接操作cgroup。</p>
+</blockquote>
+<p>Linux中cgroup的实现形式表现为一个文件系统，因此需要mount这个文件系统才能够使用（也有可能已经mount好了），挂载成功后，就可以看到各类子系统。</p>
+<h3 id="cgroups实现方式及工作原理"><a href="#cgroups实现方式及工作原理" class="headerlink" title="cgroups实现方式及工作原理"></a>cgroups实现方式及工作原理</h3><p>cgroups的实现本质上是给任务挂上钩子，当任务运行的过程中涉及某种资源时，就会触发钩子所附带的子系统进行检测，根据资源类别的不同，使用对应的技术进行资源限制和优先级分配。</p>
+<h4 id="cgroups如何判断资源超限及超出限额之后的措施"><a href="#cgroups如何判断资源超限及超出限额之后的措施" class="headerlink" title="cgroups如何判断资源超限及超出限额之后的措施"></a>cgroups如何判断资源超限及超出限额之后的措施</h4><p>对于不同的系统资源，cgroups提供了统一的接口对资源进行控制和统计，但是限制的具体方式则不尽相同。比如memory子系统，会在描述内存状态的mm_struct 结构体中记录它所属的cgroup，当进程需要申请更多内存时，就会触发cgroup用量检测，用量超过cgroup规定的限额，则拒绝用户的内存申请，否则就给予相应内存并在cgroup的统计信息中记录。</p>
+<p>进程所需的内存超过它所属的cgroup最大限额后，如果设置了OOM Control(内存超限控制)，那么进程就会收到OOM信号并结束；否则进程就会被挂起，进入睡眠状态，直到cgroup中其他进程释放了足够的内存资源为止。Docker中默认是开启OOM Control 的。其他子系统的实现与此类似，cgroups提供了多种资源限制的策略供用户选择。</p>
+<h4 id="cgroup与任务之间的关联关系"><a href="#cgroup与任务之间的关联关系" class="headerlink" title="cgroup与任务之间的关联关系"></a>cgroup与任务之间的关联关系</h4><p>实现上，cgroup与任务之间是多对多的关系，所以它们并不直接关联，而是通过一个中间结构把双向的关联信息记录下来。每个任务结构体task_struct 中都包含了一个指针，可以查询到对应cgroup的情况，同时也可以查询到各个子系统的状态，这些子系统中也包含了找到任务的指针，不同类型的子系统按需定义本身的控制信息结构体，最终在自定义的结构体中把子系统状态指针包含进去，然后内核通过container_of等宏定义来获取对应的结构体，关联到任务，以此达到资源限制的目的。</p>
+<h4 id="Docker在使用cgroup时的注意事项"><a href="#Docker在使用cgroup时的注意事项" class="headerlink" title="Docker在使用cgroup时的注意事项"></a>Docker在使用cgroup时的注意事项</h4><p>在实际使用过程，Docker需要通过挂载cgroup文件系统新建 一个层级结构，挂载时指定要绑定的子系统。把cgroup文件系统挂载上以后，就可以像操作文件一样对cgroups的层级进行浏览和操作管理（包括权限管理、子文件管理等）。除了cgroup文件系统以后，内核没有为cgroups的访问和操作添加任何系统调用。</p>
+<p>如果新建的层级结构要绑定的子系统与目前已经存在的层级结构完全相同，那么新的挂载会重用原来已经存在的那一套（指向相同的css_set）。否则，如果要绑定的子系统已经被别的层级绑定，就会返回挂载失败的错误。如果一切顺利，挂载完成后层级就被激活并与相应子系统关联起来，可以开始使用。</p>
+<p>目前无法将一个新的子系统绑定到激活的层级上，或者从一个激活的层级中解除某个子系统的绑定。</p>
+<p>当一个顶层的cgroup文件系统被卸载时，如果其中创建过深层次的后代cgroup目录，那么就算上层的cgroup被卸载了，层级也是激活状态，其后代cgroup中的配置依旧有效。只有递归地卸载层级中的所有cgroup，那个层级才会被真正删除。</p>
+<p>在创建的层级中创建文件夹，就类似fork了一个后代cgroup，后代cgroup中默认继承在原有cgroup中的配置属性，但是可以根据需求对配置参数进行调整。这样就把一个大的cgroup割成一个个嵌套的、可动态变化的“软分区”。</p>
+<h4 id="sys-fs-cgroup-cpu-docker-下文件的作用"><a href="#sys-fs-cgroup-cpu-docker-下文件的作用" class="headerlink" title="/sys/fs/cgroup/cpu/docker/下文件的作用"></a>/sys/fs/cgroup/cpu/docker/<container-id>下文件的作用</container-id></h4><p>以资源开头（如cpu.shares）的文件都是用来限制这个cgroup下任务的可用的配置文件。一个cgroup创建完成，不管绑定了何种子系统，其目录下都会生成以下几个文件，用来描述cgroup的相应信息。同样，把信息写入这些配置文件就可以生效。</p>
+<ul>
+<li><p>tasks：这个文件罗列了所有在该cgroup中任务的TID，即所有进程或线程的ID。该文件并不保证任务的TID有序，把一个任务的TID写到这个文件就意味着把这个任务加入这个cgroup中，如果这个任务所在的任务组与其不在同一个cgroup，那么就会在cgroup.procs文件里记录一个该任务所在任务组的TGID的值，但是该任务组的其他任务并不受影响。</p>
+</li>
+<li><p>cgroup.procs：这个文件罗列了所有在该cgroup中的TGID（线程组ID），即线程组中第一个进程的PID。该文件并不保证TGID有序和无重复。写一个TGID到这个文件就意味着把与其相关的线程都加到这个cgroup。</p>
+</li>
+<li><p>notify_on_release：值为0为1，表示是否在cgroup中最后一个任务退出时通知运行release agent，默认情况下是0，表示不运行。</p>
+</li>
+<li><p>release_agent：指定relase agent执行脚本的文件路径（该文件位于最顶层的cgroup目录中），这个脚本通常用于自动化卸载无用的cgroup。</p>
+</li>
+</ul>
+<p><strong>引用：</strong></p>
+<ul>
+<li><a href="https://book.douban.com/subject/26894736/" target="_blank" rel="external">Docker 容器与混合云 第二版</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/docker/" rel="tag"># docker</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/09/seven-sort-algorithm3/" rel="next" title="常见的查找算法（下）哈希查找">
+                <i class="fa fa-chevron-left"></i> 常见的查找算法（下）哈希查找
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/09/15/java-concurrent/" rel="prev" title="【转】Java并发编程：CountDownLatch、CyclicBarrier和Semaphore">
+                【转】Java并发编程：CountDownLatch、CyclicBarrier和Semaphore <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#namespace资源隔离"><span class="nav-number">1.</span> <span class="nav-text">namespace资源隔离</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Linux相关API"><span class="nav-number">1.2.</span> <span class="nav-text">Linux相关API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UTS-namespace"><span class="nav-number">1.3.</span> <span class="nav-text">UTS namespace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IPC-namespace"><span class="nav-number">1.4.</span> <span class="nav-text">IPC namespace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PID-namespace"><span class="nav-number">1.5.</span> <span class="nav-text">PID namespace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mount-namespacce"><span class="nav-number">1.6.</span> <span class="nav-text">mount namespacce</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#network-namespace"><span class="nav-number">1.7.</span> <span class="nav-text">network namespace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#user-namespace"><span class="nav-number">1.8.</span> <span class="nav-text">user namespace</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cgroups-资源限制"><span class="nav-number">2.</span> <span class="nav-text">cgroups 资源限制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述-1"><span class="nav-number">2.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#术语"><span class="nav-number">2.2.</span> <span class="nav-text">术语</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cgroups、任务、子系统、层级四者间的关系及其基本规则"><span class="nav-number">2.3.</span> <span class="nav-text">cgroups、任务、子系统、层级四者间的关系及其基本规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#子系统简介"><span class="nav-number">2.4.</span> <span class="nav-text">子系统简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cgroups实现方式及工作原理"><span class="nav-number">2.5.</span> <span class="nav-text">cgroups实现方式及工作原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#cgroups如何判断资源超限及超出限额之后的措施"><span class="nav-number">2.5.1.</span> <span class="nav-text">cgroups如何判断资源超限及超出限额之后的措施</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#cgroup与任务之间的关联关系"><span class="nav-number">2.5.2.</span> <span class="nav-text">cgroup与任务之间的关联关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Docker在使用cgroup时的注意事项"><span class="nav-number">2.5.3.</span> <span class="nav-text">Docker在使用cgroup时的注意事项</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sys-fs-cgroup-cpu-docker-下文件的作用"><span class="nav-number">2.5.4.</span> <span class="nav-text">/sys/fs/cgroup/cpu/docker/下文件的作用</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

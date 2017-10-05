@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="algorithm," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="哈希查找也称为散列查找，它是通过计算数据元素的存储地址进行查找的一种方法。">
+<meta name="keywords" content="algorithm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="常见的查找算法（下）哈希查找">
+<meta property="og:url" content="http://witchiman.github.io/2017/07/09/seven-sort-algorithm3/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="哈希查找也称为散列查找，它是通过计算数据元素的存储地址进行查找的一种方法。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/witchiman/GitDemo/blob/master/images/seven-sort-algorithm3-1.png?raw=true">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.918Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="常见的查找算法（下）哈希查找">
+<meta name="twitter:description" content="哈希查找也称为散列查找，它是通过计算数据元素的存储地址进行查找的一种方法。">
+<meta name="twitter:image" content="https://github.com/witchiman/GitDemo/blob/master/images/seven-sort-algorithm3-1.png?raw=true">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2017/07/09/seven-sort-algorithm3/"/>
+
+
+
+
+
+  <title>常见的查找算法（下）哈希查找 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2017/07/09/seven-sort-algorithm3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">常见的查找算法（下）哈希查找</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-09T09:30:55+08:00">
+                2017-07-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>哈希查找也称为散列查找，它是通过计算数据元素的存储地址进行查找的一种方法。</p>
+<a id="more"></a>
+<blockquote>
+<p>原文：<a href="http://www.cnblogs.com/maybe2030/p/4715035.html，这里在原文基础上加以补充修改。" target="_blank" rel="external">http://www.cnblogs.com/maybe2030/p/4715035.html，这里在原文基础上加以补充修改。</a> </p>
+</blockquote>
+<h3 id="哈希表与哈希函数"><a href="#哈希表与哈希函数" class="headerlink" title="哈希表与哈希函数"></a>哈希表与哈希函数</h3><p><strong>哈希表（Hash）</strong></p>
+<p>我们使用一个下标范围比较大的数组来存储元素。可以设计一个函数（哈希函数， 也叫做散列函数），使得每个元素的关键字都与一个函数值（即数组下标）相对应，于是用这个数组单元来存储这个元素；也可以简单的理解为，按照关键字为每一个元素”分类”，然后将这个元素存储在相应”类”所对应的地方。但是，不能够保证每个元素的关键字与函数值是一一对应的，因此极有可能出现对于不同的元素，却计算出了相同的函数值，这样就产生了”冲突”，换句话说，就是把不同的元素分在了相同的”类”之中。后面我们将看到一种解决”冲突”的简便做法。</p>
+<p><strong>总的来说，”直接定址”与”解决冲突”是哈希表的两大特点。</strong></p>
+<p><strong>哈希函数</strong></p>
+<p>哈希函数的规则是：通过某种转换关系，使关键字适度的分散到指定大小的的顺序结构中，越分散，则以后查找的时间复杂度越小，空间复杂度越高。</p>
+<p><strong>六种哈希函数的构造方法：</strong></p>
+<ul>
+<li><p>直接定址法：</p>
+<p>函数公式：f(key)=a*key+b (a,b为常数)</p>
+<p>这种方法的优点是：简单，均匀，不会产生冲突。但是需要事先知道关键字的分布情况，适合查找表较小并且连续的情况。</p>
+</li>
+<li><p>数字分析法：</p>
+<p>比如我们的11位手机号码“136XXXX7887”，其中前三位是接入号，一般对应不同运营公司的子品牌，如130是联通如意通，136是移动神州行，153是电信等。中间四们是HLR识别号，表示用户归属地。最后四们才是真正的用户号。</p>
+<p>若我们现在要存储某家公司员工登记表，如果用手机号码作为关键字，那么极有可能前7位都是相同的，所以我们选择后面的四们作为哈希地址就是不错的选择。</p>
+</li>
+<li><p>平方取中法：</p>
+<p>故名思义，比如关键字是1234，那么它的平方就是1522756，再抽取中间的3位就是227作为哈希地址。</p>
+</li>
+<li><p>折叠法：</p>
+<p>折叠法是将关键字从左到右分割成位数相等的几个部分(最后一部分位数不够可以短些)，然后将这几部分叠加求和，并按哈希表表长，取后几位作为哈希地址。</p>
+<p>比如我们的关键字是9876543210，哈希表表长三位，我们将它分为四组，987|654|321|0 ，然后将它们叠加求和987+654+321+0=1962，再求后3位即得到哈希地址为962，哈哈，是不是很有意思。</p>
+</li>
+<li><p>​ 除留余数法:</p>
+<p>  函数公式：f(key)=key mod p (p&lt;=m)m为哈希表表长。</p>
+<blockquote>
+<p>这种方法是最常用的哈希函数构造方法。</p>
+</blockquote>
+</li>
+<li><p>随机数法：</p>
+<p>函数公式：f(key)= random(key)。</p>
+<p>这里random是随机函数，当关键字的长度不等是，采用这种方法比较合适。</p>
+</li>
+</ul>
+<h3 id="具体算法"><a href="#具体算法" class="headerlink" title="具体算法"></a>具体算法</h3><p><strong>算法思想：</strong>哈希的思路很简单，如果所有的键都是整数，那么就可以使用一个简单的无序数组来实现：将键作为索引，值即为其对应的值，这样就可以快速访问任意键的值。这是对于简单的键的情况，我们将其扩展到可以处理更加复杂的类型的键。</p>
+<p><strong>算法流程：</strong></p>
+<ul>
+<li><p>用给定的哈希函数构造哈希表；</p>
+</li>
+<li><p>根据选择的冲突处理方法解决地址冲突；</p>
+<blockquote>
+<p>常见的解决冲突的方法：拉链法和线性探测法。详细的介绍可以参见：<a href="http://www.cnblogs.com/yangecnu/p/Introduce-Hashtable.html" target="_blank" rel="external">浅谈算法和数据结构: 十一 哈希表</a>。</p>
+</blockquote>
+</li>
+</ul>
+<ul>
+<li>在哈希表的基础上执行哈希查找。</li>
+</ul>
+<p><strong>哈希表是一个在时间和空间上做出权衡的经典例子。如果没有内存限制，那么可以直接将键作为数组的索引。那么所有的查找时间复杂度为O(1)；如果没有时间限制，那么我们可以使用无序数组并进行顺序查找，这样只需要很少的内存。哈希表使用了适度的时间和空间来在这两个极端之间找到了平衡。只需要调整哈希函数算法即可在时间和空间上做出取舍。</strong></p>
+<p><strong>复杂度分析</strong>：</p>
+<p>单纯论查找复杂度：对于无冲突的Hash表而言，查找复杂度为O(1)（注意，在查找之前我们需要构建相应的Hash表）。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> OK 1</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> ERROR 0</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> TRUE 1</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> FALSE 0</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> SUCCESS 1</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> UNSUCCESS 0</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> HASHSIZE 7 <span class="comment">/* 定义散列表长为数组的长度 */</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> NULLKEY -32768 </span></div><div class="line"></div><div class="line"><span class="keyword">typedef</span> <span class="keyword">int</span> Status;    </div><div class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span></span></div><div class="line"><span class="class">&#123;</span></div><div class="line">    <span class="keyword">int</span> *elem; <span class="comment">/* 数据元素存储地址，动态分配数组 */</span></div><div class="line">    <span class="keyword">int</span> count; <span class="comment">/*  当前数据元素个数 */</span></div><div class="line">&#125;HashTable;</div><div class="line"></div><div class="line"><span class="keyword">int</span> m=<span class="number">0</span>; <span class="comment">/* 散列表表长，全局变量 */</span></div><div class="line"></div><div class="line"><span class="comment">/*初始化*/</span></div><div class="line"><span class="function">Status <span class="title">Init</span><span class="params">(HashTable *hashTable)</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    <span class="keyword">int</span> i;</div><div class="line">    m=HASHSIZE;</div><div class="line">    hashTable-&gt;elem= (<span class="keyword">int</span> *)<span class="built_in">malloc</span>(m*<span class="keyword">sizeof</span>(<span class="keyword">int</span>)); <span class="comment">//申请内存</span></div><div class="line">    hashTable-&gt;count=m;</div><div class="line">    <span class="keyword">for</span> (i=<span class="number">0</span>;i&lt;m;i++)</div><div class="line">    &#123;</div><div class="line">        hashTable-&gt;elem[i]=NULLKEY;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> OK;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/*哈希函数(除留余数法)*/</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">Hash</span><span class="params">(<span class="keyword">int</span> data)</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    <span class="keyword">return</span> data%m;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/*插入*/</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">Insert</span><span class="params">(HashTable *hashTable,<span class="keyword">int</span> data)</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    <span class="keyword">int</span> hashAddress=Hash(data);					   <span class="comment">//求哈希地址</span></div><div class="line">    <span class="keyword">while</span>(hashTable-&gt;elem[hashAddress]!=NULLKEY)  <span class="comment">//发生冲突</span></div><div class="line">    &#123;        </div><div class="line">        hashAddress=(++hashAddress)%m;           <span class="comment">//利用开放定址的线性探测法解决冲突</span></div><div class="line">    &#125;</div><div class="line">    hashTable-&gt;elem[hashAddress]=data;           <span class="comment">//插入值</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/*查找*/</span></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">Search</span><span class="params">(HashTable *hashTable,<span class="keyword">int</span> data)</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    <span class="keyword">int</span> hashAddress=Hash(data);				 <span class="comment">//求哈希地址</span></div><div class="line">    <span class="keyword">while</span>(hashTable-&gt;elem[hashAddress]!=data)   <span class="comment">//发生冲突</span></div><div class="line">    &#123;</div><div class="line">        hashAddress=(++hashAddress)%m;      <span class="comment">//利用开放定址的线性探测法解决冲突</span></div><div class="line">        <span class="keyword">if</span> (hashTable-&gt;elem[hashAddress]==NULLKEY||hashAddress==Hash(data))</div><div class="line">        	<span class="keyword">return</span> <span class="number">-1</span>;</div><div class="line">    &#125;</div><div class="line">   </div><div class="line">    <span class="keyword">return</span> hashAddress;    <span class="comment">//查找成功</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/*打印结果*/</span></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">Display</span><span class="params">(HashTable *hashTable)</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    <span class="keyword">int</span> i;</div><div class="line">    <span class="built_in">printf</span>(<span class="string">"\n**********展示结果**********\n"</span>);</div><div class="line">    <span class="keyword">for</span> (i=<span class="number">0</span>;i&lt;hashTable-&gt;count;i++)</div><div class="line">    &#123;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%d "</span>,hashTable-&gt;elem[i]);</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">printf</span>(<span class="string">"\n**********展示完毕**********\n"</span>);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">main</span><span class="params">()</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    <span class="keyword">int</span> i,j,result;</div><div class="line">    HashTable hashTable;</div><div class="line">    <span class="keyword">int</span> arr[HASHSIZE]=&#123;<span class="number">13</span>,<span class="number">29</span>,<span class="number">27</span>,<span class="number">28</span>,<span class="number">26</span>,<span class="number">30</span>,<span class="number">38</span>&#125;;</div><div class="line"></div><div class="line">    <span class="built_in">printf</span>(<span class="string">"***************哈希查找(C语言版)***************\n"</span>);</div><div class="line"></div><div class="line">    <span class="comment">//初始化哈希表</span></div><div class="line">    Init(&amp;hashTable);</div><div class="line"></div><div class="line">    <span class="comment">//插入数据</span></div><div class="line">    <span class="keyword">for</span> (i=<span class="number">0</span>;i&lt;HASHSIZE;i++)</div><div class="line">    &#123;</div><div class="line">        Insert(&amp;hashTable,arr[i]);</div><div class="line">    &#125;</div><div class="line">    Display(&amp;hashTable);</div><div class="line"></div><div class="line">    <span class="comment">//查找数据</span></div><div class="line">    result= Search(&amp;hashTable,<span class="number">29</span>);</div><div class="line">    <span class="keyword">if</span> (result==<span class="number">-1</span>) <span class="built_in">printf</span>(<span class="string">"对不起，没有找到！"</span>);</div><div class="line">    <span class="keyword">else</span> <span class="built_in">printf</span>(<span class="string">"29在哈希表中的位置是:%d"</span>,result);</div><div class="line"></div><div class="line">    getchar();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="使用Hash的代价"><a href="#使用Hash的代价" class="headerlink" title="使用Hash的代价"></a>使用Hash的代价</h3><p>我们在实际编程中存储一个大规模的数据，最先想到的存储结构可能就是map，也就是我们常说的KV pair，经常使用Python的博友可能更有这种体会。使用map的好处就是，我们在后续处理数据处理时，可以根据数据的key快速的查找到对应的value值。map的本质就是Hash表，那我们在获取了超高查找效率的基础上，我们付出了什么？</p>
+<p>Hash是一种典型<strong>以空间换时间</strong>的算法，比如原来一个长度为100的数组，对其查找，只需要遍历且匹配相应记录即可，从空间复杂度上来看，假如数组存储的是byte类型数据，那么该数组占用100byte空间。现在我们采用Hash算法，我们前面说的Hash必须有一个规则，约束键与存储位置的关系，那么就需要一个固定长度的hash表，此时，仍然是100byte的数组，假设我们需要的100byte用来记录键与位置的关系，那么总的空间为200byte,而且用于记录规则的表大小会根据规则，大小可能是不定的。</p>
+<p>Hash算法和其他查找算法的性能对比：</p>
+<p><img src="https://github.com/witchiman/GitDemo/blob/master/images/seven-sort-algorithm3-1.png?raw=true" alt="search method efficient conclusion"></p>
+<h3 id="工业上的应用"><a href="#工业上的应用" class="headerlink" title="工业上的应用"></a>工业上的应用</h3><p>Hash算法在信息安全方面的应用主要体现在以下的3个方面：</p>
+<ul>
+<li>文件校验<br>我们比较熟悉的校验算法有奇偶校验和CRC校验，这2种校验并没有抗数据篡改的能力，它们一定程度上能检测并纠正数据传输中的信道误码，但却不能防止对数据的恶意破坏。<br>MD5 Hash算法的”数字指纹”特性，使它成为目前应用最广泛的一种文件完整性校验和(Checksum)算法，不少Unix系统有提供计算md5 checksum的命令。</li>
+<li>数字签名<br>Hash 算法也是现代密码体系中的一个重要组成部分。由于非对称算法的运算速度较慢，所以在数字签名协议中，单向散列函数扮演了一个重要的角色。 对 Hash 值，又称”数字摘要”进行数字签名，在统计上可以认为与对文件本身进行数字签名是等效的。而且这样的协议还有其他的优点。</li>
+<li>鉴权协议<br>如下的鉴权协议又被称作挑战–认证模式：在传输信道是可被侦听，但不可被篡改的情况下，这是一种简单而安全的方法。</li>
+</ul>
+<p>参考：</p>
+<ul>
+<li><a href="http://blog.csdn.net/sinat_33363493/article/details/52693668" target="_blank" rel="external">哈希查找算法</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/algorithm/" rel="tag"># algorithm</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/09/seven-sort-algorithm2/" rel="next" title="常见的查找算法（中）树表查找">
+                <i class="fa fa-chevron-left"></i> 常见的查找算法（中）树表查找
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/08/14/docker-namespace-cgroups/" rel="prev" title="Docker：资源隔离和资源限制">
+                Docker：资源隔离和资源限制 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#哈希表与哈希函数"><span class="nav-number">1.</span> <span class="nav-text">哈希表与哈希函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#具体算法"><span class="nav-number">2.</span> <span class="nav-text">具体算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用Hash的代价"><span class="nav-number">3.</span> <span class="nav-text">使用Hash的代价</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#工业上的应用"><span class="nav-number">4.</span> <span class="nav-text">工业上的应用</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

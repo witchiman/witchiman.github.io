@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="java,concurrent," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="在Java 1.5中，提供了一些非常有用的辅助类来帮助我们进行并发编程，比如CountDownLatch，CyclicBarrier和Semaphore，今天我们就来学习一下这三个辅助类的用法。">
+<meta name="keywords" content="java,concurrent">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【转】Java并发编程：CountDownLatch、CyclicBarrier和Semaphore">
+<meta property="og:url" content="http://witchiman.github.io/2017/09/15/java-concurrent/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="在Java 1.5中，提供了一些非常有用的辅助类来帮助我们进行并发编程，比如CountDownLatch，CyclicBarrier和Semaphore，今天我们就来学习一下这三个辅助类的用法。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-10-05T06:28:04.580Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【转】Java并发编程：CountDownLatch、CyclicBarrier和Semaphore">
+<meta name="twitter:description" content="在Java 1.5中，提供了一些非常有用的辅助类来帮助我们进行并发编程，比如CountDownLatch，CyclicBarrier和Semaphore，今天我们就来学习一下这三个辅助类的用法。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2017/09/15/java-concurrent/"/>
+
+
+
+
+
+  <title>【转】Java并发编程：CountDownLatch、CyclicBarrier和Semaphore | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2017/09/15/java-concurrent/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">【转】Java并发编程：CountDownLatch、CyclicBarrier和Semaphore</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-15T12:58:06+08:00">
+                2017-09-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在Java 1.5中，提供了一些非常有用的辅助类来帮助我们进行并发编程，比如CountDownLatch，CyclicBarrier和Semaphore，今天我们就来学习一下这三个辅助类的用法。</p>
+<a id="more"></a>
+<p>以下是本文目录大纲：</p>
+<ul>
+<li><p>CountDownLatch用法</p>
+</li>
+<li><p>CyclicBarrier用法</p>
+</li>
+<li><p>Semaphore用法</p>
+</li>
+</ul>
+<blockquote>
+<p>转自<a href="http://www.cnblogs.com/dolphin0520/p/3920397.html" target="_blank" rel="external">http://www.cnblogs.com/dolphin0520/p/3920397.html</a></p>
+</blockquote>
+<h2 id="CountDownLatch用法"><a href="#CountDownLatch用法" class="headerlink" title="CountDownLatch用法"></a>CountDownLatch用法</h2><p>CountDownLatch类位于java.util.concurrent包下，利用它可以实现类似计数器的功能。比如有一个任务A，它要等待其他4个任务执行完毕之后才能执行，此时就可以利用CountDownLatch来实现这种功能了。</p>
+<p>CountDownLatch类只提供了一个构造器：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">CountDownLatch</span><span class="params">(<span class="keyword">int</span> count)</span> </span>&#123;  &#125;;  <span class="comment">//参数count为计数值</span></div></pre></td></tr></table></figure>
+<p>然后下面这3个方法是CountDownLatch类中最重要的方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123; &#125;;   <span class="comment">//调用await()方法的线程会被挂起，它会等待直到count值为0才继续执行</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">await</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException </span>&#123; &#125;;  <span class="comment">//和await()类似，只不过等待一定的时间后count值还没变为0的话就会继续执行</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">countDown</span><span class="params">()</span> </span>&#123; &#125;;  <span class="comment">//将count值减1</span></div></pre></td></tr></table></figure>
+<p>下面看一个例子大家就清楚CountDownLatch的用法了：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</div><div class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;   </div><div class="line">         <span class="keyword">final</span> CountDownLatch latch = <span class="keyword">new</span> CountDownLatch(<span class="number">2</span>);</div><div class="line">          </div><div class="line">         <span class="keyword">new</span> Thread()&#123;</div><div class="line">             <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">                 <span class="keyword">try</span> &#123;</div><div class="line">                     System.out.println(<span class="string">"子线程"</span>+Thread.currentThread().getName()+<span class="string">"正在执行"</span>);</div><div class="line">                    Thread.sleep(<span class="number">3000</span>);</div><div class="line">                    System.out.println(<span class="string">"子线程"</span>+Thread.currentThread().getName()+<span class="string">"执行完毕"</span>);</div><div class="line">                    latch.countDown();</div><div class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                &#125;</div><div class="line">             &#125;;</div><div class="line">         &#125;.start();</div><div class="line">          </div><div class="line">         <span class="keyword">new</span> Thread()&#123;</div><div class="line">             <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">                 <span class="keyword">try</span> &#123;</div><div class="line">                     System.out.println(<span class="string">"子线程"</span>+Thread.currentThread().getName()+<span class="string">"正在执行"</span>);</div><div class="line">                     Thread.sleep(<span class="number">3000</span>);</div><div class="line">                     System.out.println(<span class="string">"子线程"</span>+Thread.currentThread().getName()+<span class="string">"执行完毕"</span>);</div><div class="line">                     latch.countDown();</div><div class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                &#125;</div><div class="line">             &#125;;</div><div class="line">         &#125;.start();</div><div class="line">          </div><div class="line">         <span class="keyword">try</span> &#123;</div><div class="line">             System.out.println(<span class="string">"等待2个子线程执行完毕..."</span>);</div><div class="line">            latch.await();</div><div class="line">            System.out.println(<span class="string">"2个子线程已经执行完毕"</span>);</div><div class="line">            System.out.println(<span class="string">"继续执行主线程"</span>);</div><div class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">     &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>执行结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">线程Thread-0正在执行</div><div class="line">线程Thread-1正在执行</div><div class="line">等待2个子线程执行完毕...</div><div class="line">线程Thread-0执行完毕</div><div class="line">线程Thread-1执行完毕</div><div class="line">2个子线程已经执行完毕</div><div class="line">继续执行主线程</div></pre></td></tr></table></figure>
+<h2 id="CyclicBarrier用法"><a href="#CyclicBarrier用法" class="headerlink" title="CyclicBarrier用法"></a>CyclicBarrier用法</h2><p>字面意思回环栅栏，通过它可以实现让一组线程等待至某个状态之后再全部同时执行。叫做回环是因为当所有等待线程都被释放以后，CyclicBarrier可以被重用。我们暂且把这个状态就叫做barrier，当调用await()方法之后，线程就处于barrier了。</p>
+<p>CyclicBarrier类位于java.util.concurrent包下，CyclicBarrier提供2个构造器：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">CyclicBarrier</span><span class="params">(<span class="keyword">int</span> parties, Runnable barrierAction)</span> </span>&#123;</div><div class="line">&#125;</div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">CyclicBarrier</span><span class="params">(<span class="keyword">int</span> parties)</span> </span>&#123;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>参数parties指让多少个线程或者任务等待至barrier状态；参数barrierAction为当这些线程都达到barrier状态时会执行的内容。</p>
+<p>然后CyclicBarrier中最重要的方法就是await方法，它有2个重载版本：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException, BrokenBarrierException </span>&#123; &#125;;</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">await</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span><span class="keyword">throws</span> InterruptedException,BrokenBarrierException,TimeoutException </span>&#123; &#125;;</div></pre></td></tr></table></figure>
+<p>第一个版本比较常用，用来挂起当前线程，直至所有线程都到达barrier状态再同时执行后续任务；</p>
+<p>第二个版本是让这些线程等待至一定的时间，如果还有线程没有到达barrier状态就直接让到达barrier的线程执行后续任务。</p>
+<p>下面举几个例子就明白了：</p>
+<p>假若有若干个线程都要进行写数据操作，并且只有所有线程都完成写数据操作之后，这些线程才能继续做后面的事情，此时就可以利用CyclicBarrier了：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        <span class="keyword">int</span> N = <span class="number">4</span>;</div><div class="line">        CyclicBarrier barrier  = <span class="keyword">new</span> CyclicBarrier(N);</div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;N;i++)</div><div class="line">            <span class="keyword">new</span> Writer(barrier).start();</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Writer</span> <span class="keyword">extends</span> <span class="title">Thread</span></span>&#123;</div><div class="line">        <span class="keyword">private</span> CyclicBarrier cyclicBarrier;</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Writer</span><span class="params">(CyclicBarrier cyclicBarrier)</span> </span>&#123;</div><div class="line">            <span class="keyword">this</span>.cyclicBarrier = cyclicBarrier;</div><div class="line">        &#125;</div><div class="line"> </div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">            System.out.println(<span class="string">"线程"</span>+Thread.currentThread().getName()+<span class="string">"正在写入数据..."</span>);</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                Thread.sleep(<span class="number">5000</span>);      <span class="comment">//以睡眠来模拟写入数据操作</span></div><div class="line">                System.out.println(<span class="string">"线程"</span>+Thread.currentThread().getName()+<span class="string">"写入数据完毕，等待其他线程写入完毕"</span>);</div><div class="line">                cyclicBarrier.await();</div><div class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</div><div class="line">                e.printStackTrace();</div><div class="line">            &#125;<span class="keyword">catch</span>(BrokenBarrierException e)&#123;</div><div class="line">                e.printStackTrace();</div><div class="line">            &#125;</div><div class="line">            System.out.println(<span class="string">"所有线程写入完毕，继续处理其他任务..."</span>);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>执行结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">线程Thread-0正在写入数据...</div><div class="line">线程Thread-3正在写入数据...</div><div class="line">线程Thread-2正在写入数据...</div><div class="line">线程Thread-1正在写入数据...</div><div class="line">线程Thread-2写入数据完毕，等待其他线程写入完毕</div><div class="line">线程Thread-0写入数据完毕，等待其他线程写入完毕</div><div class="line">线程Thread-3写入数据完毕，等待其他线程写入完毕</div><div class="line">线程Thread-1写入数据完毕，等待其他线程写入完毕</div><div class="line">所有线程写入完毕，继续处理其他任务...</div><div class="line">所有线程写入完毕，继续处理其他任务...</div><div class="line">所有线程写入完毕，继续处理其他任务...</div><div class="line">所有线程写入完毕，继续处理其他任务...</div></pre></td></tr></table></figure>
+<p>从上面输出结果可以看出，每个写入线程执行完写数据操作之后，就在等待其他线程写入操作完毕。</p>
+<p>当所有线程线程写入操作完毕之后，所有线程就继续进行后续的操作了。</p>
+<p>如果说想在所有线程写入操作完之后，进行额外的其他操作可以为CyclicBarrier提供Runnable参数：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        <span class="keyword">int</span> N = <span class="number">4</span>;</div><div class="line">        CyclicBarrier barrier  = <span class="keyword">new</span> CyclicBarrier(N,<span class="keyword">new</span> Runnable() &#123;</div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">                System.out.println(<span class="string">"当前线程"</span>+Thread.currentThread().getName());   </div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line">         </div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;N;i++)</div><div class="line">            <span class="keyword">new</span> Writer(barrier).start();</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Writer</span> <span class="keyword">extends</span> <span class="title">Thread</span></span>&#123;</div><div class="line">        <span class="keyword">private</span> CyclicBarrier cyclicBarrier;</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Writer</span><span class="params">(CyclicBarrier cyclicBarrier)</span> </span>&#123;</div><div class="line">            <span class="keyword">this</span>.cyclicBarrier = cyclicBarrier;</div><div class="line">        &#125;</div><div class="line"> </div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">            System.out.println(<span class="string">"线程"</span>+Thread.currentThread().getName()+<span class="string">"正在写入数据..."</span>);</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                Thread.sleep(<span class="number">5000</span>);      <span class="comment">//以睡眠来模拟写入数据操作</span></div><div class="line">                System.out.println(<span class="string">"线程"</span>+Thread.currentThread().getName()+<span class="string">"写入数据完毕，等待其他线程写入完毕"</span>);</div><div class="line">                cyclicBarrier.await();</div><div class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</div><div class="line">                e.printStackTrace();</div><div class="line">            &#125;<span class="keyword">catch</span>(BrokenBarrierException e)&#123;</div><div class="line">                e.printStackTrace();</div><div class="line">            &#125;</div><div class="line">            System.out.println(<span class="string">"所有线程写入完毕，继续处理其他任务..."</span>);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>运行结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">线程Thread-0正在写入数据...</div><div class="line">线程Thread-1正在写入数据...</div><div class="line">线程Thread-2正在写入数据...</div><div class="line">线程Thread-3正在写入数据...</div><div class="line">线程Thread-0写入数据完毕，等待其他线程写入完毕</div><div class="line">线程Thread-1写入数据完毕，等待其他线程写入完毕</div><div class="line">线程Thread-2写入数据完毕，等待其他线程写入完毕</div><div class="line">线程Thread-3写入数据完毕，等待其他线程写入完毕</div><div class="line">当前线程Thread-3</div><div class="line">所有线程写入完毕，继续处理其他任务...</div><div class="line">所有线程写入完毕，继续处理其他任务...</div><div class="line">所有线程写入完毕，继续处理其他任务...</div><div class="line">所有线程写入完毕，继续处理其他任务...</div></pre></td></tr></table></figure>
+<p>从结果可以看出，当四个线程都到达barrier状态后，会从四个线程中选择一个线程去执行Runnable。</p>
+<p>下面看一下为await指定时间的效果：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        <span class="keyword">int</span> N = <span class="number">4</span>;</div><div class="line">        CyclicBarrier barrier  = <span class="keyword">new</span> CyclicBarrier(N);</div><div class="line">         </div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;N;i++) &#123;</div><div class="line">            <span class="keyword">if</span>(i&lt;N-<span class="number">1</span>)</div><div class="line">                <span class="keyword">new</span> Writer(barrier).start();</div><div class="line">            <span class="keyword">else</span> &#123;</div><div class="line">                <span class="keyword">try</span> &#123;</div><div class="line">                    Thread.sleep(<span class="number">5000</span>);</div><div class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                &#125;</div><div class="line">                <span class="keyword">new</span> Writer(barrier).start();</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Writer</span> <span class="keyword">extends</span> <span class="title">Thread</span></span>&#123;</div><div class="line">        <span class="keyword">private</span> CyclicBarrier cyclicBarrier;</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Writer</span><span class="params">(CyclicBarrier cyclicBarrier)</span> </span>&#123;</div><div class="line">            <span class="keyword">this</span>.cyclicBarrier = cyclicBarrier;</div><div class="line">        &#125;</div><div class="line"> </div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">            System.out.println(<span class="string">"线程"</span>+Thread.currentThread().getName()+<span class="string">"正在写入数据..."</span>);</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                Thread.sleep(<span class="number">5000</span>);      <span class="comment">//以睡眠来模拟写入数据操作</span></div><div class="line">                System.out.println(<span class="string">"线程"</span>+Thread.currentThread().getName()+<span class="string">"写入数据完毕，等待其他线程写入完毕"</span>);</div><div class="line">                <span class="keyword">try</span> &#123;</div><div class="line">                    cyclicBarrier.await(<span class="number">2000</span>, TimeUnit.MILLISECONDS);</div><div class="line">                &#125; <span class="keyword">catch</span> (TimeoutException e) &#123;</div><div class="line">                    <span class="comment">// TODO Auto-generated catch block</span></div><div class="line">                    e.printStackTrace();</div><div class="line">                &#125;</div><div class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</div><div class="line">                e.printStackTrace();</div><div class="line">            &#125;<span class="keyword">catch</span>(BrokenBarrierException e)&#123;</div><div class="line">                e.printStackTrace();</div><div class="line">            &#125;</div><div class="line">            System.out.println(Thread.currentThread().getName()+<span class="string">"所有线程写入完毕，继续处理其他任务..."</span>);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>执行结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">线程Thread-0正在写入数据...</div><div class="line">线程Thread-2正在写入数据...</div><div class="line">线程Thread-1正在写入数据...</div><div class="line">线程Thread-2写入数据完毕，等待其他线程写入完毕</div><div class="line">线程Thread-0写入数据完毕，等待其他线程写入完毕</div><div class="line">线程Thread-1写入数据完毕，等待其他线程写入完毕</div><div class="line">线程Thread-3正在写入数据...</div><div class="line">java.util.concurrent.TimeoutException</div><div class="line">Thread-1所有线程写入完毕，继续处理其他任务...</div><div class="line">Thread-0所有线程写入完毕，继续处理其他任务...</div><div class="line">    at java.util.concurrent.CyclicBarrier.dowait(Unknown Source)</div><div class="line">    at java.util.concurrent.CyclicBarrier.await(Unknown Source)</div><div class="line">    at com.cxh.test1.Test<span class="variable">$Writer</span>.run(Test.java:58)</div><div class="line">java.util.concurrent.BrokenBarrierException</div><div class="line">    at java.util.concurrent.CyclicBarrier.dowait(Unknown Source)</div><div class="line">    at java.util.concurrent.CyclicBarrier.await(Unknown Source)</div><div class="line">    at com.cxh.test1.Test<span class="variable">$Writer</span>.run(Test.java:58)</div><div class="line">java.util.concurrent.BrokenBarrierException</div><div class="line">    at java.util.concurrent.CyclicBarrier.dowait(Unknown Source)</div><div class="line">    at java.util.concurrent.CyclicBarrier.await(Unknown Source)</div><div class="line">    at com.cxh.test1.Test<span class="variable">$Writer</span>.run(Test.java:58)</div><div class="line">Thread-2所有线程写入完毕，继续处理其他任务...</div><div class="line">java.util.concurrent.BrokenBarrierException</div><div class="line">线程Thread-3写入数据完毕，等待其他线程写入完毕</div><div class="line">    at java.util.concurrent.CyclicBarrier.dowait(Unknown Source)</div><div class="line">    at java.util.concurrent.CyclicBarrier.await(Unknown Source)</div><div class="line">    at com.cxh.test1.Test<span class="variable">$Writer</span>.run(Test.java:58)</div><div class="line">Thread-3所有线程写入完毕，继续处理其他任务...</div></pre></td></tr></table></figure>
+<p>上面的代码在main方法的for循环中，故意让最后一个线程启动延迟，因为在前面三个线程都达到barrier之后，等待了指定的时间发现第四个线程还没有达到barrier，就抛出异常并继续执行后面的任务。</p>
+<p>另外CyclicBarrier是可以重用的，看下面这个例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        <span class="keyword">int</span> N = <span class="number">4</span>;</div><div class="line">        CyclicBarrier barrier  = <span class="keyword">new</span> CyclicBarrier(N);</div><div class="line">         </div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;N;i++) &#123;</div><div class="line">            <span class="keyword">new</span> Writer(barrier).start();</div><div class="line">        &#125;</div><div class="line">         </div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            Thread.sleep(<span class="number">25000</span>);</div><div class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">         </div><div class="line">        System.out.println(<span class="string">"CyclicBarrier重用"</span>);</div><div class="line">         </div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;N;i++) &#123;</div><div class="line">            <span class="keyword">new</span> Writer(barrier).start();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Writer</span> <span class="keyword">extends</span> <span class="title">Thread</span></span>&#123;</div><div class="line">        <span class="keyword">private</span> CyclicBarrier cyclicBarrier;</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Writer</span><span class="params">(CyclicBarrier cyclicBarrier)</span> </span>&#123;</div><div class="line">            <span class="keyword">this</span>.cyclicBarrier = cyclicBarrier;</div><div class="line">        &#125;</div><div class="line"> </div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">            System.out.println(<span class="string">"线程"</span>+Thread.currentThread().getName()+<span class="string">"正在写入数据..."</span>);</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                Thread.sleep(<span class="number">5000</span>);      <span class="comment">//以睡眠来模拟写入数据操作</span></div><div class="line">                System.out.println(<span class="string">"线程"</span>+Thread.currentThread().getName()+<span class="string">"写入数据完毕，等待其他线程写入完毕"</span>);</div><div class="line">             </div><div class="line">                cyclicBarrier.await();</div><div class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</div><div class="line">                e.printStackTrace();</div><div class="line">            &#125;<span class="keyword">catch</span>(BrokenBarrierException e)&#123;</div><div class="line">                e.printStackTrace();</div><div class="line">            &#125;</div><div class="line">            System.out.println(Thread.currentThread().getName()+<span class="string">"所有线程写入完毕，继续处理其他任务..."</span>);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>执行结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">线程Thread-0正在写入数据...</div><div class="line">线程Thread-1正在写入数据...</div><div class="line">线程Thread-3正在写入数据...</div><div class="line">线程Thread-2正在写入数据...</div><div class="line">线程Thread-1写入数据完毕，等待其他线程写入完毕</div><div class="line">线程Thread-3写入数据完毕，等待其他线程写入完毕</div><div class="line">线程Thread-2写入数据完毕，等待其他线程写入完毕</div><div class="line">线程Thread-0写入数据完毕，等待其他线程写入完毕</div><div class="line">Thread-0所有线程写入完毕，继续处理其他任务...</div><div class="line">Thread-3所有线程写入完毕，继续处理其他任务...</div><div class="line">Thread-1所有线程写入完毕，继续处理其他任务...</div><div class="line">Thread-2所有线程写入完毕，继续处理其他任务...</div><div class="line">CyclicBarrier重用</div><div class="line">线程Thread-4正在写入数据...</div><div class="line">线程Thread-5正在写入数据...</div><div class="line">线程Thread-6正在写入数据...</div><div class="line">线程Thread-7正在写入数据...</div><div class="line">线程Thread-7写入数据完毕，等待其他线程写入完毕</div><div class="line">线程Thread-5写入数据完毕，等待其他线程写入完毕</div><div class="line">线程Thread-6写入数据完毕，等待其他线程写入完毕</div><div class="line">线程Thread-4写入数据完毕，等待其他线程写入完毕</div><div class="line">Thread-4所有线程写入完毕，继续处理其他任务...</div><div class="line">Thread-5所有线程写入完毕，继续处理其他任务...</div><div class="line">Thread-6所有线程写入完毕，继续处理其他任务...</div><div class="line">Thread-7所有线程写入完毕，继续处理其他任务...</div></pre></td></tr></table></figure>
+<blockquote>
+<p>从执行结果可以看出，在初次的4个线程越过barrier状态后，又可以用来进行新一轮的使用。而CountDownLatch无法进行重复使用。</p>
+</blockquote>
+<h2 id="Semaphore用法"><a href="#Semaphore用法" class="headerlink" title="Semaphore用法"></a>Semaphore用法</h2><p>Semaphore翻译成字面意思为 信号量，Semaphore可以控同时访问的线程个数，通过 acquire() 获取一个许可，如果没有就等待，而 release() 释放一个许可。</p>
+<p>Semaphore类位于java.util.concurrent包下，它提供了2个构造器：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">Semaphore</span><span class="params">(<span class="keyword">int</span> permits)</span> </span>&#123;          <span class="comment">//参数permits表示许可数目，即同时可以允许多少线程进行访问</span></div><div class="line">    sync = <span class="keyword">new</span> NonfairSync(permits);</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">Semaphore</span><span class="params">(<span class="keyword">int</span> permits, <span class="keyword">boolean</span> fair)</span> </span>&#123;    <span class="comment">//这个多了一个参数fair表示是否是公平的，即等待时间越久的越先获取许可</span></div><div class="line">    sync = (fair)? <span class="keyword">new</span> FairSync(permits) : <span class="keyword">new</span> NonfairSync(permits);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>下面说一下Semaphore类中比较重要的几个方法，首先是acquire()、release()方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">acquire</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;  &#125;     <span class="comment">//获取一个许可</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">acquire</span><span class="params">(<span class="keyword">int</span> permits)</span> <span class="keyword">throws</span> InterruptedException </span>&#123; &#125;    <span class="comment">//获取permits个许可</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">release</span><span class="params">()</span> </span>&#123; &#125;          <span class="comment">//释放一个许可</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">release</span><span class="params">(<span class="keyword">int</span> permits)</span> </span>&#123; &#125;    <span class="comment">//释放permits个许可</span></div></pre></td></tr></table></figure>
+<p>acquire()用来获取一个许可，若无许可能够获得，则会一直等待，直到获得许可。</p>
+<p>release()用来释放许可。</p>
+<p>这4个方法都会被阻塞，如果想立即得到执行结果，可以使用下面几个方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">()</span> </span>&#123; &#125;;    <span class="comment">//尝试获取一个许可，若获取成功，则立即返回true，若获取失败，则立即返回false</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException </span>&#123; &#125;;  <span class="comment">//尝试获取一个许可，若在指定的时间内获取成功，则立即返回true，否则则立即返回false</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">(<span class="keyword">int</span> permits)</span> </span>&#123; &#125;; <span class="comment">//尝试获取permits个许可，若获取成功，则立即返回true，若获取失败，则立即返回false</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">(<span class="keyword">int</span> permits, <span class="keyword">long</span> timeout, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException </span>&#123; &#125;; <span class="comment">//尝试获取permits个许可，若在指定的时间内获取成功，则立即返回true，否则则立即返回false</span></div></pre></td></tr></table></figure>
+<p>另外还可以通过availablePermits()方法得到可用的许可数目。</p>
+<p>下面通过一个例子来看一下Semaphore的具体使用：</p>
+<p>假若一个工厂有5台机器，但是有8个工人，一台机器同时只能被一个工人使用，只有使用完了，其他工人才能继续使用。那么我们就可以通过Semaphore来实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        <span class="keyword">int</span> N = <span class="number">8</span>;            <span class="comment">//工人数</span></div><div class="line">        Semaphore semaphore = <span class="keyword">new</span> Semaphore(<span class="number">5</span>); <span class="comment">//机器数目</span></div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;N;i++)</div><div class="line">            <span class="keyword">new</span> Worker(i,semaphore).start();</div><div class="line">    &#125;</div><div class="line">     </div><div class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Worker</span> <span class="keyword">extends</span> <span class="title">Thread</span></span>&#123;</div><div class="line">        <span class="keyword">private</span> <span class="keyword">int</span> num;</div><div class="line">        <span class="keyword">private</span> Semaphore semaphore;</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Worker</span><span class="params">(<span class="keyword">int</span> num,Semaphore semaphore)</span></span>&#123;</div><div class="line">            <span class="keyword">this</span>.num = num;</div><div class="line">            <span class="keyword">this</span>.semaphore = semaphore;</div><div class="line">        &#125;</div><div class="line">         </div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                semaphore.acquire();</div><div class="line">                System.out.println(<span class="string">"工人"</span>+<span class="keyword">this</span>.num+<span class="string">"占用一个机器在生产..."</span>);</div><div class="line">                Thread.sleep(<span class="number">2000</span>);</div><div class="line">                System.out.println(<span class="string">"工人"</span>+<span class="keyword">this</span>.num+<span class="string">"释放出机器"</span>);</div><div class="line">                semaphore.release();           </div><div class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</div><div class="line">                e.printStackTrace();</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>执行结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">工人0占用一个机器在生产...</div><div class="line">工人1占用一个机器在生产...</div><div class="line">工人2占用一个机器在生产...</div><div class="line">工人4占用一个机器在生产...</div><div class="line">工人5占用一个机器在生产...</div><div class="line">工人0释放出机器</div><div class="line">工人2释放出机器</div><div class="line">工人3占用一个机器在生产...</div><div class="line">工人7占用一个机器在生产...</div><div class="line">工人4释放出机器</div><div class="line">工人5释放出机器</div><div class="line">工人1释放出机器</div><div class="line">工人6占用一个机器在生产...</div><div class="line">工人3释放出机器</div><div class="line">工人7释放出机器</div><div class="line">工人6释放出机器</div></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>下面对上面说的三个辅助类进行一个总结：</p>
+<ul>
+<li><p>CountDownLatch和CyclicBarrier都能够实现线程之间的等待，只不过它们侧重点不同：</p>
+<ul>
+<li><p>CountDownLatch一般用于某个线程A等待若干个其他线程执行完任务之后，它才执行；</p>
+</li>
+<li><p>而CyclicBarrier一般用于一组线程互相等待至某个状态，然后这一组线程再同时执行；</p>
+</li>
+<li><p>CountDownLatch是不能够重用的，而CyclicBarrier是可以重用的。</p>
+</li>
+</ul>
+</li>
+<li><p>Semaphore其实和锁有点类似，它一般用于控制对某组资源的访问权限。</p>
+</li>
+</ul>
+<p>　　</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>《Java编程思想》</p>
+<p><a href="http://www.itzhai.com/the-introduction-and-use-of-a-countdownlatch.html" target="_blank" rel="external">http://www.itzhai.com/the-introduction-and-use-of-a-countdownlatch.html</a></p>
+<p><a href="http://leaver.me/archives/3220.html" target="_blank" rel="external">http://leaver.me/archives/3220.html</a></p>
+<p><a href="http://developer.51cto.com/art/201403/432095.htm" target="_blank" rel="external">http://developer.51cto.com/art/201403/432095.htm</a></p>
+<p><a href="http://blog.csdn.net/yanhandle/article/details/9016329" target="_blank" rel="external">http://blog.csdn.net/yanhandle/article/details/9016329</a></p>
+<p><a href="http://blog.csdn.net/cutesource/article/details/5780740" target="_blank" rel="external">http://blog.csdn.net/cutesource/article/details/5780740</a></p>
+<p><a href="http://www.cnblogs.com/whgw/archive/2011/09/29/2195555.html" target="_blank" rel="external">http://www.cnblogs.com/whgw/archive/2011/09/29/2195555.html</a></p>
+<blockquote>
+<p>作者：海子　　　　<br>出处：<a href="http://www.cnblogs.com/dolphin0520/" target="_blank" rel="external">http://www.cnblogs.com/dolphin0520/</a>　　　　<br>本博客中未标明转载的文章归作者海子和博客园共有，欢迎转载，但未经作者同意必须保留此段声明，且在文章页面明显位置给出原文连接，否则保留追究法律责任的权利。</p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/java/" rel="tag"># java</a>
+          
+            <a href="/tags/concurrent/" rel="tag"># concurrent</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/08/14/docker-namespace-cgroups/" rel="next" title="Docker：资源隔离和资源限制">
+                <i class="fa fa-chevron-left"></i> Docker：资源隔离和资源限制
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#CountDownLatch用法"><span class="nav-number">1.</span> <span class="nav-text">CountDownLatch用法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CyclicBarrier用法"><span class="nav-number">2.</span> <span class="nav-text">CyclicBarrier用法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Semaphore用法"><span class="nav-number">3.</span> <span class="nav-text">Semaphore用法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

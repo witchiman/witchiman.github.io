@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="linux," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="近来在研究Linux内核的源码，怎一个“难”字了得，看来还是自己悟性不够高。读了《深入理解LINUX内核》这本书，看起来很费劲，读完后一头雾水，还是留到以后再反复咀嚼吧。后来发现一本国人写的书《Linux内核源代码情景分析》还不错，多多少少能看懂点儿，可惜书里的讲解是基于Linux 2.4的内核讲解的，要知道2.6的内核相比之前的内核改动很大。但是万变不离其宗，原来大部分优秀的设计还是保留下来的。">
+<meta name="keywords" content="linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《Linux内核源代码情景分析》笔记">
+<meta property="og:url" content="http://witchiman.github.io/2016/12/05/linux-kernel-src/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="近来在研究Linux内核的源码，怎一个“难”字了得，看来还是自己悟性不够高。读了《深入理解LINUX内核》这本书，看起来很费劲，读完后一头雾水，还是留到以后再反复咀嚼吧。后来发现一本国人写的书《Linux内核源代码情景分析》还不错，多多少少能看懂点儿，可惜书里的讲解是基于Linux 2.4的内核讲解的，要知道2.6的内核相比之前的内核改动很大。但是万变不离其宗，原来大部分优秀的设计还是保留下来的。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://image18-c.poco.cn/mypoco/myphoto/20161201/17/18349370720161201170029033.png?600x580_130">
+<meta property="og:image" content="http://image18-c.poco.cn/mypoco/myphoto/20161206/21/18349370720161206213420026_640.jpg?780x556_130">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.653Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="《Linux内核源代码情景分析》笔记">
+<meta name="twitter:description" content="近来在研究Linux内核的源码，怎一个“难”字了得，看来还是自己悟性不够高。读了《深入理解LINUX内核》这本书，看起来很费劲，读完后一头雾水，还是留到以后再反复咀嚼吧。后来发现一本国人写的书《Linux内核源代码情景分析》还不错，多多少少能看懂点儿，可惜书里的讲解是基于Linux 2.4的内核讲解的，要知道2.6的内核相比之前的内核改动很大。但是万变不离其宗，原来大部分优秀的设计还是保留下来的。">
+<meta name="twitter:image" content="http://image18-c.poco.cn/mypoco/myphoto/20161201/17/18349370720161201170029033.png?600x580_130">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2016/12/05/linux-kernel-src/"/>
+
+
+
+
+
+  <title>《Linux内核源代码情景分析》笔记 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2016/12/05/linux-kernel-src/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">《Linux内核源代码情景分析》笔记</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-12-05T13:46:16+08:00">
+                2016-12-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>近来在研究Linux内核的源码，怎一个“难”字了得，看来还是自己悟性不够高。读了《深入理解LINUX内核》这本书，看起来很费劲，读完后一头雾水，还是留到以后再反复咀嚼吧。后来发现一本国人写的书《Linux内核源代码情景分析》还不错，多多少少能看懂点儿，可惜书里的讲解是基于Linux 2.4的内核讲解的，要知道2.6的内核相比之前的内核改动很大。但是万变不离其宗，原来大部分优秀的设计还是保留下来的。这两天翻阅了几章，顺便把知识点整理了下。</p>
+<a id="more"></a>
+<h2 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h2><h3 id="内存映射"><a href="#内存映射" class="headerlink" title="内存映射"></a>内存映射</h3><ul>
+<li><p>考虑到不在不同CPU上的实现，需要设计出一种通用的模型，linux 内核的映射机制设计成三层。对应到代码中，页面目录称为PGD，中间目录称为PMD，页面表称为PT。PT中的表项为PTE(Page Table Entry)，三者均为数组。</p>
+</li>
+<li><p>相应地， 在逻辑上也把线性地址从高位到低位分为四段，分别作用在PGD的下标、中间目录PMD的下标、页面表PT中的下标及物理页面内的位移。三者均为数组。</p>
+</li>
+</ul>
+<h3 id="实际CPU上的映射模型"><a href="#实际CPU上的映射模型" class="headerlink" title="实际CPU上的映射模型"></a>实际CPU上的映射模型</h3><p>i386的CPU映射模型只有两层，从Pentium Pro，Intel引用了物理地址扩充功能PAE，允许将地址带宽从32位提到36位，并在硬件上支持三层映射模型。</p>
+<p>include/asm-i386/pgtable.h</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="number">106</span> <span class="meta">#<span class="meta-keyword">if</span> CONFIG_X86_PAE</span></div><div class="line"><span class="number">107</span> <span class="meta"># <span class="meta-keyword">include</span> <span class="meta-string">&lt;asm/pgtable-3level.h&gt;</span></span></div><div class="line"><span class="number">108</span> <span class="meta">#<span class="meta-keyword">else</span></span></div><div class="line"><span class="number">109</span> <span class="meta"># <span class="meta-keyword">include</span> <span class="meta-string">&lt;asm/pgtable-2level.h&gt;</span></span></div><div class="line"><span class="number">110</span> <span class="meta">#<span class="meta-keyword">endif</span></span></div></pre></td></tr></table></figure>
+<h3 id="系统空间"><a href="#系统空间" class="headerlink" title="系统空间"></a>系统空间</h3><p>linux把32位地址即4G虚存空间分分两部分，最高的1G（从虚地址0xC000 0000到0xFFFF FFFF）为系统空间，用于内核本身，较低的（从虚地址0x0至0xBFFF FFFF），作用各个进程的“用户空间”。</p>
+<p>虽然系统空间占据了每个虚存空间中最高的1G字节，在物理内存中却是从最低的地址开始的。对于内核来说，其地址的映射是很简单的线性映射，0xC000 0000是两者之间的位移量。</p>
+<p>include/asm-i386/page.h<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">define</span> PAGE_OFFSET ((unsigned long)__PAGE_OFFSET)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> __pa(x) ((unsigned long)(x)-PAGE_OFFSET)</span></div><div class="line"><span class="meta">#<span class="meta-keyword">define</span> __va(x) ((void *)((unsigned long)(x)+PAGE_OFFSET))</span></div></pre></td></tr></table></figure></p>
+<p>给定一个虚地址x，其物理地址为x-PAGE_OFFSET；给定一个物理地址x，其虚地址为xPAGE_OFFSET。当然，CPU并不能过此方法映射的，__pa()只是为内核代码当需要知道一个虚地址对应的物理地址时提供方便。例如，在切换进程的时候要将寄存器CR3设置成指向新进程的页面目录PGD，而该目录的起始地址在内核代码中是虚地址，但CR3所需要的是物理地址。</p>
+<h3 id="GDT"><a href="#GDT" class="headerlink" title="GDT"></a>GDT</h3><p>每个进程的LDT都作为一个独立的段而存在，在全局段描述表GDT中要有一个表项指向这个段的起始地址，并说明该段的长度和其它一些参数。每个进程还有一个TSS(任务状态段)也一样。故每个进程要在GDT中占有两个表项。</p>
+<p>段寄存器中,第一位RPL为请求者特权级，第二位TI为选择域，用以选择GDT或LDT，而用作下标的位宽度高13位，故GDT中有8192个表项，除去系统的开销（GDT中，第二项和第三项用作内核的代码段和数据段，第四项和第五项永远用作当前进程的代码段和数据段，第一项永远为0，bla~）以外，还有8180个表项可用，理论上系统中最大的进程数量是4090。</p>
+<h3 id="Intel-80836后的处理器提供三种工作模式："><a href="#Intel-80836后的处理器提供三种工作模式：" class="headerlink" title="Intel 80836后的处理器提供三种工作模式："></a>Intel 80836后的处理器提供三种工作模式：</h3><ul>
+<li>实模式</li>
+<li>保护模式</li>
+<li>虚拟8086模式（即VM86模式）</li>
+</ul>
+<h3 id="逻辑地址到物理地址的转换"><a href="#逻辑地址到物理地址的转换" class="headerlink" title="逻辑地址到物理地址的转换"></a>逻辑地址到物理地址的转换</h3><ul>
+<li><p>一个逻辑地址包含一个段选择符（16位）和一个偏移量（有效地址，32位）。利用段选择符中的偏移值（段索引）在GDT和LDT表中定位相应的段描述符（仅当一个新的段选择符加载到段寄存器才需要这一步），一个段描述符包括段基地址、段限长和段属性；利用段描述符的检验段的访问权限和范围，以确保该段是可以访问的并且偏移量位于段界内；把段描述符中取得的段基地址加到偏移量上，形成了<strong>线性地址</strong>。由于linux段基址设为0，每个段都是从0地址开始的整个4GB的虚存空间，虚地址到线性地址的映射保持原值不变。对于linux内核映射，可以直接把线性地址当作虚拟地址。</p>
+</li>
+<li><p>对于一个32位的线性地址，其高10位为目录项的下标。根据其下标可去<strong>页面目录</strong> 中找到其目录项。这个<strong>目录项</strong>的高20位指向一个页面表，CPU在其20位后添加12个0即得到该页面表的指针。找到页面表以后，根据线性地址中间的10位，可在页面表中找到相应的<strong>表项</strong>。与目录项相似，页面表项的P位为1时，表示的映射的页面在内存中。32位的页面表项中的高20位指向一个物理内存页面，在后面添加12个0就得到其起始地址。此地址加线性地址的低12位就是最终的<strong>物理内存地址</strong>。</p>
+</li>
+</ul>
+<h3 id="linux提供了两个特殊的、与段式存储管理有关的系统调用。"><a href="#linux提供了两个特殊的、与段式存储管理有关的系统调用。" class="headerlink" title="linux提供了两个特殊的、与段式存储管理有关的系统调用。"></a>linux提供了两个特殊的、与段式存储管理有关的系统调用。</h3><blockquote>
+<p>这是为了能在Linux内核上仿真运行采用段式存储管理的Windows或DOS软件</p>
+</blockquote>
+<ul>
+<li><p>modify_ldt(int func, void *ptr, unsigned bytecount)</p>
+<p>  它是为了开发WINE的的需要而设置的。当func为0时，其返回进程局部段描述表的大小，而表的内容就在ptr指向缓冲区内； 当func为1时，ptr指向一个结构modify_ldt_ldt_s，bytecount为sizeof(struct modify_ldt_ldt_s)。</p>
+</li>
+<li><p>vm86(struct vm86_struct *info)</p>
+<p>  用来在linxu上模拟DOS软件。i386 CPU专门提供了一种寻址方式VM86，用来在保护模式下运行实模式的软件（已经很少了）。 </p>
+</li>
+</ul>
+<h3 id="内存的数据结构"><a href="#内存的数据结构" class="headerlink" title="内存的数据结构"></a>内存的数据结构</h3><ul>
+<li><p>物理内存中，每一个物理页面都有一个page结构(mem_map_t),系统在初始化的时候根据物理内存的大小建立起一个page结构数组mem_map，作为物理页面的仓库。仓库的物理页面划分成ZONE_DMA和ZONE_NORMAL两个管理区(根据系统配置可能还有第三个管理区ZONE_HIGHMEM)。</p>
+</li>
+<li><p>虚存空间的数据结构为vm_area_struct，vm_area_struct通过成员vm_area_height、vm_area_left和vm_area_right实现AVL树，来提高访问速度。</p>
+</li>
+</ul>
+<p>在两种情况下，虚存页面会跟磁盘文件发生关系：  </p>
+<ul>
+<li>一种是盘区交换（swap），当物理内存不够时，一些不经常使用的页面可以被交换到磁盘上。</li>
+<li>一种是将一个磁盘文件映射到用户空间中。Linux系统提供了一个系统调用mmap()（munmap()撤销）,使进程可以将一个己打开的文件映射到用户空间中去，此后就可像访问一个字符数组那样来访问这个文件的内容。</li>
+</ul>
+<ul>
+<li><p>vm_area_struct中有一个指针指向一个结构mm_struct，一个比vm_area_struct更高层次上使用的数据结构，每个进程只有一个mm_struct，它是进程在用户空间中的抽象，是总的控制结构。每个进程的task_strut有一个指针指向mm_struct。</p>
+</li>
+<li><p>内核中定义了一个swap_info_struct 的数据结构，用以描述和管理用于页面交换的文件或设备（比如磁盘）。</p>
+<ul>
+<li>结构成员swap_map指向一个数组，数组成员对应物理页面，数组大小取决于pages。swap_map[0]作为第一个页面不用于页面交换，它包含了该设备或文件自身的一些信息以及表示哪些页面可供使用。</li>
+</ul>
+</li>
+</ul>
+<h3 id="用户空间内存页面"><a href="#用户空间内存页面" class="headerlink" title="用户空间内存页面"></a>用户空间内存页面</h3><ul>
+<li>普通的用户页面，包括进程的代码段、数据段、堆栈段，以及动态分配的“存储堆”。</li>
+<li>通过系统调用mmap()映射到用户空间的已打开文件的内容。</li>
+<li>进程间的共享内存区。</li>
+</ul>
+<h3 id="页面换出"><a href="#页面换出" class="headerlink" title="页面换出"></a>页面换出</h3><ul>
+<li><p>kswapd，在linux内核中设置的一个可定期将页面换出的守护进程。</p>
+<ul>
+<li>相当于一个进程，有自身的控制块task_struct，受内核调度。</li>
+<li>不同于其它进程，没有独立的地址空间，使用内核的空间。</li>
+<li>代码静态地连接内核中，可直接调用内核中的各种子程序，不像其它进程还得通过系统调用。</li>
+</ul>
+</li>
+<li><p>kreclaimd</p>
+</li>
+</ul>
+<h3 id="HZ常量，决定了内核中每秒有多少次时钟中断。"><a href="#HZ常量，决定了内核中每秒有多少次时钟中断。" class="headerlink" title="HZ常量，决定了内核中每秒有多少次时钟中断。"></a>HZ常量，决定了内核中每秒有多少次时钟中断。</h3><h3 id="页面换出-1"><a href="#页面换出-1" class="headerlink" title="页面换出"></a>页面换出</h3><ul>
+<li><p>当物理页面在内存中时，页面表项是一个pte_t结构，指向一个内存页面；当物理页面不在内存时，则是一个swap_entry_t结构，指向一个盘面结构。</p>
+</li>
+<li><p>page结构的使用计数，分配页面把其设置为1，通过add_to_swap_cache()将其链入换入\换出队列（或文件映射队列）和LRU队列active_list时，又在add_to_page_locked()中通过page_cache_get()递增了这个计数。</p>
+<ul>
+<li>当有并且只有一个进程映射到这个换入\换出页面时，其使用计数为2。</li>
+<li>若页面来自文件映射，则由于同时又与文件读/写缓冲区相联系，又多一个“用户”，所以其使用计数为3。</li>
+</ul>
+</li>
+</ul>
+<h3 id="内核缓冲区管理（slab）"><a href="#内核缓冲区管理（slab）" class="headerlink" title="内核缓冲区管理（slab）"></a>内核缓冲区管理（slab）</h3><ul>
+<li><p>每种重要的数据结构都有自己专用的缓冲区队列，每种数据结构都有相应的constuctor”和“destructor”函数</p>
+</li>
+<li><p>每个对象队列并非直接由对象构成，而是由一连串的“大块”（slab）构成，而每个大块包含了若干种对象</p>
+</li>
+<li><p>一个slab上的所有对象的起始地址都必然是按高速缓存中的缓冲行对起的</p>
+</li>
+<li><p>分配某一个数据结构的缓冲区时，只需指明是从哪一个队列中分配，不需指明缓冲区大小，不用初始化，使用函数 kmem_cache_alloc()和kmem_cache_free()</p>
+</li>
+</ul>
+<h3 id="外部设备存储空间的地址映射"><a href="#外部设备存储空间的地址映射" class="headerlink" title="外部设备存储空间的地址映射"></a>外部设备存储空间的地址映射</h3><blockquote>
+<p>不管是I/O映射还是存储器映射，都需要通过ioremap()函数映射到内存</p>
+</blockquote>
+<ul>
+<li>内存映射，如控制寄存器、状态寄存器、数据寄存器等等。</li>
+<li>I/O映射</li>
+</ul>
+<h3 id="一个有用户空间、可换出的内存页面即page数据结构，同时在三个队列中。"><a href="#一个有用户空间、可换出的内存页面即page数据结构，同时在三个队列中。" class="headerlink" title="一个有用户空间、可换出的内存页面即page数据结构，同时在三个队列中。"></a>一个有用户空间、可换出的内存页面即page数据结构，同时在三个队列中。</h3><ul>
+<li><p>一是通过其队列头list链入某个换入/换出队列，即相应address_space结构中的clean_pages、dirty_pages以及locked_pages三个队列之一</p>
+</li>
+<li><p>二是通过其队列头lru链入到某个LRU队列，即active_list、inactive_list或者某个inactive_clean_list之一</p>
+</li>
+<li><p>三是通过其指针next_hash链入一个杂凑队列</p>
+</li>
+</ul>
+<h2 id="中断、异常和系统调用"><a href="#中断、异常和系统调用" class="headerlink" title="中断、异常和系统调用"></a>中断、异常和系统调用</h2><h3 id="中断向量"><a href="#中断向量" class="headerlink" title="中断向量"></a>中断向量</h3><pre><code>Intel X86 CPU 支持256个不同的中断向量。
+</code></pre><ul>
+<li>外中断，异步的，其向量是由软件或硬件偏好设置好的。</li>
+<li>软中断，同步的的，是在“自掐指令”中发出的（INT n中的n）</li>
+<li>异常，由CPU的硬件结构中预先规定好的</li>
+</ul>
+<h3 id="门（gate）"><a href="#门（gate）" class="headerlink" title="门（gate）"></a>门（gate）</h3><p>有四类，任务门（task gate，Linux不使用）、中断门（interrupt gate）、陷阱门(trap gate)以及调用门(call gate)。其大小为64位。</p>
+<p>中断门与陷阱门的唯一区别，通过中断门进行中断服务程序时CPU会自动关中断，也就是将CPU中EFLAGS寄存器的IF标志位清成0，防止嵌套中断发生；而通过陷阱门进入服务程序时，IF标志位不变。</p>
+<h3 id="中断处理程序分成两个半部：顶半部和底半部。"><a href="#中断处理程序分成两个半部：顶半部和底半部。" class="headerlink" title="中断处理程序分成两个半部：顶半部和底半部。"></a>中断处理程序分成两个半部：顶半部和底半部。</h3><p>设备的中断会打断内核中进程的正常调度和运行，系统对更高吞吐率的追求势必要求中断服务程序尽可能短小精悍。然而，在大多数真实的系统中，当中断来临时，要完成的工作并不会是矮小的，它可能要进行大量的耗时操作。为了在中断执行时间尽可能短和中断处理需要完成大量工作之间找到一个平衡点，Linux将中断处理程序分解成两个半部。</p>
+<ul>
+<li><p>顶半部（top half），顶半部完成尽可能少的比较紧急的功能，它往往只是简单地读取寄存器的中断状态并清除中断标志后，就进行“登记中断”的工作。意味着将底半部处理程序挂到该设备的底半部执行队列中去。这样，顶半部执行的速度就会很快，可以服务更多的中断请求。</p>
+</li>
+<li><p>底半部(bottom half)，中断处理的工作重心落到底半部的头上，它处理绝大多数任务，它可以被新的中断打断。tasklet和工作队列都调度中断底半部的良好机制。 </p>
+</li>
+</ul>
+<h3 id="内核线程的task-struct"><a href="#内核线程的task-struct" class="headerlink" title="内核线程的task_struct"></a>内核线程的task_struct</h3><p>进程中有两个mm_struct指针，一个是mm，指向用户空间，别一个是active_mm。对于用户空间的线程，这两个指针给始终是一致的。</p>
+<ul>
+<li><p>内核线程task_struct的mm为0，没有用户空间</p>
+</li>
+<li><p>active_mm不为0。当一个不具备用户空间的进程（如果内核线程）被调度时，要求它的active_mm一定要指向某个mm_struct，所以只好暂借一个。其值与之前运行的进程中的active_mm相同，停止运行时再重新置为0。</p>
+</li>
+</ul>
+<h3 id="进程调度"><a href="#进程调度" class="headerlink" title="进程调度"></a>进程调度</h3><p><img src="http://image18-c.poco.cn/mypoco/myphoto/20161201/17/18349370720161201170029033.png?600x580_130" alt="process_schedule"></p>
+<p>三种调度政策:</p>
+<ul>
+<li><p>SCHED_FIFO，适合于时间性要求比较强、但每次运行所需的时间比较短的进程。</p>
+<p>  除非出现以下情况，否则采用FIFO调度策略的进程一直运行：</p>
+<ul>
+<li>该进程执行了系统调用sched_yield自愿让出CPU</li>
+<li>有更高优先级的进程抢占该进程的CPU。如对于多核CPU，其它CPU上出现了一个比该进程优先级更高的进程，push到该进程的CPU上</li>
+<li>该进程停止（TASK_STOPPED或TASK_TRACED状态）或者被杀死（EXIT_ZOMBIE或EXIT_DEAD状态）</li>
+<li>该进程执行了阻塞调用并进入睡眠（TASK_INTERRUPTIBLE或TASK_UNINTERRUPTIBLE）</li>
+</ul>
+</li>
+<li><p>SCHED_RR，RR即“Round Robin”，适合比较大、也就是每次运行需时较长的进程。</p>
+<p>  对于实时进程，即调度政策为SCHED_FIFO和SCHED_RR的进程，有一种正向的优先级即rt_priority(rt即realtime)，<br>  权值为1000+p-&gt;rt_priority，其权值至少为1000。由于实时进程有很大的基数，所以当有实时进程就绪时，非实时进程是没机会运行的。</p>
+</li>
+<li><p>SCHED_OTHER，为传统的调度政策，比较适合于交互式的分时应用。其权值主要取决于两个因素：一个是时间配额，用完了则其权值为0；另一个是进程的优先级nice，其数值表示谦让的程度，取值范围为19~-20，以-20为最高。</p>
+</li>
+</ul>
+<h3 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h3><ul>
+<li><p>锁的每一个操作都包含两个部分：一部分是以_local开头的，其作用是关闭或开启本处理器上的中断响应；另一部分是以_lock结尾的，其作用是防止来自其它处理器的干扰。</p>
+</li>
+<li><p>spin_lock，CPU不断地循环测试其值，直到其值大于0为止。之所以不像对信号量的down()操作那样进入睡眠，让CPU作有用功，是因为想要加锁的这段程序未必是在一个进程的上下文中调用的，它可能调用自一段的中断服务程序或者bh函数，根本就不是可调度的。所以加锁时间也不能太长，否则就浪费了。</p>
+</li>
+<li><p>防止死锁的主要手段有：</p>
+<ul>
+<li>不允许在进入加锁后的程序以后再进入其它加锁的代码，这是最简单的。</li>
+<li>如果允许这样做，就要为所有加锁的代码段建立一个统一的次序，如必须是先进行A才能进入B（目前linux 2.4尚未采用）。</li>
+</ul>
+</li>
+</ul>
+<h2 id="文件系统"><a href="#文件系统" class="headerlink" title="文件系统"></a>文件系统</h2><h3 id="linux-文件系统逻辑结构"><a href="#linux-文件系统逻辑结构" class="headerlink" title="linux 文件系统逻辑结构"></a>linux 文件系统逻辑结构</h3><p><img src="http://image18-c.poco.cn/mypoco/myphoto/20161206/21/18349370720161206213420026_640.jpg?780x556_130" alt="vfs"></p>
+<ul>
+<li><p>fs_struct结构中的信息都是与文件系统和进程有关的，带有全局性，而与具体的已打开文件没有什么关系。</p>
+</li>
+<li><p>file结构中存放与具体已打开文件的具体信息，files_struct结构的主体就是一个file结构数组。每打开一个文件后，进程就通过一个“打开文件号”fid来访问这个文件，而fid实际上就是相应的file结构在数组中的下标。</p>
+</li>
+<li><p>每个文件系统都只有一个file_operations结构，它既不专属于某个特定的文件，也不专属于某个特定的上下文。反过来并非每个file_operations都代表一个不同的文件系统，如管道文件就根据读、写权限的不同而有一个不同的file_operations结构。</p>
+</li>
+</ul>
+<h3 id="引导块和超级块"><a href="#引导块和超级块" class="headerlink" title="引导块和超级块"></a>引导块和超级块</h3><ul>
+<li><p>引导块，引导块占用第0号块，不属于文件系统管辖，如果系统中有多个文件系统，只有根文件系统才有引导程序放在引导块中，其余文件系统都不使用引导块。</p>
+</li>
+<li><p>超级块，其作用是存储文件系统的大小、空的和填满的块，以及它们各自的总数和其他诸如此类的信息。要使用一个分区来进行数据访问，首先要访问的就是超级块。超级块占用1号逻辑块，是文件系统的控制块，它是系统为文件分配存储空间、回收存储空间的依据。</p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux/" rel="tag"># linux</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/10/30/bitwise-operation/" rel="next" title="巧用位运算">
+                <i class="fa fa-chevron-left"></i> 巧用位运算
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/02/23/linux-nfs/" rel="prev" title="NFS的安装及使用">
+                NFS的安装及使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#内存管理"><span class="nav-number">1.</span> <span class="nav-text">内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#内存映射"><span class="nav-number">1.1.</span> <span class="nav-text">内存映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实际CPU上的映射模型"><span class="nav-number">1.2.</span> <span class="nav-text">实际CPU上的映射模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#系统空间"><span class="nav-number">1.3.</span> <span class="nav-text">系统空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GDT"><span class="nav-number">1.4.</span> <span class="nav-text">GDT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Intel-80836后的处理器提供三种工作模式："><span class="nav-number">1.5.</span> <span class="nav-text">Intel 80836后的处理器提供三种工作模式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#逻辑地址到物理地址的转换"><span class="nav-number">1.6.</span> <span class="nav-text">逻辑地址到物理地址的转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#linux提供了两个特殊的、与段式存储管理有关的系统调用。"><span class="nav-number">1.7.</span> <span class="nav-text">linux提供了两个特殊的、与段式存储管理有关的系统调用。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内存的数据结构"><span class="nav-number">1.8.</span> <span class="nav-text">内存的数据结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#用户空间内存页面"><span class="nav-number">1.9.</span> <span class="nav-text">用户空间内存页面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#页面换出"><span class="nav-number">1.10.</span> <span class="nav-text">页面换出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HZ常量，决定了内核中每秒有多少次时钟中断。"><span class="nav-number">1.11.</span> <span class="nav-text">HZ常量，决定了内核中每秒有多少次时钟中断。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#页面换出-1"><span class="nav-number">1.12.</span> <span class="nav-text">页面换出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内核缓冲区管理（slab）"><span class="nav-number">1.13.</span> <span class="nav-text">内核缓冲区管理（slab）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#外部设备存储空间的地址映射"><span class="nav-number">1.14.</span> <span class="nav-text">外部设备存储空间的地址映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一个有用户空间、可换出的内存页面即page数据结构，同时在三个队列中。"><span class="nav-number">1.15.</span> <span class="nav-text">一个有用户空间、可换出的内存页面即page数据结构，同时在三个队列中。</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#中断、异常和系统调用"><span class="nav-number">2.</span> <span class="nav-text">中断、异常和系统调用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#中断向量"><span class="nav-number">2.1.</span> <span class="nav-text">中断向量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#门（gate）"><span class="nav-number">2.2.</span> <span class="nav-text">门（gate）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#中断处理程序分成两个半部：顶半部和底半部。"><span class="nav-number">2.3.</span> <span class="nav-text">中断处理程序分成两个半部：顶半部和底半部。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内核线程的task-struct"><span class="nav-number">2.4.</span> <span class="nav-text">内核线程的task_struct</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进程调度"><span class="nav-number">2.5.</span> <span class="nav-text">进程调度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#锁"><span class="nav-number">2.6.</span> <span class="nav-text">锁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文件系统"><span class="nav-number">3.</span> <span class="nav-text">文件系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#linux-文件系统逻辑结构"><span class="nav-number">3.1.</span> <span class="nav-text">linux 文件系统逻辑结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#引导块和超级块"><span class="nav-number">3.2.</span> <span class="nav-text">引导块和超级块</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

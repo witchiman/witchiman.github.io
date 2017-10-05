@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="python," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="Python是这两年比较火的一门语言，上手容易，代码可读性高，在web开发尤其是机器学习领域内得到很广泛的应用。 我自己半年前也学过Python,当时写了几个网络爬虫，由于长时间不用，现在好多东西都忘记了，这两天抽空回顾了Python。这里整理了下感觉重要的一些知识点。">
+<meta name="keywords" content="python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python知识点梳理">
+<meta property="og:url" content="http://witchiman.github.io/2015/11/21/python-knowlege-points/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="Python是这两年比较火的一门语言，上手容易，代码可读性高，在web开发尤其是机器学习领域内得到很广泛的应用。 我自己半年前也学过Python,当时写了几个网络爬虫，由于长时间不用，现在好多东西都忘记了，这两天抽空回顾了Python。这里整理了下感觉重要的一些知识点。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.794Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python知识点梳理">
+<meta name="twitter:description" content="Python是这两年比较火的一门语言，上手容易，代码可读性高，在web开发尤其是机器学习领域内得到很广泛的应用。 我自己半年前也学过Python,当时写了几个网络爬虫，由于长时间不用，现在好多东西都忘记了，这两天抽空回顾了Python。这里整理了下感觉重要的一些知识点。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2015/11/21/python-knowlege-points/"/>
+
+
+
+
+
+  <title>Python知识点梳理 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2015/11/21/python-knowlege-points/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Python知识点梳理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-21T15:11:12+08:00">
+                2015-11-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Python是这两年比较火的一门语言，上手容易，代码可读性高，在web开发尤其是机器学习领域内得到很广泛的应用。</p>
+<p>我自己半年前也学过Python,当时写了几个网络爬虫，由于长时间不用，现在好多东西都忘记了，这两天抽空回顾了Python。这里整理了下感觉重要的一些知识点。</p>
+<a id="more"></a>
+<ol>
+<li><p>Python解释器由于设计时有GIL全局锁，导致了多线程无法利用多核。多线程的并发在Python中就是一个美丽的梦。</p>
+</li>
+<li><p>Python 是一种解释型语言，类似于Java，其实际上是字节编译的，其结果是可以生成一种近似于机器语言的中间形式<br>，改善了其性能并保持了解释型语言的优点。</p>
+</li>
+<li><p>print(str,end=’’)加上end=’’，可使其不自动换行。</p>
+</li>
+<li><p><strong>init</strong>可以被当成构造器，不过不像其它语言中的构造器，它并不创建实例–它仅仅对象创造后执行的第一个方法，执行<br>一些必要的初始化工作。</p>
+</li>
+<li><p>Python的多元赋值方式可以实现无需中间变量交换两个变量的值。 </p>
+</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">x, y = <span class="number">1</span>, <span class="number">2</span></div><div class="line">x, y = y, x</div></pre></td></tr></table></figure>
+<ol>
+<li><p>变量名_xxx被看作是私有的，在模块或类外不可用</p>
+</li>
+<li><p>将经常用到的模块属性替换为一个本地引用，代码运行得更快，而也不用敲那么长的变量名了。</p>
+</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ls = os.linesep</div></pre></td></tr></table></figure>
+<ol>
+<li><p>所有类型对象的类型都是type，它也是所有Python类型的根和所有Python标准类的默认元类（metaclass)。</p>
+</li>
+<li><p>Python 提供了is 和 is not操作符来测试两个变量是否指向同一个对象。a is b 等价于 id(a) == id(b)</p>
+</li>
+<li><p>Python 仅缓存简单整型，它认为Python应用程序中这些小整数型会经常用。（Python 3.5.0 范围是-5~256）</p>
+</li>
+<li><p>str()函数得到的字符串可读性较好，而repr()函数得到的字符串通常可以用来重新获得该对象，通常情况下</p>
+</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Obj == eval(repr(obj)。</div></pre></td></tr></table></figure>
+<ol>
+<li>比较对象类型时，最好不要使用type(2) == type(0)这样的代码,应该减少函数调用的次数，导入types模块,然后使用如下：</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&gt;&gt;&gt;type(<span class="number">2</span>) == int </div><div class="line">&gt;&gt;&gt;type(<span class="number">2.0</span>) == float</div><div class="line">&gt;&gt;&gt;type([]) == list </div><div class="line">&gt;&gt;&gt;type(<span class="keyword">False</span>) == bool</div></pre></td></tr></table></figure>
+<ol>
+<li><p>Python的长整型类型能表达的数值仅仅与本地机器支持的（虚拟）内存大小有关，可以轻松表达很大的值。要用大写字<br>母“L”表示长整型。</p>
+</li>
+<li><p>abs()返回给定参数的绝对值，如果参数是一个复数，那就返回math.sqr(num.real + num.imag)。</p>
+</li>
+<li><p>chr()接受一个单字节的整型值，返回一个字符串，其值为对应的字符。函数ord()则相反，它接受一个字符，返回其对应的整型值。</p>
+</li>
+<li><p>Python中布尔型是整型的子类，但是不能再被继承而生成其它的子类。没有<strong>nonzero</strong>()(Python 3.x为 <strong>bool</strong>())<br>的方法的对象默认值是True.对于值为零的任何数字或空集（空列表、空元组和空字典等）在Python中的布尔值都是False.</p>
+</li>
+<li><p>split()把string切片成一个列表，用join()方法可以把这个列表重新连接成一个字符串。</p>
+</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&gt;&gt;&gt;quest = <span class="string">'what is your favorite color'</span></div><div class="line">&gt;&gt;&gt;<span class="string">':'</span>.join(quest.split())</div><div class="line"><span class="string">'what:is:your:favorite:color'</span></div></pre></td></tr></table></figure>
+<ol>
+<li><p>所有函数返回多对象（不包括有符号封装的）都是元组类型。tuple = (1,) 创建只有一个元素的元组。</p>
+</li>
+<li><p>非容器类型（比如数字、字符串和其他‘原子’类型的对象，像代码、类型和range对象等）没有被拷贝一说，浅拷贝是完全用切片操作来完成的。如果元组变量只包含原子类型，对它的深拷贝将不会进行。下面是一个深拷贝的例子</p>
+</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> copy</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>person = [<span class="string">'name'</span>,[<span class="string">'savings'</span>,<span class="number">100</span>]]</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>hubby = person</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>wifey = copy.deepcopy(person)</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>[id(x) <span class="keyword">for</span> x <span class="keyword">in</span> (person, hubby, wifey)]</div><div class="line">[<span class="number">2287513851656</span>, <span class="number">2287513851656</span>, <span class="number">2287513851528</span>]</div><div class="line"></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>hubby[<span class="number">0</span>] =<span class="string">'jim'</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>wifey[<span class="number">0</span>] =<span class="string">'tom'</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>hubby,wifey</div><div class="line">([<span class="string">'jim'</span>, [<span class="string">'savings'</span>, <span class="number">100</span>]], [<span class="string">'tom'</span>, [<span class="string">'savings'</span>, <span class="number">100</span>]])</div><div class="line"></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>hubby[<span class="number">1</span>][<span class="number">1</span>] = <span class="number">50</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>hubby, wifey</div><div class="line">([<span class="string">'jim'</span>, [<span class="string">'savings'</span>, <span class="number">50</span>]], [<span class="string">'tom'</span>, [<span class="string">'savings'</span>, <span class="number">100</span>]])</div></pre></td></tr></table></figure>
+<p>20.内建函数sorted()通过输入一个字典参数返回一个有序的迭代子。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span>dict1 = &#123;<span class="string">'e'</span>:<span class="number">4</span>,<span class="string">'b'</span>:<span class="number">2</span>,<span class="string">'a'</span>:<span class="number">1</span>&#125;</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>sorted(dict1)</div><div class="line">[<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'e'</span>]</div></pre></td></tr></table></figure>
+<ol>
+<li>可以把每行分割为单词，然后计算单词的个数：</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span>f = open(<span class="string">'sample.txt'</span>, <span class="string">'r'</span>)</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>len([word <span class="keyword">for</span> line <span class="keyword">in</span> f <span class="keyword">for</span> word <span class="keyword">in</span> line.split()])</div></pre></td></tr></table></figure>
+<ol>
+<li><p>SyntaxError异常是唯一不是在运行时发生的异常。</p>
+</li>
+<li><p>用try-except语句捕获AssertionError异常:</p>
+</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&gt;&gt;&gt;<span class="keyword">try</span> :</div><div class="line">	<span class="keyword">assert</span> <span class="number">1</span> ==<span class="number">0</span>, <span class="string">'One does not eaqual zero silly!'</span></div><div class="line"><span class="keyword">except</span> AssertionError <span class="keyword">as</span> args:</div><div class="line">	print(<span class="string">'%s: %s'</span> % (args.__class__.__name__, args))</div><div class="line"></div><div class="line">	</div><div class="line">AssertionError: One does <span class="keyword">not</span> eaqual zero silly!</div></pre></td></tr></table></figure>
+<ol>
+<li>偏函数</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> operator <span class="keyword">import</span> add</div><div class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> functools <span class="keyword">import</span> partial</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>add1 = partial(add, <span class="number">1</span>)</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>add1(<span class="number">3</span>)</div><div class="line"><span class="number">4</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>baseTwo = partial(int, base=<span class="number">2</span>)</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>baseTwo(<span class="string">'100100'</span>)</div><div class="line"><span class="number">36</span></div></pre></td></tr></table></figure>
+<ol>
+<li>静态方法和类方法，实例方法隐含的参数为类实例，而类方法隐含的参数为类本身。静态方法无隐含参数，主要为了类实例也可以直接调用静态方法。</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">  <span class="class"><span class="keyword">class</span> <span class="title">A</span><span class="params">(object)</span>:</span></div><div class="line">    <span class="string">"This ia A Class"</span></div><div class="line"> </div><div class="line"><span class="meta">    @staticmethod</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">Foo1</span><span class="params">()</span>:</span></div><div class="line">        print(<span class="string">"Call static method foo1()\n"</span>)</div><div class="line"> </div><div class="line"><span class="meta">    @classmethod</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">Foo2</span><span class="params">(cls)</span>:</span></div><div class="line">        print(<span class="string">"Call class method foo2()"</span>)</div><div class="line">        print(<span class="string">"cls.__name__ is "</span>,cls.__name__)</div><div class="line"> </div><div class="line">A.Foo1();</div><div class="line">A.Foo2();</div><div class="line"></div><div class="line">Call static method foo1() </div><div class="line">Call <span class="class"><span class="keyword">class</span> <span class="title">method</span> <span class="title">foo2</span><span class="params">()</span></span></div><div class="line"><span class="class"><span class="title">cls</span>.<span class="title">__name__</span> <span class="title">is</span>  <span class="title">A</span></span></div></pre></td></tr></table></figure>
+<ol>
+<li>运算符重载 <strong>add</strong>()</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">data</span><span class="params">()</span>:</span></div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, val)</span>:</span></div><div class="line">		self.val = val</div><div class="line">		</div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__add__</span><span class="params">(self, other)</span>:</span></div><div class="line">		<span class="keyword">return</span> data(self.val + other.val)</div><div class="line">		</div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__str__</span><span class="params">(self)</span>:</span></div><div class="line">		<span class="keyword">return</span> str(self.val)</div><div class="line">	__repr__ = __str__</div><div class="line"></div><div class="line">	</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>a = data(<span class="number">2</span>)</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>b = data(<span class="number">3</span>)</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>a+b</div><div class="line"><span class="number">5</span></div></pre></td></tr></table></figure>
+<p>27.授权是包装的一个特性，可用于简化处理相关命令性功能，采用已存在的功能以达到最大限度的代码重用。包装一个类型通常是对已存在的类型的一些定制。实现授权的关键点就是覆盖<strong>getattr</strong>()方法，在代码中包含一个对getattr()内建函数的调用。特殊行为没有在类型方法列表中，不能被访问，因为它们不是属性，如切片。实现一个包装类：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span><span class="class"><span class="keyword">class</span> <span class="title">WrapMe</span>:</span></div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, obj)</span>:</span></div><div class="line">		self.__data = obj</div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">get</span><span class="params">(self)</span>:</span></div><div class="line">		<span class="keyword">return</span> self.__data</div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></div><div class="line">		<span class="keyword">return</span> str(self.__data)</div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__str__</span><span class="params">(self)</span>:</span></div><div class="line">		<span class="keyword">return</span> str(self.__data)</div><div class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__getattr__</span><span class="params">(self, attr)</span>:</span></div><div class="line">		<span class="keyword">return</span> getattr(self.__data, attr)</div><div class="line"></div><div class="line">	</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>wrap = WrapMe(<span class="number">3.5</span> + <span class="number">2j</span>)</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>wrap</div><div class="line">(<span class="number">3.5</span>+<span class="number">2j</span>)</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>wrap.real</div><div class="line"><span class="number">3.5</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>wrap.imag</div><div class="line"><span class="number">2.0</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>wrap.conjugate()</div><div class="line">(<span class="number">3.5</span><span class="number">-2j</span>)</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>wrap.get()</div><div class="line">(<span class="number">3.5</span>+<span class="number">2j</span>)</div></pre></td></tr></table></figure>
+<ol>
+<li><strong>slots</strong>是一个类变量，由一序列对象组成，由所有合法标识构成的实例属性的集合来表示。它可以是一个列表，元组或可迭代对象，也可以是标识实例能拥有的唯一的属性的简单字符串。任何创建一个其名不在<strong>slots</strong>中的名字的实例属性都将导致AttributeError异常。</li>
+</ol>
+<p>主要目的是节约内存，防止用户随心所欲地增加实例属性。带<strong>slots</strong>属性的类定义不会存在<strong>dict</strong>中，除非在<strong>slots</strong>中增加<strong>dict</strong>的元素。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">SlottedClass</span>:</span></div><div class="line">	__slots__ =&#123;<span class="string">'foo'</span>, <span class="string">'bar'</span>&#125;</div><div class="line"></div><div class="line">	</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>c = SlottedClass()</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>c.foo = <span class="number">42</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>c.xx = <span class="string">'WTF'</span></div><div class="line">Traceback (most recent call last):</div><div class="line">  File <span class="string">"&lt;pyshell#253&gt;"</span>, line <span class="number">1</span>, <span class="keyword">in</span> &lt;module&gt;</div><div class="line">    c.xx = <span class="string">'WTF'</span></div><div class="line">AttributeError: <span class="string">'SlottedClass'</span> object has no attribute <span class="string">'xx'</span></div></pre></td></tr></table></figure>
+<ol>
+<li>Python给类提供了<strong>call</strong>的特别方法，该方法允许程序员创建可调用的对象（实例），默认情况下，<strong>call</strong>方法是没有实现。意味着大多实例是不可调用的。</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span><span class="class"><span class="keyword">class</span> <span class="title">C</span>:</span></div><div class="line">		<span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, *args)</span>:</span></div><div class="line">			print(<span class="string">" I'm callable! Called with args:\n"</span>, args)</div><div class="line"></div><div class="line">			</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>c = C()</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>c</div><div class="line">&lt;__main__.C object at <span class="number">0x000002149A744C88</span>&gt;</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>c()</div><div class="line"> I<span class="string">'m callable! Called with args:</span></div><div class="line"><span class="string"> ()</span></div><div class="line"><span class="string">&gt;&gt;&gt; c(3)</span></div><div class="line"><span class="string"> I'</span>m callable! Called <span class="keyword">with</span> args:</div><div class="line"> (<span class="number">3</span>,)</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>callable(c)</div><div class="line"><span class="keyword">True</span></div></pre></td></tr></table></figure>
+<ol>
+<li>compile()可用来动态生成字符串形式的Python代码，然后生成一个代码对象。 第一个参数是字符串，第二个参数通常置空，其代表了存放代码对象的名字（字符串类型），第三个参数如下：</li>
+</ol>
+<ul>
+<li>‘eval’  ,可求值的表达式[和eval()一起使用]</li>
+<li>‘single’ , 单一执行语句[和exec一起使用]</li>
+<li>‘exec’ ,可执行语句组[和exec一起使用]</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span>eval_code=  compile(<span class="string">'100 + 200'</span>, <span class="string">''</span>, <span class="string">'eval'</span> )</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>eval(eval_code)</div><div class="line"><span class="number">300</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>single_code = compile(<span class="string">'print("Hello world!")'</span>, <span class="string">''</span>, <span class="string">'single'</span>)</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>exec(single_code)</div><div class="line">Hello world!</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>exec_code = compile(<span class="string">'''</span></div><div class="line"><span class="string">req = input("input the numbers:")</span></div><div class="line"><span class="string">for eachnum in range(int(req)):</span></div><div class="line"><span class="string">	print(eachnum)</span></div><div class="line"><span class="string">        '''</span>, <span class="string">''</span>, <span class="string">'exec'</span>)</div><div class="line"><span class="meta">&gt;&gt;&gt; </span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>exec(exec_code)</div><div class="line">input the numbers:<span class="number">3</span></div><div class="line"><span class="number">0</span></div><div class="line"><span class="number">1</span></div><div class="line"><span class="number">2</span></div></pre></td></tr></table></figure>
+<ol>
+<li>sub()和subn()完成搜索和代替的功能，后者还能多返回一个表示替换次数的数字。</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span>re.sub(<span class="string">'jim'</span>, <span class="string">'xxxx'</span>, <span class="string">'jim is a fucking guy.'</span>)</div><div class="line"><span class="string">'xxxx is a fucking guy.'</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>re.subn(<span class="string">'jim'</span>, <span class="string">'xxxx'</span>, <span class="string">'jim is a fucking guy'</span>)</div><div class="line">(<span class="string">'xxxx is a fucking guy'</span>, <span class="number">1</span>)</div></pre></td></tr></table></figure>
+<ol>
+<li><p>Python3.x 中TCP/UDP 接收和发送的数据要编码和解码（encode()和decode()）。</p>
+</li>
+<li><p>对Python虚拟机的访问由全局解释器锁（global interpreter lock，GIL）来控制，正是这个锁能保证同一时刻只有一个线程运行。</p>
+</li>
+<li><p>守护进程，在调用thread.start()之前，调用setDaemon()函数设定线程的daemon标志（thread.setDaemon(True)），就表示这个线程“不重要”.</p>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/python/" rel="tag"># python</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/09/27/poem-mid-autumn/" rel="next" title="中秋有感">
+                <i class="fa fa-chevron-left"></i> 中秋有感
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/11/25/python-property/" rel="prev" title="Python里的property">
+                Python里的property <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

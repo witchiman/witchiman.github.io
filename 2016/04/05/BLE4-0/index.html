@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="android,蓝牙," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="前言蓝牙4.0分为标准蓝牙和低功耗蓝牙（BLE），标准蓝牙就是手机上用的那种，低功能耗蓝牙由于其具有最大化的待机时间、快速连接和低峰值的发送和接收特性，被广泛用于智能手表、智能手环等可穿戴设备上。在安卓4.3之前，安卓平台上的BLE开发相当难搞，好在谷歌在4.3之后发布了官方的API。在安卓5.0之后又引入了新的API，原来的API已经被废弃。在新的系统里采用旧API开发的APP仍可使用，但采用新">
+<meta name="keywords" content="android,蓝牙">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于Android 5.x的低功耗蓝牙BLE开发简介">
+<meta property="og:url" content="http://witchiman.github.io/2016/04/05/BLE4-0/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="前言蓝牙4.0分为标准蓝牙和低功耗蓝牙（BLE），标准蓝牙就是手机上用的那种，低功能耗蓝牙由于其具有最大化的待机时间、快速连接和低峰值的发送和接收特性，被广泛用于智能手表、智能手环等可穿戴设备上。在安卓4.3之前，安卓平台上的BLE开发相当难搞，好在谷歌在4.3之后发布了官方的API。在安卓5.0之后又引入了新的API，原来的API已经被废弃。在新的系统里采用旧API开发的APP仍可使用，但采用新">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.341Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于Android 5.x的低功耗蓝牙BLE开发简介">
+<meta name="twitter:description" content="前言蓝牙4.0分为标准蓝牙和低功耗蓝牙（BLE），标准蓝牙就是手机上用的那种，低功能耗蓝牙由于其具有最大化的待机时间、快速连接和低峰值的发送和接收特性，被广泛用于智能手表、智能手环等可穿戴设备上。在安卓4.3之前，安卓平台上的BLE开发相当难搞，好在谷歌在4.3之后发布了官方的API。在安卓5.0之后又引入了新的API，原来的API已经被废弃。在新的系统里采用旧API开发的APP仍可使用，但采用新">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2016/04/05/BLE4-0/"/>
+
+
+
+
+
+  <title>基于Android 5.x的低功耗蓝牙BLE开发简介 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2016/04/05/BLE4-0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">基于Android 5.x的低功耗蓝牙BLE开发简介</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-04-05T12:47:44+08:00">
+                2016-04-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>蓝牙4.0分为标准蓝牙和低功耗蓝牙（BLE），标准蓝牙就是手机上用的那种，低功能耗蓝牙由于其具有最大化的待机时间、快速连接和低峰值的发送和接收特性，被广泛用于智能手表、智能手环等可穿戴设备上。在安卓4.3之前，安卓平台上的BLE开发相当难搞，好在谷歌在4.3之后发布了官方的API。在安卓5.0之后又引入了新的API，原来的API已经被废弃。在新的系统里采用旧API开发的APP仍可使用，但采用新API开发的APP只能在LOLLIPOP即安卓5.0及其以后的版本使用。<br><a id="more"></a></p>
+<p>标准蓝牙的的开发和BLE不同。标准蓝牙连接里有两个角色一个是客户端一个是服务器，当客户端搜索到蓝牙服务器后并与之配对后，才能通过UUID（这个是唯一的，服务器端必须与客户端一致）建立socket，然后使用流像文件读写和网络通信那样传输数据就行了。在BLE里，变成了中心设备（central）和外围设备（peripheral），中心设备就是你的手机，外围设备就是智能手环一类的东西。开发BLE的应用都得遵守Generic Attribute Profile (GATT)，一个BLE蓝牙设备包含多个service，每个service又包含多个characteristic。每个characteristic有一个value和多个descriptor，通过characteristic中心设备与外围设备进行通信。descriptor顾名思义，包含了BLE设备的一些信息。不同service、characteristic和descriptor都有各自己唯一的UUID。想要跟BLE设备通信，首先通过UUID获取目标服务，然后再通过UUID获取characteristic，charateristic起着载体的作用，通过writeCharacteristic()和readCharacteristic()，可以写入和读出信息。每个characteristic都有一些自己的属性，其中在property里，说明了该characteristic的属性，例如READ|WRITE|WRITE_NO_RESPONSE|NOTIFY。</p>
+<p>以下是关键代码：</p>
+<h2 id="修改AndroidManifest-xml"><a href="#修改AndroidManifest-xml" class="headerlink" title="修改AndroidManifest.xml"></a>修改AndroidManifest.xml</h2><p>在AndroidManifest.xml里加入</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;uses-feature android:name=<span class="string">"android.bluetooth.le"</span> android:required=<span class="string">"true"</span>/&gt; <span class="comment">//Android 5.0之前是android.hardware.bluetooth_le</span></div><div class="line">&lt;uses-permission android:name=<span class="string">"android.permission.BLUETOOTH_ADMIN"</span>/&gt;</div><div class="line">&lt;uses-permission android:name=<span class="string">"android.permission.BLUETOOTH"</span>/&gt;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>使用新API时，最好在调用方法前判断下系统版本，否则会在低版本系统里运行出错。<br>if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.LOLLIPOP) {<br>　　…<br>}</p>
+</blockquote>
+<h2 id="获取BluetoothAdapter，初始化蓝牙"><a href="#获取BluetoothAdapter，初始化蓝牙" class="headerlink" title="获取BluetoothAdapter，初始化蓝牙"></a>获取BluetoothAdapter，初始化蓝牙</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);<span class="comment">//这里与标准蓝牙略有不同</span></div><div class="line">BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();</div><div class="line">　　<span class="comment">/*隐式打开蓝牙*/</span></div><div class="line">　　<span class="keyword">if</span> (!bluetoothAdapter.isEnabled()) &#123;</div><div class="line">　　　　bluetoothAdapter.enable();</div><div class="line">　　&#125;</div></pre></td></tr></table></figure>
+<h2 id="搜索蓝牙设备"><a href="#搜索蓝牙设备" class="headerlink" title="搜索蓝牙设备"></a>搜索蓝牙设备</h2><p>获取BluetoothLeScanner通过startScan()方法扫描周围的BLE设备。当搜索到目标设备或者搜索一定时间后通过BluetoothScanner的stopScan()方法停止搜索。　</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">BluetoothLeScanner scanner = bluetoothAdapter.getBluetoothLeScanner();</div><div class="line">scanner.startScan(leCallback);</div></pre></td></tr></table></figure>
+<blockquote>
+<p>leCallback是一个回调函数，通过onScanResult()把每次搜索到的设备添加到本地。leCallback还<br>有一个方法onBatchScanResults(),按理说应该是批量处理搜索到的结果，但是不知道为什么在我这<br>里无法调用。　　</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">leCallback = <span class="keyword">new</span> ScanCallback() &#123;</div><div class="line">                <span class="meta">@Override</span></div><div class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onScanResult</span><span class="params">(<span class="keyword">int</span> callbackType, ScanResult result)</span> </span>&#123;</div><div class="line">                    <span class="keyword">super</span>.onScanResult(callbackType, result);</div><div class="line">                    <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.LOLLIPOP) &#123;</div><div class="line">                        BluetoothDevice device = result.getDevice();</div><div class="line">                        <span class="keyword">if</span> (!devices.contains(device)) &#123;  <span class="comment">//判断是否已经添加</span></div><div class="line">                            devices.add(device);</div><div class="line">                        &#125;</div><div class="line">                        deviceAdapter.notifyDataSetChanged();</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                <span class="meta">@Override</span></div><div class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onScanFailed</span><span class="params">(<span class="keyword">int</span> errorCode)</span> </span>&#123;</div><div class="line">                    <span class="keyword">super</span>.onScanFailed(errorCode);</div><div class="line">                    Log.e(<span class="string">"搜索失败"</span>);</div><div class="line">                &#125;</div><div class="line">            &#125;;</div></pre></td></tr></table></figure>
+<h2 id="连接目标设备"><a href="#连接目标设备" class="headerlink" title="连接目标设备"></a>连接目标设备</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">BluetoothGatt bluetoothGatt = device.connectGatt(MainActivity.<span class="keyword">this</span>, <span class="keyword">false</span>, <span class="keyword">new</span> BluetoothGattCallback() &#123;</div><div class="line"></div><div class="line">                <span class="meta">@Override</span></div><div class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onConnectionStateChange</span><span class="params">(BluetoothGatt gatt, <span class="keyword">int</span> status, <span class="keyword">int</span> newState)</span> </span>&#123;</div><div class="line">                    <span class="keyword">if</span> (newState == BluetoothProfile.STATE_CONNECTED) &#123;   </div><div class="line">                        gatt.discoverServices();　　　　　　　　　　<span class="comment">//连接成功，开始搜索服务，一定要调用此方法，否则获取不到服务</span></div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                <span class="meta">@Override</span></div><div class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCharacteristicWrite</span><span class="params">(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, <span class="keyword">int</span> status)</span> </span>&#123;</div><div class="line">                      Log.e(TAG,gatt.getDevice().getName() + <span class="string">" write successfully"</span>);</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                <span class="meta">@Override</span></div><div class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCharacteristicRead</span><span class="params">(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, <span class="keyword">int</span> status)</span> </span>&#123;</div><div class="line">                    　　String value = UtilOnStr.parseBytesToHexString(characteristic.getValue());</div><div class="line">                        Log.e(TAG,gatt.getDevice().getName() + <span class="string">" recieved "</span> + value);</div><div class="line">                &#125;</div><div class="line"></div><div class="line">　　　　　　　　<span class="meta">@Override</span></div><div class="line">    　　　　　　<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCharacteristicChanged</span><span class="params">(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic)</span> </span>&#123;</div><div class="line">       　　　　　　 　　String response = UtilOnStr.parseBytesToHexString(characteristic.getValue());</div><div class="line">　　　　　　　　　　　　　Log.e(TAG,  <span class="string">"The response is "</span>+ response); </div><div class="line">        　　　　&#125;</div><div class="line"></div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<h2 id="写入和读取数据"><a href="#写入和读取数据" class="headerlink" title="写入和读取数据"></a>写入和读取数据</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">BluetoothGattService service = bluetoothGatt.getService(SERVICE_UUID);</div><div class="line"><span class="keyword">if</span>(service != <span class="keyword">null</span>) &#123;</div><div class="line">　　characteristic = service.getCharacteristic(CHARACTERISTIC_UUID);</div><div class="line">　　<span class="keyword">if</span> (characteristic !=<span class="keyword">null</span>) &#123;    </div><div class="line">　　　　bluetoothGatt.setCharacteristicNotification(characteristic, <span class="keyword">true</span>);  <span class="comment">//设置characteristic的通知，触发bluetoothGatt.onCharacteristicWrite()事件。</span></div><div class="line">        characteristic.setValue(UtilOnStr.parseHexStringToBytes(value));</div><div class="line">        bluetoothGatt.writeCharacteristic(characteristic);  </div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li><p>当连接上BLE设备后，调用discoveryServices()发现服务，通过SERVICE_UUID获取目标service，如果service不为空，再通过CHARACTERISTIC_UUID获取characteristic，借助characteristic写入指定值与BLE设备进行通信。这里要注意的是characteristic接收的是一个byte数组，而且读写的方法都是异步的。调用bluetoothGatt.readCharacteristic(characteristic)可读取BLE设备返回的值。bluetoothGatt的writeCharacteristic()方法会触发BluetoothGattCallback里的onCharacteristicWrite(),相应的，bluetoothGatt的readCharacteristic()方法会触发onCharacteristicRead()。</p>
+</li>
+<li><p>对中心设备与外围设备的传输数据的处理发生在onCharacteristicChanged()里，当characteristic写入了正确的数值后，会激活BLE设备，不时地返回数据。</p>
+</li>
+</ul>
+<blockquote>
+<p>当不知道BLE设备的service和characteristic的对应的UUID时，可以在回调函数里的onServicesDiscovered()方法里，通过BluetoothGatt的getServices()获得该设备所有的service，然后再调用service的getUuid()得到其UUID，同理通过service的getCharacteristics()可以得到每个service所有的characteristic和其UUID。然后一个个不厌其烦的尝试，找到正确的service和characteristic(我就是这样干的)。</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>由于网上关于Android 5.x 低功耗蓝牙 BLE开发的资料不是很多，我才下决心写这篇文章的，希望能对做相关开发的人有一点儿帮助。</p>
+<p>最后附上Github上的源码: <a href="https://github.com/witchiman/BluetoothTest" target="_blank" rel="external">BluetoothTest</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/android/" rel="tag"># android</a>
+          
+            <a href="/tags/蓝牙/" rel="tag"># 蓝牙</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/25/poem-dielianhua/" rel="next" title="蝶恋花">
+                <i class="fa fa-chevron-left"></i> 蝶恋花
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/24/android-knowlege-points/" rel="prev" title="Android学习过程中的一些知识点梳理">
+                Android学习过程中的一些知识点梳理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改AndroidManifest-xml"><span class="nav-number">2.</span> <span class="nav-text">修改AndroidManifest.xml</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#获取BluetoothAdapter，初始化蓝牙"><span class="nav-number">3.</span> <span class="nav-text">获取BluetoothAdapter，初始化蓝牙</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#搜索蓝牙设备"><span class="nav-number">4.</span> <span class="nav-text">搜索蓝牙设备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#连接目标设备"><span class="nav-number">5.</span> <span class="nav-text">连接目标设备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#写入和读取数据"><span class="nav-number">6.</span> <span class="nav-text">写入和读取数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

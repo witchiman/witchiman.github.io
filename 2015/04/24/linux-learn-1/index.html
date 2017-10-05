@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="linux," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="以前用过Linux，但是从来没有当作过主力操作系统使用，也没有试过长时在Linux下写代码，用起来称不上得心应手。现在决定把学习Linux过程中的点点滴滴记录下来，学习过程中主要翻阅《鸟哥的Linux私房菜》这本书和查看参考网上的资料。PS:鸟哥的书是极不错的，但是繁体字和台湾腔的术语读起来总是感觉怪怪的，还有有些知识点是过时的，不过影响不大。  本篇博文主要总结Linux操作系统基础操作的常用命">
+<meta name="keywords" content="linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linxu学习札记（一）：常用命令">
+<meta property="og:url" content="http://witchiman.github.io/2015/04/24/linux-learn-1/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="以前用过Linux，但是从来没有当作过主力操作系统使用，也没有试过长时在Linux下写代码，用起来称不上得心应手。现在决定把学习Linux过程中的点点滴滴记录下来，学习过程中主要翻阅《鸟哥的Linux私房菜》这本书和查看参考网上的资料。PS:鸟哥的书是极不错的，但是繁体字和台湾腔的术语读起来总是感觉怪怪的，还有有些知识点是过时的，不过影响不大。  本篇博文主要总结Linux操作系统基础操作的常用命">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.669Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linxu学习札记（一）：常用命令">
+<meta name="twitter:description" content="以前用过Linux，但是从来没有当作过主力操作系统使用，也没有试过长时在Linux下写代码，用起来称不上得心应手。现在决定把学习Linux过程中的点点滴滴记录下来，学习过程中主要翻阅《鸟哥的Linux私房菜》这本书和查看参考网上的资料。PS:鸟哥的书是极不错的，但是繁体字和台湾腔的术语读起来总是感觉怪怪的，还有有些知识点是过时的，不过影响不大。  本篇博文主要总结Linux操作系统基础操作的常用命">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2015/04/24/linux-learn-1/"/>
+
+
+
+
+
+  <title>Linxu学习札记（一）：常用命令 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2015/04/24/linux-learn-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Linxu学习札记（一）：常用命令</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-24T12:48:35+08:00">
+                2015-04-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>以前用过Linux，但是从来没有当作过主力操作系统使用，也没有试过长时在Linux下写代码，用起来称不上得心应手。现在决定把学习Linux过程中的点点滴滴记录下来，学习过程中主要翻阅《鸟哥的Linux私房菜》这本书和查看参考网上的资料。PS:鸟哥的书是极不错的，但是繁体字和台湾腔的术语读起来总是感觉怪怪的，还有有些知识点是过时的，不过影响不大。</p>
+<p> 本篇博文主要总结Linux操作系统基础操作的常用命令。</p>
+<a id="more"></a>
+<h1 id="基础操作"><a href="#基础操作" class="headerlink" title="基础操作"></a>基础操作</h1><h2 id="查看当前系统的语言"><a href="#查看当前系统的语言" class="headerlink" title="查看当前系统的语言"></a>查看当前系统的语言</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">user@pc:$ <span class="built_in">echo</span> <span class="variable">$LANG</span></div><div class="line">user@pc:$ LANG=<span class="string">"en"</span> <span class="comment">#在当前登录时使用英语，退出系统后恢复默认</span></div></pre></td></tr></table></figure>
+<h2 id="计算器"><a href="#计算器" class="headerlink" title="计算器"></a>计算器</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">user@pc:$ bc <span class="comment">#简单的计算器</span></div></pre></td></tr></table></figure>
+<blockquote>
+<p>使用quit命令退出。</p>
+<p>进入计算器后，可通过scale=number[number为小数]设置精确到的小数位数，默认为0。</p>
+</blockquote>
+<h2 id="查看时间"><a href="#查看时间" class="headerlink" title="查看时间"></a>查看时间</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">user@pc:$ date <span class="comment">#显示日期 </span></div><div class="line">user@pc:$ cal <span class="comment">#显示日历，默认查看当月的日历</span></div><div class="line">user@pc:$ cal 3 2006 <span class="comment">#查看2006年3月的日历</span></div></pre></td></tr></table></figure>
+<h2 id="命令补全"><a href="#命令补全" class="headerlink" title="命令补全"></a>命令补全</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">user@pc:$ ca[tab][tab] <span class="comment">#ca后紧跟两个tab，表示查找以ca开头的命令</span></div></pre></td></tr></table></figure>
+<h2 id="文件补全"><a href="#文件补全" class="headerlink" title="文件补全"></a>文件补全</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">user@pc:$ ls -al file[tab][tab] <span class="comment">#file后紧跟两个tab，表示查找以file开头的文件</span></div></pre></td></tr></table></figure>
+<h2 id="用man命令查找某个命令的帮助信息时，按下“-”后，输入某个单词可搜索与其有关的内容，按“n”继续-“N”反向查找，输入“-”可进行向前查询。"><a href="#用man命令查找某个命令的帮助信息时，按下“-”后，输入某个单词可搜索与其有关的内容，按“n”继续-“N”反向查找，输入“-”可进行向前查询。" class="headerlink" title="用man命令查找某个命令的帮助信息时，按下“/”后，输入某个单词可搜索与其有关的内容，按“n”继续,“N”反向查找，输入“?”可进行向前查询。"></a>用man命令查找某个命令的帮助信息时，按下“/”后，输入某个单词可搜索与其有关的内容，按“n”继续,“N”反向查找，输入“?”可进行向前查询。</h2><h2 id="whatis-同-man-f-用于查询一个命令执行什么功能，并将查询结果打印到终端上。"><a href="#whatis-同-man-f-用于查询一个命令执行什么功能，并将查询结果打印到终端上。" class="headerlink" title="whatis 同 man -f 用于查询一个命令执行什么功能，并将查询结果打印到终端上。"></a><em>whatis</em> 同 <em>man -f</em> 用于查询一个命令执行什么功能，并将查询结果打印到终端上。</h2><h2 id="apropos-同-man-k-用于在-whatis-数据库中查找字符串。"><a href="#apropos-同-man-k-用于在-whatis-数据库中查找字符串。" class="headerlink" title="apropos 同 man -k 用于在 whatis 数据库中查找字符串。"></a><em>apropos</em> 同 <em>man -k</em> 用于在 <em>whatis</em> 数据库中查找字符串。</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">user@pc:$ apropos ps  <span class="comment">#下面为输出信息 </span></div><div class="line">...</div><div class="line">pptpsetup (8)        - Point-to-Point Tunneling Protocol setup</div><div class="line">printers.conf (5)    - printer configuration file <span class="keyword">for</span> cups</div><div class="line">proc (5)             - process information pseudo-filesystem</div><div class="line">procfs (5)           - process information pseudo-filesystem</div><div class="line">...</div></pre></td></tr></table></figure>
+<h2 id="sync-命令可把内存里的内容写入硬盘。"><a href="#sync-命令可把内存里的内容写入硬盘。" class="headerlink" title="sync 命令可把内存里的内容写入硬盘。"></a><em>sync</em> 命令可把内存里的内容写入硬盘。</h2><h2 id="不知道原来文件的属性，只想要增加某个文件可写入的权限"><a href="#不知道原来文件的属性，只想要增加某个文件可写入的权限" class="headerlink" title="不知道原来文件的属性，只想要增加某个文件可写入的权限"></a>不知道原来文件的属性，只想要增加某个文件可写入的权限</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">user@pc:$ chmod a-w file01</div></pre></td></tr></table></figure>
+<h2 id="设定用户具有可读、可写、可执行的权限，同组和其他人具有可执行的权限。"><a href="#设定用户具有可读、可写、可执行的权限，同组和其他人具有可执行的权限。" class="headerlink" title="设定用户具有可读、可写、可执行的权限，同组和其他人具有可执行的权限。"></a>设定用户具有可读、可写、可执行的权限，同组和其他人具有可执行的权限。</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">user@pc:$ chmod u=rwx,go=rx file01 <span class="comment">#","前后是连在一起的</span></div><div class="line">```  </div><div class="line"></div><div class="line"><span class="comment">## 查看系统的基本信息</span></div><div class="line"></div><div class="line">```bash</div><div class="line">user@pc:$ uname -r <span class="comment">#-a查看所有信息</span></div><div class="line">3.19.0-15-generic  <span class="comment">#查看实际的核心版本</span></div><div class="line"></div><div class="line">user@pc:$ lsb_release -a  </div><div class="line">No LSB modules are available. </div><div class="line">Distributor ID:	Ubuntu          </div><div class="line">Description:	Ubuntu 15.04  <span class="comment">#distribution版本</span></div><div class="line">Release:	15.04</div><div class="line">Codename:	vivid</div></pre></td></tr></table></figure>
+<h1 id="常用的文件操作"><a href="#常用的文件操作" class="headerlink" title="常用的文件操作"></a>常用的文件操作</h1><h2 id="查看工作目录"><a href="#查看工作目录" class="headerlink" title="查看工作目录"></a>查看工作目录</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">user@pc:$  <span class="built_in">pwd</span> -P <span class="comment">#加以参数"P"，可查看某个连接指向的真实地址</span></div></pre></td></tr></table></figure>
+<h2 id="新建目录"><a href="#新建目录" class="headerlink" title="新建目录"></a>新建目录</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">user@pc:$  mkdir -p test1/test2/test3 <span class="comment">#递归地创建目录</span></div><div class="line">user@pc:$  mkdir -m 711 <span class="built_in">test</span> <span class="comment">#创建目录时设定权限</span></div></pre></td></tr></table></figure>
+<h2 id="删除目录或文件"><a href="#删除目录或文件" class="headerlink" title="删除目录或文件"></a>删除目录或文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">user@pc:$  rmdir -p test1/test2/test3 <span class="comment">#递归地删除目录，只能删除空目录</span></div><div class="line">user@pc:$  rm -f test1/test2 <span class="comment">#递归地删除目录或文件</span></div></pre></td></tr></table></figure>
+<h2 id="关于cp"><a href="#关于cp" class="headerlink" title="关于cp"></a>关于cp</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">user@pc:$ cp -a /var/<span class="built_in">log</span>/wtmp  temp <span class="comment">#将文件的所有属性一起复制过来,否则权限可能会发生改变</span></div><div class="line">user@pc:$ cp -i /var/file  /usr/<span class="built_in">local</span> <span class="comment">#覆盖时询问，输入n或y继续</span></div><div class="line">user@pc:$ cp -r /var temp <span class="comment">#复制不为空的目录时要加上参数“r”</span></div><div class="line"></div><div class="line">[hui@linux tmp]$ cp -s bashrc bashrc_slink <span class="comment">#建立符号连接，同ln -s</span></div><div class="line">[hui@linux tmp]$ cp -l bashrc bashrc_hlink <span class="comment">#建立硬连接，同ln</span></div><div class="line"></div><div class="line">hui@linux tmp]$ cp -u ~/.bashrc /tmp/bashrc <span class="comment">#在目标文件与来源文件有差异时，才会复制，常被用于备份,使用命令mv时也有此参数</span></div><div class="line">[hui@linux tmp]$ cp -d bashrc_slink bashrc_slink_2  <span class="comment">#复制连接</span></div></pre></td></tr></table></figure>
+<h2 id="删除文件"><a href="#删除文件" class="headerlink" title="删除文件"></a>删除文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[hui@linux tmp]<span class="comment"># rm ./-aaa- #删除以“-”命名开头的文件</span></div></pre></td></tr></table></figure>
+<h2 id="取路径名与文件名"><a href="#取路径名与文件名" class="headerlink" title="取路径名与文件名"></a>取路径名与文件名</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">hui@linux ~]$ basename /etc/sysconfig/network <span class="comment">#取得最后的文件名</span></div><div class="line">network </div><div class="line">[hui@linux ~]$ dirname /etc/sysconfig/network <span class="comment">#取得的目录名</span></div><div class="line">/etc/sysconfig</div></pre></td></tr></table></figure>
+<h2 id="查看文件内容"><a href="#查看文件内容" class="headerlink" title="查看文件内容"></a>查看文件内容</h2><ul>
+<li>cat 由第一行开始显示文件内容</li>
+<li>tac 从最后一行开始显示，可以看出 tac 是 cat 的倒着写！</li>
+<li>nl 显示的时候，顺道输出行号！</li>
+<li>more 一页一页的显示文件内容</li>
+<li>less 与 more 类似，但是比 more 更好的是，他可以往前翻页！</li>
+<li>head 只看头几行</li>
+<li>tail 只看尾巴几行</li>
+<li><p>od 以二进制的方式读取文件内容！</p>
+<p>cat命令：</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ cat -n file2  <span class="comment">#显示出行号</span></div><div class="line">     1	Yes, you are right!</div><div class="line">     2	file2</div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ cat -A file2 <span class="comment">#将文件的内容完整的显示出来（包含特殊字符）</span></div><div class="line">Yes, you are right!$</div><div class="line">file2^Ibefore here there<span class="string">'s a tab $</span></div></pre></td></tr></table></figure>
+<p>nl命令：</p>
+<blockquote>
+<p>-b ：指定行号指定的方式，主要有两种：</p>
+<ul>
+<li>-b a ：表示不论是否为空行，也同样列出行号；</li>
+<li>-b t ：如果有空行，空的那一行不要列出行号；</li>
+</ul>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ nl -b a ./file2</div><div class="line">     1	Yes, you are right!</div><div class="line">     2	file2	before here there<span class="string">'s a tab </span></div><div class="line"><span class="string">     3	</span></div><div class="line"><span class="string">     4	Iam a good boy!</span></div><div class="line"><span class="string">     5	nothing to be here.</span></div><div class="line"><span class="string">     6</span></div></pre></td></tr></table></figure>
+<p>more 和less命令：</p>
+<blockquote>
+<p>less不但可以进行向下搜索（“/”），还可以向上搜索（“？”），除了空格还可用PageUp和PageDown进行翻页。</p>
+</blockquote>
+<p>head和tail命令:</p>
+<blockquote>
+<p>取前几行或后几行，-n 后跟行数，默认是10行</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ tail -n 2 file2 <span class="comment">#取后两行</span></div><div class="line">Iam a good boy!</div><div class="line">nothing to be here.</div><div class="line"></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ head -n 5 file2|tail -n 3 <span class="comment">#取第3~5行内容</span></div><div class="line">lala</div><div class="line">Iam a good boy!</div><div class="line">nothing to be here.</div></pre></td></tr></table></figure>
+<p>od命令：</p>
+<blockquote>
+<p>-t ：后面可以接各种『类型 (TYPE)』的输出，：</p>
+<ul>
+<li>a ：利用预设的字符来输出；</li>
+<li>c ：使用 ASCII 字符来输出</li>
+<li>d[size] ：利用十进制(decimal)来输出数据，每个整数占用 size bytes ；</li>
+<li>f[size] ：利用浮点数值(floating)来输出数据，每个数占用 size bytes ；</li>
+<li>o[size] ：利用八进位(octal)来输出数据，每个整数占用 size bytes ；</li>
+<li>x[size] ：利用十六进制(hexadecimal)来输出数据，每个整数占用 size bytes ；</li>
+</ul>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ od -t c  /usr/bin/passwd <span class="comment">#以ASCII码形式显示</span></div><div class="line">0000000 177   E   L   F 002 001 001  \0  \0 </div><div class="line">0000020 002  \0   &gt;  \0 001  \0  \0  \0 300 </div><div class="line">0000040   @  \0  \0  \0  \0  \0  \0  \0 030 </div><div class="line">...</div></pre></td></tr></table></figure>
+<h2 id="查看文件的变动时间"><a href="#查看文件的变动时间" class="headerlink" title="查看文件的变动时间"></a>查看文件的变动时间</h2><blockquote>
+<p>不加–time参数用ls命令查看的是最近文件内容发生改变时的时间。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">hui@linux ~]$ ls -l --time=atime /etc/man.config <span class="comment">#查看最后访问时间</span></div><div class="line">-rw-r--r-- 1 hui hui 4506 Jul 19 17:53 /etc/man.config</div><div class="line"></div><div class="line">[hui@linux ~]<span class="comment"># ls -l --time=ctime /etc/man.config   #查看最近属性或权限改变时的时间</span></div><div class="line">-rw-r--r-- 1 hui hui 4506 Jun 25 08:28 /etc/man.config</div></pre></td></tr></table></figure>
+<h2 id="修改文件的时间"><a href="#修改文件的时间" class="headerlink" title="修改文件的时间"></a>修改文件的时间</h2><blockquote>
+<p>通过touch命令不能修改ctime，即状态的时间。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ ls -l  file2</div><div class="line">-rw-r--r-- 1 hui hui 92  8月 14 12:37 file2</div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ touch -d <span class="string">"2 days ago"</span> file2</div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ ls -l  file2  <span class="comment">#查看mtime，时间变回两天前</span></div><div class="line">-rw-r--r-- 1 hui hui 92  8月 12 13:28 file2                  </div><div class="line"></div><div class="line">[hui@linux tmp]$ touch -t 0507150202 bashrc <span class="comment">#直接输入具体日期,格式为[YYMMDDhhmm]</span></div></pre></td></tr></table></figure>
+<h2 id="查看文件或目录创建时的默认属性值"><a href="#查看文件或目录创建时的默认属性值" class="headerlink" title="查看文件或目录创建时的默认属性值"></a>查看文件或目录创建时的默认属性值</h2><blockquote>
+<p>新建文件或目录时，其权限为预设值减去对应的数值，文件为预设最大为666，目录为777，如预设umask为022，则新建文件的权限为666-022=644，新建的目录为755。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ <span class="built_in">umask</span></div><div class="line">0022        <span class="comment">#第一个数值为特殊权限</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ <span class="built_in">umask</span> -S</div><div class="line">u=rwx,g=rwx,o=rx</div><div class="line"></div><div class="line">[hui@linux ~]<span class="comment"># umask 002 #设定预设值</span></div></pre></td></tr></table></figure>
+<h2 id="设定文件的隐藏属性"><a href="#设定文件的隐藏属性" class="headerlink" title="设定文件的隐藏属性"></a>设定文件的隐藏属性</h2><p>chattr命令</p>
+<blockquote>
+<ul>
+<li>+：增加某一个特殊参数，其它原本存在参数则不动。</li>
+<li>-：移除某一个特殊参数，其它原本存在参数则不动。</li>
+<li>=：设定指定值</li>
+</ul>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ sudo chattr +a file1 <span class="comment">#文件只能将增加数据，而不能删除，只有 hui才能设定这个属性。</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ rm file1</div><div class="line">rm: remove write-protected regular empty file ‘file1’? y</div><div class="line">rm: cannot remove ‘file1’: Operation not permitted</div><div class="line"></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ sudo chattr +i file1 <span class="comment">#文件不能被重命名、删除、设定连接和添加内容。</span></div><div class="line"></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ lsattr  <span class="comment">#显示文件的隐藏属性</span></div><div class="line">----i--------e-- ./file1</div><div class="line">-------------e-- ./<span class="built_in">test</span></div></pre></td></tr></table></figure>
+<h2 id="查看文件格式"><a href="#查看文件格式" class="headerlink" title="查看文件格式"></a>查看文件格式</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ file jv.java  <span class="comment">#查看是ASCII、data或是二进制文件。</span></div><div class="line">jv.java: C <span class="built_in">source</span>, ASCII text</div></pre></td></tr></table></figure>
+<h2 id="查找文件"><a href="#查找文件" class="headerlink" title="查找文件"></a>查找文件</h2><blockquote>
+<p>find命令不常用，因为速度慢，whereis或locate找不到时才会用find。whereis与 locate 是利用数据库来搜寻数据，所以速度相当快。</p>
+</blockquote>
+<p>which命令：</p>
+<blockquote>
+<p>从环境变量设置PATH的路径中查找可执行文件。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">[hui@linux ~]$ <span class="built_in">which</span> passwd   <span class="comment">#默认只能显示找到的第一个可执行文件</span></div><div class="line">/usr/bin/passwd</div><div class="line">[hui@linux ~]$ <span class="built_in">which</span> traceroute -a  <span class="comment">#加上参数-a,可列出所有能查找得到的可执行文件</span></div><div class="line">/usr/sbin/traceroute</div><div class="line">/bin/traceroute</div></pre></td></tr></table></figure>
+<p> whereis命令：</p>
+<blockquote>
+<p>从数据库中查找，默认数据库一星期更新一次，参数：</p>
+<ul>
+<li>-b :只找 binary 的文件</li>
+<li>-m :只找在说明文件 manual 路径下的文件，即只查找说明文件</li>
+<li>-s :只找source 源文件</li>
+<li>-u :没有说明档的文件</li>
+</ul>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ whereis -m  file</div><div class="line">file: /usr/share/man/man1/file.1.gz</div></pre></td></tr></table></figure>
+<p>locate命令：</p>
+<blockquote>
+<p>相当于find -name，但比后者快。locate搜索一个数据库/var/lib/locatedb，这个数据库中含有本地所有文件信息。Linux系统自动创建这个数据库，并且每天自动更新一次，所以使用locate命令查不到最新变动过的文件。</p>
+<p>为了避免这种情况，可以在使用locate之前，先使用updatedb命令，手动更新数据库。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ locate file1</div><div class="line">/home/hui/<span class="built_in">test</span>/<span class="comment">#file1#</span></div><div class="line">/home/hui/<span class="built_in">test</span>/file1</div><div class="line">/home/hui/<span class="built_in">test</span>/<span class="built_in">test</span>/file1</div><div class="line">...</div></pre></td></tr></table></figure>
+<p>find命令：</p>
+<blockquote>
+<p>find后加-type f，可筛选出文件,-type d可筛选出目录 </p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">[hui@linux ~]$ find / -mtime 0                 <span class="comment">#将过去系统上面24小时内有变动过内容 (mtime,atime,ctime同理) 的文件列出</span></div><div class="line">[hui@linux ~]$ find /etc -newer /etc/passwd    <span class="comment">#寻找/etc底下的文件，如果文件日期比 /etc/passwd 新就列出</span></div><div class="line"></div><div class="line">[hui@linux ~]$ find /home -user hui    <span class="comment">#搜寻/home底下属于hui的文件</span></div><div class="line">[hui@linux ~]$ find / -nouser          <span class="comment">#搜寻系统中不属于任何人的文件，可以查找出不太正常的文件</span></div><div class="line"></div><div class="line">[hui@linux ~]$ find / -name passwd    <span class="comment">#找名为passwd的文件</span></div><div class="line">[hui@linux ~]$ find / -size +1000k    <span class="comment">#找出系统中，大于 1MB 的档案,还可用M(MB）和G（GB）。</span></div><div class="line"></div><div class="line"></div><div class="line">[hui@linux ~]$ find / -perm +7000  <span class="comment">#搜寻文件当中含有 SGID/SUID/SBIT 的属性，7000 就是 ---s--s--t ，</span></div><div class="line">                                    <span class="comment"># 只要含有 s 或 t 的就列出，使用 -7000 表示要含有 ---s--s--t 的所有三个权限。</span></div><div class="line">                                     </div><div class="line">[hui@linux ~]$ find / -perm +7000 -<span class="built_in">exec</span> ls -l &#123;&#125; \; <span class="comment">#将上个例子找到的文件使用 ls -l 列出来，“&#123;&#125;”是查找的内容，“\”表示到此为止。</span></div></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux/" rel="tag"># linux</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/04/26/linux-learn-2/" rel="prev" title="Linux学习札记（二）：tar、vim的使用及正则表达式的介绍">
+                Linux学习札记（二）：tar、vim的使用及正则表达式的介绍 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#基础操作"><span class="nav-number">1.</span> <span class="nav-text">基础操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#查看当前系统的语言"><span class="nav-number">1.1.</span> <span class="nav-text">查看当前系统的语言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#计算器"><span class="nav-number">1.2.</span> <span class="nav-text">计算器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看时间"><span class="nav-number">1.3.</span> <span class="nav-text">查看时间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#命令补全"><span class="nav-number">1.4.</span> <span class="nav-text">命令补全</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文件补全"><span class="nav-number">1.5.</span> <span class="nav-text">文件补全</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#用man命令查找某个命令的帮助信息时，按下“-”后，输入某个单词可搜索与其有关的内容，按“n”继续-“N”反向查找，输入“-”可进行向前查询。"><span class="nav-number">1.6.</span> <span class="nav-text">用man命令查找某个命令的帮助信息时，按下“/”后，输入某个单词可搜索与其有关的内容，按“n”继续,“N”反向查找，输入“?”可进行向前查询。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#whatis-同-man-f-用于查询一个命令执行什么功能，并将查询结果打印到终端上。"><span class="nav-number">1.7.</span> <span class="nav-text">whatis 同 man -f 用于查询一个命令执行什么功能，并将查询结果打印到终端上。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#apropos-同-man-k-用于在-whatis-数据库中查找字符串。"><span class="nav-number">1.8.</span> <span class="nav-text">apropos 同 man -k 用于在 whatis 数据库中查找字符串。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sync-命令可把内存里的内容写入硬盘。"><span class="nav-number">1.9.</span> <span class="nav-text">sync 命令可把内存里的内容写入硬盘。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不知道原来文件的属性，只想要增加某个文件可写入的权限"><span class="nav-number">1.10.</span> <span class="nav-text">不知道原来文件的属性，只想要增加某个文件可写入的权限</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#设定用户具有可读、可写、可执行的权限，同组和其他人具有可执行的权限。"><span class="nav-number">1.11.</span> <span class="nav-text">设定用户具有可读、可写、可执行的权限，同组和其他人具有可执行的权限。</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#常用的文件操作"><span class="nav-number">2.</span> <span class="nav-text">常用的文件操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#查看工作目录"><span class="nav-number">2.1.</span> <span class="nav-text">查看工作目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#新建目录"><span class="nav-number">2.2.</span> <span class="nav-text">新建目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除目录或文件"><span class="nav-number">2.3.</span> <span class="nav-text">删除目录或文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于cp"><span class="nav-number">2.4.</span> <span class="nav-text">关于cp</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除文件"><span class="nav-number">2.5.</span> <span class="nav-text">删除文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#取路径名与文件名"><span class="nav-number">2.6.</span> <span class="nav-text">取路径名与文件名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看文件内容"><span class="nav-number">2.7.</span> <span class="nav-text">查看文件内容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看文件的变动时间"><span class="nav-number">2.8.</span> <span class="nav-text">查看文件的变动时间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改文件的时间"><span class="nav-number">2.9.</span> <span class="nav-text">修改文件的时间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看文件或目录创建时的默认属性值"><span class="nav-number">2.10.</span> <span class="nav-text">查看文件或目录创建时的默认属性值</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#设定文件的隐藏属性"><span class="nav-number">2.11.</span> <span class="nav-text">设定文件的隐藏属性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看文件格式"><span class="nav-number">2.12.</span> <span class="nav-text">查看文件格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查找文件"><span class="nav-number">2.13.</span> <span class="nav-text">查找文件</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

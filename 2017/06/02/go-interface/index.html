@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="go," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="Interface 是Go语言里很优秀的一个设计，它本身是仅仅是一个结构体，但是通过interface我们可以实现面向对象的很多特性，比如多态、动态联编等。interface 在Go 语言里使用起来的感觉，相比于其它语言也要优雅得多。">
+<meta name="keywords" content="go">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言interface的介绍">
+<meta property="og:url" content="http://witchiman.github.io/2017/06/02/go-interface/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="Interface 是Go语言里很优秀的一个设计，它本身是仅仅是一个结构体，但是通过interface我们可以实现面向对象的很多特性，比如多态、动态联编等。interface 在Go 语言里使用起来的感觉，相比于其它语言也要优雅得多。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.466Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Go语言interface的介绍">
+<meta name="twitter:description" content="Interface 是Go语言里很优秀的一个设计，它本身是仅仅是一个结构体，但是通过interface我们可以实现面向对象的很多特性，比如多态、动态联编等。interface 在Go 语言里使用起来的感觉，相比于其它语言也要优雅得多。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2017/06/02/go-interface/"/>
+
+
+
+
+
+  <title>Go语言interface的介绍 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2017/06/02/go-interface/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Go语言interface的介绍</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-02T18:09:33+08:00">
+                2017-06-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Interface 是Go语言里很优秀的一个设计，它本身是仅仅是一个结构体，但是通过interface我们可以实现面向对象的很多特性，比如多态、动态联编等。interface 在Go 语言里使用起来的感觉，相比于其它语言也要优雅得多。</p>
+<a id="more"></a>
+<h2 id="底层实现"><a href="#底层实现" class="headerlink" title="底层实现"></a>底层实现</h2><p>Interface 的底层只是一个简单的由c语言实现的数据结构：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Eface</span></span></div><div class="line"><span class="class">&#123;</span></div><div class="line">    Type*    type;</div><div class="line">    <span class="keyword">void</span>*    data;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>type 表示它的类型，data 里存储了它的具体信息。对于Go语言，任何数据类型都是可以由interface{}来表示的。当我们使用时可以通过反射把里面的信息取出来。</p>
+<h2 id="方法实现"><a href="#方法实现" class="headerlink" title="方法实现"></a>方法实现</h2><p>我们先定义一个简单的接口，类似于Java 中的那样。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Animal <span class="keyword">interface</span> &#123;</div><div class="line">	Run()</div><div class="line">	Roar()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>定义一个结构体 Dog ，直接定义Run 和 Roar 方法，即可实现接口。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Dog <span class="keyword">struct</span> &#123;</div><div class="line">	Name <span class="keyword">string</span></div><div class="line">	Size <span class="keyword">string</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(d *Dog)</span><span class="title">Run</span><span class="params">()</span></span>  &#123;</div><div class="line">	fmt.Printf(<span class="string">"Dog %s run!\n"</span>, d.Name)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(d *Dog)</span><span class="title">Roar</span><span class="params">()</span></span>  &#123;</div><div class="line">	fmt.Printf(<span class="string">"A %s dog roar!\n"</span>, d.Size)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>声明一个Dog 类型并初始化。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span> <span class="params">()</span></span> &#123;</div><div class="line">    d := Dog&#123;</div><div class="line">            Name: <span class="string">"Jim"</span>,</div><div class="line">            Size: <span class="string">"big"</span>,</div><div class="line">        &#125;</div><div class="line">	d.Run()</div><div class="line">	d.Roar()</div><div class="line">&#125;</div><div class="line"><span class="comment">// output: </span></div><div class="line"><span class="comment">//		Dog Jim run!</span></div><div class="line"><span class="comment">//		A big dog roar!</span></div></pre></td></tr></table></figure>
+<p>这样实现一个接口的方法很简单，只需要在定义某一类型的时候，定义一个同名的方法即可。</p>
+<h2 id="多态"><a href="#多态" class="headerlink" title="多态"></a>多态</h2><p>我们可以直接声明一个该接口的变量，再让这个变量指向实现其方法类型的实例的地址，这个变量就可以调用此实例的方法。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	...</div><div class="line">	<span class="keyword">var</span> a Animal</div><div class="line">	a = &amp;d</div><div class="line">	a.Run()</div><div class="line">	a.Roar()</div><div class="line">&#125;</div><div class="line"><span class="comment">// output:</span></div><div class="line"><span class="comment">//      Dog Jim run!</span></div><div class="line"><span class="comment">//      A big dog roar!</span></div></pre></td></tr></table></figure>
+<p>同样定义另外一个实现该接口的类型。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Cat <span class="keyword">struct</span> &#123;</div><div class="line">	Name <span class="keyword">string</span></div><div class="line">	Color <span class="keyword">string</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cat)</span><span class="title">Run</span><span class="params">()</span></span>  &#123;</div><div class="line">	fmt.Printf(<span class="string">"Cat %s run!\n"</span>, c.Name)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cat)</span><span class="title">Roar</span><span class="params">()</span></span>  &#123;</div><div class="line">	fmt.Printf(<span class="string">"A %s cat roar!\n"</span>, c.Color)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p> 再让上面声明的接口变量指向这个类型的实例的地址，实际上调用方法的对象则变成后者。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	...</div><div class="line">	c := Cat&#123;</div><div class="line">		Name: <span class="string">"Kitty"</span>,</div><div class="line">		Color: <span class="string">"yello"</span>,</div><div class="line">	&#125;</div><div class="line">	a = &amp;c</div><div class="line">	c.Roar()</div><div class="line">	c.Run()</div><div class="line">&#125;</div><div class="line"><span class="comment">//output:</span></div><div class="line"><span class="comment">//		A yello cat roar!</span></div><div class="line"><span class="comment">//		Cat Kitty run!</span></div></pre></td></tr></table></figure>
+<p>Go语言里面向对象的特性通过interface 很轻易地体现了出来。本质上上述声明的Animal 变量a 是一个指针，它底层的内存结构包含两个字段：</p>
+<ul>
+<li>receiver，a可以指向任意变量，只需要这个变量的类型实现了该接口，此时receiver 存储该变量的地址，实际上此地址指向的其实是该变量的一个副本，因为Go 会在堆上申请一段空间用以存储变量的副本。如果该变量不大于一个字，则该变量直接存储在receiver 中。</li>
+<li>method table ptr，类似于C++ 里的虚函数表，当a 指向某实例变量后，该字段存储其方法的入口地址。</li>
+</ul>
+<h2 id="类型转换"><a href="#类型转换" class="headerlink" title="类型转换"></a>类型转换</h2><p>一个空的 interface ，不包含任何方法，因此它能够存储任意类型的值。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">    <span class="keyword">var</span> i <span class="keyword">interface</span>&#123;&#125;</div><div class="line">    a := <span class="number">1</span></div><div class="line">    i = a</div><div class="line">    fmt.Println(i)</div><div class="line">    b := <span class="literal">true</span></div><div class="line">    i = b</div><div class="line">    fmt.Println(i)</div><div class="line">&#125;</div><div class="line"><span class="comment">//output:</span></div><div class="line"><span class="comment">//		1</span></div><div class="line"><span class="comment">//		true</span></div></pre></td></tr></table></figure>
+<p>我们可以借此实现一个函数，它的参数可以接收任意类型的值。这时，interface 的用法就比较像Java里的Object 对象。同样，我们使用这个参数前需要类型转换，在Java里可以通过运算符instanceof  来判断一个对象的实例是否为某一类型，并可以通过显示类型转换来使用这个实例。 在Go语言里，我们通过断言一样可以做到这些。先看看断言的用法：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">testFunc</span><span class="params">(animal <span class="keyword">interface</span>&#123;&#125;)</span></span>  &#123;</div><div class="line">	<span class="keyword">if</span> c, ok := animal.(Cat); ok &#123;</div><div class="line">		fmt.Println(c)</div><div class="line">	&#125; <span class="keyword">else</span> &#123;</div><div class="line">      		fmt.<span class="built_in">println</span>(<span class="string">"It's not a cat!"</span>)</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>格式为：变量名.(类型名)。返回两个值，第一个值为转换类型后的实例，第二个值为布尔变量，如果传入的参数为Cat 类型就返回 true, 否则返回 false 。 调用testFunc 时，在函数里判断其传入的参数是否为Cat 类型，如果是就打印出它的值。</p>
+<p>也可以直接使用断言返回的第一个值。用法如c := animal.(Cat)，直接忽略判断的结果。下面我们为testFunc 加入更多类型的判断，这时，通过结合switch的使用，使代码可读性更加友好。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">testFunc</span><span class="params">(animal <span class="keyword">interface</span>&#123;&#125;)</span></span>  &#123;</div><div class="line">	<span class="keyword">switch</span> animal.(<span class="keyword">type</span>) &#123;</div><div class="line">	<span class="keyword">case</span> Dog:</div><div class="line">		fmt.Println(animal)</div><div class="line">	<span class="keyword">case</span> Cat:</div><div class="line">		fmt.Println(animal)</div><div class="line">	<span class="keyword">default</span>:</div><div class="line">		fmt.Println(<span class="string">"It's nothing!"</span>)</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/go/" rel="tag"># go</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/10/go-synchronize/" rel="next" title="Go语言里的并发控制">
+                <i class="fa fa-chevron-left"></i> Go语言里的并发控制
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/06/10/go-threadpool/" rel="prev" title="Go语言里线程池的实现">
+                Go语言里线程池的实现 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#底层实现"><span class="nav-number">1.</span> <span class="nav-text">底层实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#方法实现"><span class="nav-number">2.</span> <span class="nav-text">方法实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多态"><span class="nav-number">3.</span> <span class="nav-text">多态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类型转换"><span class="nav-number">4.</span> <span class="nav-text">类型转换</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

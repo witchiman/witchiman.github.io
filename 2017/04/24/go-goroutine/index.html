@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="go," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="Goroutine是Go里的一种轻量级线程——协程。相对线程，协程的优势就在于它非常轻量级，进行上下文切换的代价非常的小。对于一个goroutine ,每个结构体G中有一个sched的属性就是用来保存它上下文的。这样，goroutine 就可以很轻易的来回切换。由于其上下文切换在用户态下发生，根本不必进入内核态，所以速度很快。而且只有当前goroutine 的 PC, SP等少量信息需要保存。">
+<meta name="keywords" content="go">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言中goroutine的分析">
+<meta property="og:url" content="http://witchiman.github.io/2017/04/24/go-goroutine/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="Goroutine是Go里的一种轻量级线程——协程。相对线程，协程的优势就在于它非常轻量级，进行上下文切换的代价非常的小。对于一个goroutine ,每个结构体G中有一个sched的属性就是用来保存它上下文的。这样，goroutine 就可以很轻易的来回切换。由于其上下文切换在用户态下发生，根本不必进入内核态，所以速度很快。而且只有当前goroutine 的 PC, SP等少量信息需要保存。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.466Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Go语言中goroutine的分析">
+<meta name="twitter:description" content="Goroutine是Go里的一种轻量级线程——协程。相对线程，协程的优势就在于它非常轻量级，进行上下文切换的代价非常的小。对于一个goroutine ,每个结构体G中有一个sched的属性就是用来保存它上下文的。这样，goroutine 就可以很轻易的来回切换。由于其上下文切换在用户态下发生，根本不必进入内核态，所以速度很快。而且只有当前goroutine 的 PC, SP等少量信息需要保存。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2017/04/24/go-goroutine/"/>
+
+
+
+
+
+  <title>Go语言中goroutine的分析 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2017/04/24/go-goroutine/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Go语言中goroutine的分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-24T15:45:18+08:00">
+                2017-04-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Goroutine是Go里的一种轻量级线程——协程。相对线程，协程的优势就在于它非常轻量级，进行上下文切换的代价非常的小。对于一个goroutine ,每个结构体G中有一个sched的属性就是用来保存它上下文的。这样，goroutine 就可以很轻易的来回切换。由于其上下文切换在用户态下发生，根本不必进入内核态，所以速度很快。而且只有当前goroutine 的 PC, SP等少量信息需要保存。</p>
+<a id="more"></a>
+<p>在Go语言中，每一个并发的执行单元为一个goroutine。当我们开始运行一个Go程序时，它的入口函数 main 实际上就是运行在一个goroutine 里。</p>
+<h2 id="Goroutine之间的通信"><a href="#Goroutine之间的通信" class="headerlink" title="Goroutine之间的通信"></a>Goroutine之间的通信</h2><p>Go 语言编写的程序通过不同的goroutine 运行，但是goroutine之间是相互独立的，各自运行在不同的上下文中。 每个 goroutine 之间的通信需要借助 channel ，channel 是Go 语言里的一种通信机制。Channel 也是Go语言里的一种引用类型，通过make函数，我们可以很容易的声明一个channel。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ch := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">string</span>)</div></pre></td></tr></table></figure>
+<p>Channel 有单方向，双方向之分：</p>
+<ul>
+<li>chan int, 双方向，可用来收发数据。</li>
+<li>chan &lt;- int,单方向，只能用来发送数据 </li>
+<li>&lt;- chan int,单方向，只能用来接收数据</li>
+</ul>
+<p>另外，channel还有有缓存无缓存之分。通过make函数创建一个带缓存的channel。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ch := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">string</span>, n)</div></pre></td></tr></table></figure>
+<p>无缓存的channel保证了每次发送数据的同步接收操作。而带缓存的channel解耦了发送与接收间的操作，这样不但是影响程序的性能还有可能引起死锁的问题。</p>
+<h2 id="调度器sheduler"><a href="#调度器sheduler" class="headerlink" title="调度器sheduler"></a>调度器sheduler</h2><p>每个goroutine的运行都是由Go语言里的调度器(scheduler）决定的。</p>
+<p>先说操作系统的线程调度。在POSIX 中有一个sheduler的内核函数，每过几ms会被执行一次。每次执行时，会挂起当前执行线程，同时保存它寄存器中信息，接着查看线程列表决定下一个线程的运行， 从内存中必复其寄存器信息和现场并开始执行。不同线程之间存在上下文切换，这包括保存一个用户线程的状态到内存，恢复另一个线程的信息到寄存器，同时还要更新sheduler相关的数据结构。这些操作都很耗时。</p>
+<p>Go 语言的Runtime有自己的sheduler，通过它我们可以在n个操作系统的线程上调度m个goroutine。实际上Go 的sheduler与操作系统的sheduler是非常相似的，只不过它只关心goroutine的调度。与操作系统sheduler不同的是，Go的sheduler不使用硬件定时器，当一个goroutine 调用了time.Sleep、触发一个channel 操作或者使用 mutex， scheduler 会使这个 goroutine 进行睡眠，进而去唤醒另外一个goroutine，这种调度方式没有上下文之间的切换，它的代价比操作系统的线程调度要小得多。</p>
+<p>Go的调度的实现，涉及到几个重要的数据结构。运行时库用这几个数据结构来实现goroutine的调度，管理goroutine和物理线程的运行。这些数据结构分别是结构体G，结构体M，结构体P，以及 Sched 结构体。这三个结构定义在文件 runtime/runtime.h 中，而Sched的定义在 runtime/proc.c 中。在Go语言中scheduler 通过一个GOMAXPROCS变量来决定有多少个操作系统的线程来运行Go程序，默认值为CPU的核心数。</p>
+<h3 id="结构体G"><a href="#结构体G" class="headerlink" title="结构体G"></a>结构体G</h3><p>G 是 goroutine 的缩写，相当于操作系统中的进程控制块，在这里就是 goroutine 的控制结构，是对goroutine的抽象。其中包括 goid 是这个 goroutine 的ID， status 是这个goroutine 的状态，如 Gidle, Grunnable, Grunning, Gsyscall, Gwaiting,Gdead 等。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">G</span></span></div><div class="line"><span class="class">&#123;</span></div><div class="line">    uintptr    stackguard;    <span class="comment">// 分段栈的可用空间下界</span></div><div class="line">    uintptr    stackbase;    <span class="comment">// 分段栈的栈基址</span></div><div class="line">    Gobuf    sched;        <span class="comment">//进程切换时，利用sched域来保存上下文</span></div><div class="line">    uintptr    stack0;</div><div class="line">    FuncVal*    fnstart;        <span class="comment">// goroutine运行的函数</span></div><div class="line">    <span class="keyword">void</span>*    param;        <span class="comment">// 用于传递参数，睡眠时其它goroutine设置param，唤醒时此goroutine可以获取</span></div><div class="line">    int16    status;        <span class="comment">// 状态Gidle,Grunnable,Grunning,Gsyscall,Gwaiting,Gdead</span></div><div class="line">    int64    goid;        <span class="comment">// goroutine的id号</span></div><div class="line">    G*    schedlink;</div><div class="line">    M*    m;        <span class="comment">// for debuggers, but offset not hard-coded</span></div><div class="line">    M*    lockedm;    <span class="comment">// G被锁定只能在这个m上运行</span></div><div class="line">    uintptr    gopc;    <span class="comment">// 创建这个goroutine的go表达式的pc</span></div><div class="line">    ...</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>结构体G中的部分域如上所示。可以看到，其中包含了栈信息stackbase和stackguard，有运行的函数信息fnstart。这些就足够成为一个可执行的单元了，只要得到CPU就可以运行。</p>
+<p>goroutine 切换时，上下文信息保存在结构体的 sched 域中。goroutine 是轻量级的线程或者称为协程，切换时并不必陷入到操作系统内核中，所以保存过程很轻量。看一下结构体 G 中的 Gobuf，其实只保存了当前栈指针，程序计数器，以及 goroutine 自身。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Gobuf</span></span></div><div class="line"><span class="class">&#123;</span></div><div class="line">    <span class="comment">// The offsets of these fields are known to (hard-coded in) libmach.</span></div><div class="line">    uintptr    sp;</div><div class="line">    byte*    pc;</div><div class="line">    G*    g;</div><div class="line">    ...</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>记录g是为了恢复当前goroutine的结构体G指针，运行时库中使用了一个常驻的寄存器extern register G* g，这个是当前goroutine的结构体G的指针。这样做是为了快速地访问goroutine中的信息，比如，Go的栈的实现并没有使用%ebp寄存器，不过这可以通过g-&gt;stackbase快速得到。”extern register”是由6c，8c等实现的一个特殊的存储。在ARM上它是实际的寄存器；其它平台是由段寄存器进行索引的线程本地存储的一个槽位。在linux系统中，对g和m使用的分别是0(GS)和4(GS)。需要注意的是，链接器还会根据特定操作系统改变编译器的输出，例如，linux下会将0(GS)重写为-16(FS)。每个链接到Go程序的C文件都必须包含runtime.h头文件，这样C编译器知道避免使用专用的寄存器。</p>
+<h3 id="结构体M"><a href="#结构体M" class="headerlink" title="结构体M"></a>结构体M</h3><p>M是machine的缩写，是对机器的抽象，每个m都是对应到一条操作系统的物理线程。M必须关联了P才可以执行Go代码，但是当它处理阻塞或者系统调用中时，可以不需要关联P。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">M</span></span></div><div class="line"><span class="class">&#123;</span></div><div class="line">    G*    g0;        <span class="comment">// 带有调度栈的goroutine</span></div><div class="line">    G*    gsignal;    <span class="comment">// signal-handling G 处理信号的goroutine</span></div><div class="line">    <span class="keyword">void</span>    (*mstartfn)(<span class="keyword">void</span>);</div><div class="line">    G*    curg;        <span class="comment">// M中当前运行的goroutine</span></div><div class="line">    P*    p;        <span class="comment">// 关联P以执行Go代码 (如果没有执行Go代码则P为nil)</span></div><div class="line">    P*    nextp;</div><div class="line">    int32    id;</div><div class="line">    int32    mallocing; <span class="comment">//状态</span></div><div class="line">    int32    throwing;</div><div class="line">    int32    gcing;</div><div class="line">    int32    locks;</div><div class="line">    int32    helpgc;        <span class="comment">//不为0表示此m在做帮忙gc。helpgc等于n只是一个编号</span></div><div class="line">    <span class="keyword">bool</span>    blockingsyscall;</div><div class="line">    <span class="keyword">bool</span>    spinning;</div><div class="line">    Note    park;</div><div class="line">    M*    alllink;    <span class="comment">// 这个域用于链接allm</span></div><div class="line">    M*    schedlink;</div><div class="line">    MCache    *mcache;</div><div class="line">    G*    lockedg;</div><div class="line">    M*    nextwaitm;    <span class="comment">// next M waiting for lock</span></div><div class="line">    GCStats    gcstats;</div><div class="line">    ...</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>和G类似，M中也有alllink域将所有的M放在allm链表中。lockedg是某些情况下，G锁定在这个M中运行而不会切换到其它M中去。M中还有一个MCache，是当前M的内存的缓存。M也和G一样有一个常驻寄存器变量，代表当前的M。同时存在多个M，表示同时存在多个物理线程。结构体M中有两个G是需要关注一下的，一个是curg，代表结构体M当前绑定的结构体G。另一个是g0，是带有调度栈的goroutine，这是一个比较特殊的goroutine。普通的goroutine的栈是在堆上分配的可增长的栈，而g0的栈是M对应的线程的栈。所有调度相关的代码，会先切换到该goroutine的栈中再执行。</p>
+<h3 id="结构体P"><a href="#结构体P" class="headerlink" title="结构体P"></a>结构体P</h3><p>Go1.1中新加入的一个数据结构，它是Processor的缩写。结构体P的加入是为了提高Go程序的并发度，实现更好的调度。M代表OS线程。P代表Go代码执行时需要的资源。当M执行Go代码时，它需要关联一个P，当M为idle或者在系统调用中时，它也需要P。有刚好GOMAXPROCS个P。所有的P被组织为一个数组，在P上实现了工作流窃取的调度器。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">P</span></span></div><div class="line"><span class="class">&#123;</span></div><div class="line">    Lock;</div><div class="line">    uint32    status;  <span class="comment">// Pidle或Prunning等</span></div><div class="line">    P*    link;</div><div class="line">    uint32    schedtick;   <span class="comment">// 每次调度时将它加一</span></div><div class="line">    M*    m;    <span class="comment">// 链接到它关联的M (nil if idle)</span></div><div class="line">    MCache*    mcache;</div><div class="line"></div><div class="line">    G*    runq[<span class="number">256</span>];</div><div class="line">    int32    runqhead;</div><div class="line">    int32    runqtail;</div><div class="line"></div><div class="line">    <span class="comment">// Available G's (status == Gdead)</span></div><div class="line">    G*    gfree;</div><div class="line">    int32    gfreecnt;</div><div class="line">    byte    pad[<span class="number">64</span>];</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>结构体P中也有相应的状态：Pidle, Prunning, Psyscall, Pgcstop, Pdead。跟G不同的是，P 不存在waiting状态。MCache被移到了P中，但是在结构体M中也还保留着。在P中有一个Grunnable的goroutine队列，这是一个P的局部队列。当P执行Go代码时，它会优先从自己的这个局部队列中取，这时可以不用加锁，提高了并发度。如果发现这个队列空了，则去其它P的队列中拿一半过来，这样实现工作流窃取的调度。这种情况下是需要给调用器加锁的。</p>
+<h3 id="结构体Sched"><a href="#结构体Sched" class="headerlink" title="结构体Sched"></a>结构体Sched</h3><p>Sched是调度实现中使用的数据结构，该结构体的定义在文件proc.c中。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Sched</span> &#123;</span></div><div class="line">    Lock;</div><div class="line"></div><div class="line">    uint64    goidgen;</div><div class="line"></div><div class="line">    M*    midle;     <span class="comment">// idle m's waiting for work</span></div><div class="line">    int32    nmidle;     <span class="comment">// number of idle m's waiting for work</span></div><div class="line">    int32    nmidlelocked; <span class="comment">// number of locked m's waiting for work</span></div><div class="line">    int3    mcount;     <span class="comment">// number of m's that have been created</span></div><div class="line">    int32    maxmcount;    <span class="comment">// maximum number of m's allowed (or die)</span></div><div class="line"></div><div class="line">    P*    pidle;  <span class="comment">// idle P's</span></div><div class="line">    uint32    npidle;  <span class="comment">//idle P的数量</span></div><div class="line">    uint32    nmspinning;</div><div class="line"></div><div class="line">    <span class="comment">// Global runnable queue.</span></div><div class="line">    G*    runqhead;</div><div class="line">    G*    runqtail;</div><div class="line">    int32    runqsize;</div><div class="line"></div><div class="line">    <span class="comment">// Global cache of dead G's.</span></div><div class="line">    Lock    gflock;</div><div class="line">    G*    gfree;</div><div class="line"></div><div class="line">    int32    stopwait;</div><div class="line">    Note    stopnote;</div><div class="line">    uint32    sysmonwait;</div><div class="line">    Note    sysmonnote;</div><div class="line">    uint64    lastpoll;</div><div class="line"></div><div class="line">    int32    profilehz;    <span class="comment">// cpu profiling rate</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>大多数需要的信息都已放在了结构体M、G和P中，Sched结构体只是一个壳。可以看到，其中有M的idle队列，P的idle队列，以及一个全局的就绪的G队列。Sched结构体中的Lock是非常必须的，如果M或P等做一些非局部的操作，它们一般需要先锁住调度器。</p>
+<h2 id="Goroutine的特点"><a href="#Goroutine的特点" class="headerlink" title="Goroutine的特点"></a>Goroutine的特点</h2><p>Goroutine是Go Runtime所提供的，并非操作系统层面上支持的，goroutine不是用线程实现的。goroutine就是一段代码，一个函数入口，以及在堆上为其分配的一个堆栈。这个栈通常很小，一般为2kB, 所以它非常廉价，我们可以很轻松的创建上成千万个goroutine，这是很普遍的。Goroutine 的栈大小不是固定的，这一点和操作系统的线程是不一样的，它可以动态的扩展，最大值可达1GB。</p>
+<p>Goroutine是协作式调度的，如果goroutine会执行很长时间，而且不是通过等待读取或写入channel的数据来同步的话，就需要主动调用Gosched()来让出CPU。</p>
+<p>Go语言封装了异步IO，所以可以写出貌似并发数很多的服务端，可即使我们通过调整GOMAXPROCS来充分利用多核CPU并行处理，其效率也不如我们利用IO事件驱动设计的、按照事务类型划分好合适比例的线程池。在响应时间上，协作式调度是硬伤。</p>
+<p>每个goroutine是没有身份标识的，这是为了避免像Thread Local Storage那样被烂用，一个函数的行为不可能由其本身变量决定。</p>
+<p>Goroutine最大的优点是在并发开发中实现了对线程池的动态扩展，不会由于某个任务的阻塞而导致死锁。随着其运行库的不断发展和完善及多核大行其道的年代，其优势会日益凸显。</p>
+<p>下面来看一个实例。</p>
+<h2 id="实例：生产者消费者问题"><a href="#实例：生产者消费者问题" class="headerlink" title="实例：生产者消费者问题"></a>实例：生产者消费者问题</h2><p>通过goroutine实现生产者消费者问题，利用 channel 通信。只需要短短几行代码，我们自己根本不需要编写代码考虑线程的同步问题。</p>
+<p>需要事先声明的变量，goods 是生产消费所共享的数据，声明为一个chan 类型，存放整型数据。接着声明一个随机数种子，根据系统时间生成伪随机数。done 也是一个 chan 类型，里面只存储一个空的struct，其作用是为了保证主线程在其它 goroutine 结束之后结束。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> goods <span class="keyword">chan</span> <span class="keyword">int</span></div><div class="line"><span class="keyword">var</span> r  = rand.New(rand.NewSource(time.Now().UnixNano())) <span class="comment">//定义一个随机数种子</span></div><div class="line"><span class="keyword">var</span> done <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;</div></pre></td></tr></table></figure>
+<p>生产者函数，循环10次，依次向 goods里写入1到10,每写完一次后，随机睡眠1～3秒。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">produce</span><span class="params">()</span></span>  &#123;</div><div class="line">	<span class="keyword">for</span> i:=<span class="number">1</span>; i&lt;=<span class="number">10</span>; i++ &#123;</div><div class="line">		goods &lt;- i</div><div class="line">		time.Sleep(time.Duration(r.Int31n(<span class="number">3</span>))*time.Second)</div><div class="line">	&#125;</div><div class="line">	done &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>消费者函数,循环5次从 goods 里取值，每读完一次，随机睡眠1～5秒。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">consume</span><span class="params">()</span></span> &#123;</div><div class="line">	<span class="keyword">for</span> i:=<span class="number">0</span>; i&lt;<span class="number">5</span>; i++ &#123;</div><div class="line">		good := &lt;- goods</div><div class="line">		fmt.Printf(<span class="string">"The goods size is : %v\n"</span>, <span class="number">10</span>-good+<span class="number">1</span>)</div><div class="line">		time.Sleep(time.Duration(r.Int31n(<span class="number">5</span>))*time.Second)</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>main 函数里开启一个goroutine 运行 produce 函数，两个goroutine 运行consume 函数。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span>  &#123;</div><div class="line">	goods = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</div><div class="line">	done = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</div><div class="line"></div><div class="line">	<span class="keyword">go</span> produce()</div><div class="line">	<span class="keyword">go</span> consume()</div><div class="line">	<span class="keyword">go</span> consume()</div><div class="line"></div><div class="line">	&lt;- done</div><div class="line">&#125;</div><div class="line"></div><div class="line">output:</div><div class="line">	The goods size is : <span class="number">10</span></div><div class="line">	The goods size is : <span class="number">9</span></div><div class="line">	The goods size is : <span class="number">8</span></div><div class="line">	The goods size is : <span class="number">7</span></div><div class="line">	The goods size is : <span class="number">6</span></div><div class="line">	The goods size is : <span class="number">5</span></div><div class="line">	The goods size is : <span class="number">4</span></div><div class="line">	The goods size is : <span class="number">3</span></div><div class="line">	The goods size is : <span class="number">2</span></div><div class="line">	The goods size is : <span class="number">1</span></div></pre></td></tr></table></figure>
+<p>参考资料：</p>
+<ul>
+<li><p><a href="http://www.sizeofvoid.net/goroutine-under-the-hood/" target="_blank" rel="external">goroutine背后的系统知识</a></p>
+</li>
+<li><p><a href="http://morsmachine.dk/go-scheduler" target="_blank" rel="external">The go sheduler</a></p>
+</li>
+<li><p><a href="https://book.douban.com/subject/26337545/" target="_blank" rel="external">The Go Programming Language</a></p>
+</li>
+<li><p><a href="https://tiancaiamao.gitbooks.io/go-internals/content/zh/05.1.html" target="_blank" rel="external">深入解析Go</a></p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/go/" rel="tag"># go</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/14/go-redis/" rel="next" title="Redis在Go中的应用">
+                <i class="fa fa-chevron-left"></i> Redis在Go中的应用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/05/distributed-system/" rel="prev" title="分布式存储系统概要">
+                分布式存储系统概要 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Goroutine之间的通信"><span class="nav-number">1.</span> <span class="nav-text">Goroutine之间的通信</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#调度器sheduler"><span class="nav-number">2.</span> <span class="nav-text">调度器sheduler</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#结构体G"><span class="nav-number">2.1.</span> <span class="nav-text">结构体G</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#结构体M"><span class="nav-number">2.2.</span> <span class="nav-text">结构体M</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#结构体P"><span class="nav-number">2.3.</span> <span class="nav-text">结构体P</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#结构体Sched"><span class="nav-number">2.4.</span> <span class="nav-text">结构体Sched</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Goroutine的特点"><span class="nav-number">3.</span> <span class="nav-text">Goroutine的特点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实例：生产者消费者问题"><span class="nav-number">4.</span> <span class="nav-text">实例：生产者消费者问题</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

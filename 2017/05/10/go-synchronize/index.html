@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="go," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="在Go语言编写的程序里可能会开启多个goroutine, 这样在主 goroutine 结束前可能在其它的goroutine里，还有任务在继续运行，这样的话，我们必须堵塞主 goroutine 才能保证其它 goroutine 正常运行。但是如何在并发的程序里合理地编写代码呢？Go 语言大概为我们提供了这几种方式。">
+<meta name="keywords" content="go">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言里的并发控制">
+<meta property="og:url" content="http://witchiman.github.io/2017/05/10/go-synchronize/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="在Go语言编写的程序里可能会开启多个goroutine, 这样在主 goroutine 结束前可能在其它的goroutine里，还有任务在继续运行，这样的话，我们必须堵塞主 goroutine 才能保证其它 goroutine 正常运行。但是如何在并发的程序里合理地编写代码呢？Go 语言大概为我们提供了这几种方式。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.528Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Go语言里的并发控制">
+<meta name="twitter:description" content="在Go语言编写的程序里可能会开启多个goroutine, 这样在主 goroutine 结束前可能在其它的goroutine里，还有任务在继续运行，这样的话，我们必须堵塞主 goroutine 才能保证其它 goroutine 正常运行。但是如何在并发的程序里合理地编写代码呢？Go 语言大概为我们提供了这几种方式。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2017/05/10/go-synchronize/"/>
+
+
+
+
+
+  <title>Go语言里的并发控制 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2017/05/10/go-synchronize/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Go语言里的并发控制</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-10T20:29:43+08:00">
+                2017-05-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在Go语言编写的程序里可能会开启多个goroutine, 这样在主 goroutine 结束前可能在其它的goroutine里，还有任务在继续运行，这样的话，我们必须堵塞主 goroutine 才能保证其它 goroutine 正常运行。但是如何在并发的程序里合理地编写代码呢？Go 语言大概为我们提供了这几种方式。</p>
+<a id="more"></a>
+<h2 id="普通的方法"><a href="#普通的方法" class="headerlink" title="普通的方法"></a>普通的方法</h2><p>首先定义一个存储类型为 struct{} 的 channel， 这样在main 函数里的末尾接收 channel 里的消息，当 channel 为空时便会堵塞住，直到在另外一个goroutine 里向 这个 channel 发送了消息，main 函数里的 channel 收到消息，程序运行结束。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span>  &#123;</div><div class="line">	done := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</div><div class="line"></div><div class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		fmt.Println(<span class="string">"I've finished!"</span>)</div><div class="line">		done &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125; <span class="comment">//或者close(done)</span></div><div class="line">	&#125;()</div><div class="line"></div><div class="line">	&lt;- done</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="使用sync-WaitGroup"><a href="#使用sync-WaitGroup" class="headerlink" title="使用sync.WaitGroup"></a>使用sync.WaitGroup</h2><p>WaitGroup 会堵塞主线程的执行，一直到其它 goroutine 的任务都执行完成。在WaitGroup里主要有三个方法</p>
+<ul>
+<li><p>Add, 可以添加或减少 goroutine的数量 </p>
+</li>
+<li><p>Done, 相当于Add(-1)</p>
+</li>
+<li><p>Wait, 执行后会堵塞主线程，直到WaitGroup 里的值减至0</p>
+</li>
+</ul>
+<p>先声明一个全局的WaitGroup 和一个全局int32类型的变量count。 </p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> wg sync.WaitGroup</div><div class="line"><span class="keyword">var</span> count <span class="keyword">int32</span></div></pre></td></tr></table></figure>
+<p>定义一个函数，在函数里调用wg.Done，调用一次相当于执行一次Add(-1)</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*定义一个函数使一个数加1*/</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">AddOne</span><span class="params">()</span></span> &#123;</div><div class="line">	<span class="keyword">defer</span> wg.Done()</div><div class="line">	count++</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>main 里的代码，开启三个goroutine, 最后打印出count 的值，执行结果为3 。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span>  &#123;</div><div class="line">	wg.Add(<span class="number">3</span>)</div><div class="line">	<span class="keyword">go</span> AddOne()</div><div class="line">	<span class="keyword">go</span> AddOne()</div><div class="line">	<span class="keyword">go</span> AddOne()</div><div class="line"></div><div class="line">	wg.Wait()</div><div class="line">	fmt.Printf(<span class="string">"Count: %d"</span>, count )</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>WaitGroup 实现了一个类似队列的结构，我们可以一直向队列中添加任务，完成一个任务后便从队列中删除一个任务，如果队列中的任务没有完全完成，可以通过Wait()方法来阻塞住主线程，等待其它 goroutine的任务一一执行完成。</p>
+<blockquote>
+<p>Notice: A WaitGroup must not be copied after first use.</p>
+</blockquote>
+<h2 id="使用context-Context"><a href="#使用context-Context" class="headerlink" title="使用context.Context"></a>使用context.Context</h2><p>Context 即上下文，它是包括一个程序的运行环境、现场和快照等。每个程序要运行时，都需要知道当前程序的运行状态，通常Go 将这些封装在一个Context 里，再将它传给要执行的 goroutine 。context 包主要是用来处理多个 goroutine 之间共享数据，及多个goroutine 的管理。</p>
+<p>context包里的Context接口：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Context <span class="keyword">interface</span> &#123;</div><div class="line">    Deadline() (deadline time.Time, ok <span class="keyword">bool</span>)</div><div class="line">    Done() &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;</div><div class="line">    Err() error</div><div class="line">    Value(key <span class="keyword">interface</span>&#123;&#125;) <span class="keyword">interface</span>&#123;&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>Deadline 方法返回一个超时时间，超时后这个Context 会被取消；Err 方法输出出错日志，即Context取消的原因； Done 方法返回一个 channel，当Context 超时后，此channel 会被关闭； Value 方法用以不同goroutine 间的共享数据，不过使用时要注意同步问题。</p>
+<p>使用Context 时，我们在main 函数里可以制定了一个deadline, 在这个deadline 来临前，其它的goroutine 都可以正常地运行，到达 deadline后程序立即结束，比如让主线程睡眠一段时间。</p>
+<p>上代码，同样声明一个int32 类型的变量count。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> count <span class="keyword">int32</span></div></pre></td></tr></table></figure>
+<p>这次定义一个函数，当函数运行时，不断轮循调用方法 Done，这个方法返回&lt;- struct{}, 通过这种方式可以查看main函数里是否调用了cancel 函数。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*定义一个函数使一个数不断地加1*/</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">AddOneContinually</span><span class="params">(ctx context.Context)</span></span> &#123;</div><div class="line">	<span class="keyword">for</span> &#123;</div><div class="line">		<span class="keyword">select</span>&#123;</div><div class="line">		<span class="keyword">case</span> &lt;- ctx.Done():</div><div class="line">			<span class="keyword">return</span></div><div class="line">		<span class="keyword">default</span>:</div><div class="line">			count++</div><div class="line"></div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>Backgroud方法返回一个非nil的空的Context, 它不能被取消、没有值，也没有过期时间。通常需要我们在main 函数里初始化，通过WithCancel 方法从父Context 创建一个衍生的子Context ，然后将其返回，同时返回一个函数指针 。此外，创建子Context 的方法还有WithDeadline,WithTimeout和WithValue。</p>
+<p>WithCancel 返回的函数指针类型为：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> CancelFunc <span class="function"><span class="keyword">func</span><span class="params">()</span></span></div></pre></td></tr></table></figure>
+<p>调用这个函数可以结束Context， 当一个Context 结束后，在其它 goroutine 里，如上述AddOneContinually 函数里的select 语句里，发现Context 已经结束，于是这个goroutine 马上终止自己。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span>  &#123;</div><div class="line">	ctx := context.Background()</div><div class="line">	ctx, cancel := context.WithCancel(ctx)</div><div class="line"></div><div class="line">	<span class="keyword">go</span> AddOneContinually(ctx)</div><div class="line">	<span class="keyword">go</span> AddOneContinually(ctx)</div><div class="line">	<span class="keyword">go</span> AddOneContinually(ctx)</div><div class="line"></div><div class="line">	time.Sleep(time.Microsecond * <span class="number">3</span> )</div><div class="line">	cancel()</div><div class="line">	fmt.Printf(<span class="string">"Count: %d"</span>, count )</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>另外，要注意的是，不要随便传一个nil的Context 给其它 goroutine。当不确定要使用哪个类型的Context时，可以使用context.TODO()，它同样返回一个非nil的空的Context。使用context的Value相关方法只应该用于在程序和接口中传递的和请求相关的元数据，不要用它来传递一些可选的参数。</p>
+</blockquote>
+<p>参考资料：</p>
+<ul>
+<li><p><a href="http://blog.haohtml.com/archives/15583" target="_blank" rel="external">Golang中的sync.WaitGroup</a></p>
+</li>
+<li><p><a href="http://www.tuicool.com/articles/RNvMRbm" target="_blank" rel="external">理解 Go Context 机制</a></p>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/go/" rel="tag"># go</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/05/distributed-system/" rel="next" title="分布式存储系统概要">
+                <i class="fa fa-chevron-left"></i> 分布式存储系统概要
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/06/02/go-interface/" rel="prev" title="Go语言interface的介绍">
+                Go语言interface的介绍 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#普通的方法"><span class="nav-number">1.</span> <span class="nav-text">普通的方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用sync-WaitGroup"><span class="nav-number">2.</span> <span class="nav-text">使用sync.WaitGroup</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用context-Context"><span class="nav-number">3.</span> <span class="nav-text">使用context.Context</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

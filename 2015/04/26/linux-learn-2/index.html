@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="linux," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="本篇主要总结文件压缩、vim和正则表达式相关的知识点。">
+<meta name="keywords" content="linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux学习札记（二）：tar、vim的使用及正则表达式的介绍">
+<meta property="og:url" content="http://witchiman.github.io/2015/04/26/linux-learn-2/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="本篇主要总结文件压缩、vim和正则表达式相关的知识点。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.684Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux学习札记（二）：tar、vim的使用及正则表达式的介绍">
+<meta name="twitter:description" content="本篇主要总结文件压缩、vim和正则表达式相关的知识点。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2015/04/26/linux-learn-2/"/>
+
+
+
+
+
+  <title>Linux学习札记（二）：tar、vim的使用及正则表达式的介绍 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2015/04/26/linux-learn-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Linux学习札记（二）：tar、vim的使用及正则表达式的介绍</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-26T11:01:51+08:00">
+                2015-04-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本篇主要总结文件压缩、vim和正则表达式相关的知识点。</p>
+<a id="more"></a>
+<h1 id="压缩与备份"><a href="#压缩与备份" class="headerlink" title="压缩与备份"></a>压缩与备份</h1><h2 id="压缩与解压文件"><a href="#压缩与解压文件" class="headerlink" title="压缩与解压文件"></a>压缩与解压文件</h2><p>gzip:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[hui@linux tmp]$ gzip man.config   <span class="comment">#此时man.config 会变成 man.config.gz ！</span></div><div class="line">[hui@linux tmp]$ zcat man.config.gz   <span class="comment">#读取压缩文件的内容  </span></div><div class="line">[hui@linux tmp]$ gzip -d man.config.gz  <span class="comment">#解压文件</span></div><div class="line">[hui@linux tmp]$ gzip -9 -c man.config &gt; man.config.gz <span class="comment">#解开的 man.config 用最佳的压缩比（1~9）压缩，并保留原文件</span></div></pre></td></tr></table></figure>
+<p>bzip2:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[hui@linux tmp]$ bzip2 -z man.config   <span class="comment">#此时man.config 会变成 man.config.bz2</span></div><div class="line">[hui@linux tmp]$ bzcat man.config.bz2   <span class="comment">#读取压缩文件的内容  </span></div><div class="line">[hui@linux tmp]$ bzip2 -d man.config.bz2  <span class="comment">#解压文件</span></div><div class="line">[hui@linux tmp]$ bzip2 -9 -c man.config &gt; man.config.bz2 <span class="comment">#解开的 man.config 用最佳的压缩比（1~9）压缩，并保留原文件</span></div></pre></td></tr></table></figure>
+<p>tar:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#将整个/etc 目录下的文件全部打包成为 /tmp/etc.tar</span></div><div class="line">[hui@linux ~]$ tar -cvf /tmp/etc.tar /etc <span class="comment">#仅打包，不压缩！</span></div><div class="line">[hui@linux ~]$ tar -zcvf /tmp/etc.tar.gz /etc <span class="comment">#打包后，以 gzip 压缩</span></div><div class="line">[hui@linux ~]$ tar -jcvf /tmp/etc.tar.bz2 /etc <span class="comment">#打包后，以 bzip2 压缩</span></div><div class="line"></div><div class="line"><span class="comment">#查看压缩文件内容</span></div><div class="line">[hui@linux ~]$ tar -ztvf /tmp/etc.tar.gz <span class="comment">#如果查看bz2文件，则用-jtvf</span></div><div class="line"></div><div class="line"><span class="comment">#将/tmp/etc.tar.gz解压缩在/usr/local/src目录下</span></div><div class="line">[hui@linux ~]$ <span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src</div><div class="line">[hui@linux src]$ tar -zxvf /tmp/etc.tar.gz</div><div class="line"><span class="comment">#或者使用如下命令</span></div><div class="line">[hui@linux src]$ tar -zxvf /tmp/etc.tar.gz -C /usr/<span class="built_in">local</span>/src</div><div class="line"><span class="comment">#只解压压缩包内某个文件</span></div><div class="line">[hui@linux tmp]$ tar -zxvf /tmp/etc.tar.gz etc/passwd  <span class="comment">#注：指定文件的路径名里没有“/”</span></div><div class="line"></div><div class="line"><span class="comment">#将/etc/ 内的所有档案备份下来，并且保存其权限</span></div><div class="line">[hui@linux ~]$ tar -zcvpf /tmp/etc.tar.gz /etc <span class="comment">#参数p可用来保存文件原来的权限</span></div><div class="line"></div><div class="line"><span class="comment">#在 /home 当中，比 2005/06/01 新的文件才备份</span></div><div class="line">[hui@linux ~]<span class="comment"># tar -N '2005/06/01' -zcvf home.tar.gz /home</span></div></pre></td></tr></table></figure>
+<h2 id="备份文件"><a href="#备份文件" class="headerlink" title="备份文件"></a>备份文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">hui@linux ~]<span class="comment"># dd if="input_file" of="outptu_file" bs="block_size" count="number"</span></div></pre></td></tr></table></figure>
+<blockquote>
+<p>参数：</p>
+<ul>
+<li>if ：就是 input file 啰～也可以是设备！</li>
+<li>of ：就是 output file 喔～也可以是设备；</li>
+<li>bs ：设定的一个 block的大小，如果没有设定时，预设是 512 bytes</li>
+<li>count：多少个bs的意思</li>
+</ul>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#将/etc/passwd 备份到用户目录下的test目录中，并命名为passwd.back</span></div><div class="line">hui@machine:~/<span class="built_in">test</span>$ dd <span class="keyword">if</span>=/etc/passwd of=~/<span class="built_in">test</span>/passwd.back</div><div class="line">4+1 records <span class="keyword">in</span></div><div class="line">4+1 records out</div><div class="line">2242 bytes (2.2 kB) copied, 0.000404902 s, 5.5 MB/s</div><div class="line"></div><div class="line"><span class="comment">#将整个 /dev/hda1 partition 备份下来。</span></div><div class="line">[hui@linux ~]$ dd <span class="keyword">if</span>=/dev/hda1 of=/some/path/filenaem <span class="comment">#tar来用备份关键数据，dd用来备份整个分区的数据</span></div></pre></td></tr></table></figure>
+<h1 id="vim"><a href="#vim" class="headerlink" title="vim"></a>vim</h1><h2 id="vim-1"><a href="#vim-1" class="headerlink" title="vim"></a>vim</h2><pre><code>**移动光标**
+</code></pre><ul>
+<li>n<space> n表示数字，按下数字再按空格，光标会向右移动n个字符的距离</space></li>
+<li>n<enter> 按下数字再按回车，光标向下移动n行</enter></li>
+<li>$ 移动到这一行最后面的字符处</li>
+<li>H、M和L 移动到屏幕最上、中间和最下行的首字符处</li>
+<li><p>nG  移动到第n行</p>
+<p><strong>编辑操作</strong> </p>
+</li>
+<li><p>:100,200s/vbird/VBIRD/g #在100到200行之间搜寻vbird并取代为VBIRD</p>
+</li>
+<li>:1,$s/word1/word2/g   #从第一行到最后一行寻找word1字符串，并将该字符串取代为word2 </li>
+<li>:1,$s/word1/word2/gc #替代前询问是否替换</li>
+<li>x,X 删除前一个字符，删除后一个字符</li>
+<li>ndd 删除自光标向下n行</li>
+<li>nyy 复制自光标向下n行</li>
+<li>ctr+u 反撤销与”u“相反</li>
+<li><p>. 重复前一个动作</p>
+<p><strong>区块选择</strong> </p>
+</li>
+<li><p>v 字符选择，会将光标经过的地方反白选择</p>
+</li>
+<li>V 行选择，会将光标经过的行反白选择</li>
+<li>ctrl + v 区块选择，可以用长方形的方式选择资料</li>
+<li>y 将反白的地方复制起来</li>
+<li>d 将反白的地方删除掉</li>
+</ul>
+<h1 id="bash"><a href="#bash" class="headerlink" title="bash"></a>bash</h1><h2 id="变量赋值"><a href="#变量赋值" class="headerlink" title="变量赋值"></a>变量赋值</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#若 str 这个变量内容存在，则 var 设定为 str ，否则 var 设定为 "newvar"</span></div><div class="line">[hui@linux ~]$ <span class="built_in">unset</span> str; var=<span class="variable">$&#123;str-newvar&#125;</span> </div><div class="line"></div><div class="line"><span class="comment">#若 str 不存在，则 var 与 str 均设定为 newvar，否则仅 var 为 newvar</span></div><div class="line">[hui@linux ~]$ <span class="built_in">unset</span> str; var=<span class="variable">$&#123;str=newvar&#125;</span></div><div class="line"></div><div class="line"><span class="comment">#若 str 这个变量存在，则 var 等于 str ，否则输出 "novar"</span></div><div class="line">[hui@linux ~]$ <span class="built_in">unset</span> str; var=<span class="variable">$&#123;str?novar&#125;</span></div><div class="line"></div><div class="line"><span class="comment">#若str这个变量不存在或为空，var值为newvar</span></div><div class="line">[hui@linux ~]$ <span class="built_in">unset</span> str; var=<span class="variable">$&#123;str:-novar&#125;</span></div></pre></td></tr></table></figure>
+<h2 id="别名"><a href="#别名" class="headerlink" title="别名"></a>别名</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[hui@linux ~]$ <span class="built_in">alias</span> rm=<span class="string">'rm -i'</span> <span class="comment">#新建一个别名</span></div><div class="line">[hui@linux ~]$ <span class="built_in">unalias</span> lm</div></pre></td></tr></table></figure>
+<h2 id="查看历史命令"><a href="#查看历史命令" class="headerlink" title="查看历史命令"></a>查看历史命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[hui@linux ~]$ <span class="built_in">history</span>  <span class="comment">#列出当前内存内的所有 history 记录</span></div><div class="line">[hui@linux ~]$ <span class="built_in">history</span> 3 <span class="comment">#列出当前最近的 3 条件记录</span></div><div class="line">[hui@linux ~]$ <span class="built_in">history</span> -w <span class="comment">#立刻将当前的资料写入 histfile 当中</span></div><div class="line"></div><div class="line">[hui@linux ~]$ !number <span class="comment">#执行第number条指令</span></div><div class="line">[hui@linux ~]$ !<span class="built_in">command</span> <span class="comment">#由于最近指令向前查找开头为"command"的指令</span></div><div class="line">[hui@linux ~]$ !! <span class="comment">#执行前一个指令同“↑”</span></div></pre></td></tr></table></figure>
+<h2 id="执行当前目录内的要执行文件"><a href="#执行当前目录内的要执行文件" class="headerlink" title="执行当前目录内的要执行文件"></a>执行当前目录内的要执行文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[hui@linux ~]$ ./squid <span class="comment">#直接输入squid不行</span></div></pre></td></tr></table></figure>
+<h2 id="登录信息"><a href="#登录信息" class="headerlink" title="登录信息"></a>登录信息</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ cat /etc/issue</div><div class="line">Ubuntu 15.04 \n \l</div></pre></td></tr></table></figure>
+<h2 id="自定义系统配置"><a href="#自定义系统配置" class="headerlink" title="自定义系统配置"></a>自定义系统配置</h2><ul>
+<li>~/.profile 自定义路径 (PATH) 与环境变量等等，只有在系统登录时才会读取。</li>
+<li>~/.bashrc 设定自定义的值，每次执行<em>shell script</em>都会被系统读取</li>
+<li>~/.bash_history 记录用户的历史命令</li>
+<li>~/.bash_logout 注销bash后，系统要执行的操作</li>
+</ul>
+<blockquote>
+<p>登录系统后，系统会依次读取/etc/profile，再根据不同的登录用户读取~/.profile，最后读取~/.bashrc。</p>
+</blockquote>
+<h2 id="更新配置文件"><a href="#更新配置文件" class="headerlink" title="更新配置文件"></a>更新配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">hui@hui-virtual-machine: <span class="built_in">source</span> file</div><div class="line">hui@hui-virtual-machine: . file   <span class="comment">#作用同上</span></div></pre></td></tr></table></figure>
+<h2 id="设置预设信息"><a href="#设置预设信息" class="headerlink" title="设置预设信息"></a>设置预设信息</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[hui@linux ~]$ <span class="built_in">set</span> -u <span class="comment">#设置 "若使用未定义变量时，则显示错误信息"</span></div></pre></td></tr></table></figure>
+<h2 id="数据流重定向"><a href="#数据流重定向" class="headerlink" title="数据流重定向"></a>数据流重定向</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">[hui@linux ~]$ ll  &gt; huifile <span class="comment">#将命令输出的信息重定向写入指定文件，文件若存在，原来内容会被清空。</span></div><div class="line">[hui@linux ~]$ ll  &gt;&gt; huifile  <span class="comment">#若指定文件存在，不清空文件内容，追加到文件里。</span></div><div class="line"></div><div class="line"><span class="comment">#输出正确信息的同时，用“2&gt;”将错误的信息输出到指定文件</span></div><div class="line">[dmtsai@linux ~]$ find /home -name testing &gt; list_right 2&gt; list_error</div><div class="line"></div><div class="line"><span class="comment">#将正确信息和错误信息写入同一个文件</span></div><div class="line">[dmtsai@linux ~]$ find /home -name testing &gt; list 2&gt;&amp;1 </div><div class="line"></div><div class="line"><span class="comment">#去除错误的信息，/dev/null相当于一个虚拟的垃圾桶，输入的任何内容都会消失不见</span></div><div class="line">[dmtsai@linux ~]$ find /home -name testing &gt; list_right 2&gt; /dev/null </div><div class="line"></div><div class="line">[hui@linux ~]$ cat &gt; catfile  <span class="comment"># 经由键盘输入内容到catfile内，文件不存在则创建</span></div><div class="line">[hui@linux ~]$ cat &gt; catfile &lt; somefile  <span class="comment">#将原本由键盘输入改为从指定文件输入</span></div><div class="line"></div><div class="line"><span class="comment">#输入指定字符结束输入，如下以“lala”结束</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ cat &gt; data2 &lt;&lt;lala</div><div class="line">&gt; a testing file</div><div class="line">&gt; haha</div><div class="line">&gt; lala</div><div class="line"></div><div class="line"><span class="comment">#目录存在才在相应的目录下建立文件</span></div><div class="line">[hui@linux ~]$ ls /tmp &amp;&amp; touch /tmp/testingagin</div><div class="line"><span class="comment">#文件不存在时才创建</span></div><div class="line">[hui@linux ~]$ ls /tmp/vbirding || touch /tmp/vbirding</div></pre></td></tr></table></figure>
+<h2 id="管道"><a href="#管道" class="headerlink" title="管道"></a>管道</h2><blockquote>
+<p>cut常用分析日志等格式化的数据文件，用某些字符分割文本内容,处理多空格的文本文件比较吃力</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#将PATH中的内容以“：”分成数段，取出第3段和第5段</span></div><div class="line">[hui@linux ~]$ <span class="built_in">echo</span> <span class="variable">$PATH</span> | cut -d <span class="string">':'</span> -f 3,5 <span class="comment">#只取第n段，直接写n</span></div><div class="line"></div><div class="line"><span class="comment">#取出输出信息第3个字符及其以后的内容，如果是3-10，则取第3个到第10个字符</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ ll |cut -c 3-</div><div class="line"></div><div class="line"><span class="comment">#last用以查看最近登录的用户,下列命令用空格分段后，取第一段</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ last |cut -d <span class="string">' '</span> -f 1</div><div class="line">hui</div><div class="line">jim</div><div class="line">tom</div></pre></td></tr></table></figure>
+<blockquote>
+<p>grep 用以分析完整的一行信息</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#last 当中，有出现 hui 的那一行就取出来</span></div><div class="line">[hui@linux ~]$ last | grep <span class="string">'hui'</span></div><div class="line"></div><div class="line"><span class="comment">#与上面的命令，只要没有 hui 的就取出！</span></div><div class="line">[hui@linux ~]$ last | grep -v <span class="string">'hui'</span></div><div class="line"></div><div class="line"><span class="comment">#在 last 的输出信息中，只要有 hui 就取出，并且仅取第一栏</span></div><div class="line">[hui@linux ~]<span class="comment"># last | grep 'hui' |cut -d ' ' -f 1</span></div></pre></td></tr></table></figure>
+<h2 id="排序"><a href="#排序" class="headerlink" title="排序"></a>排序</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ cat data2| sort</div><div class="line"><span class="built_in">alias</span> is not a good girl.</div><div class="line">bob will be successful.</div><div class="line">david is so strong.</div><div class="line"></div><div class="line"><span class="comment">#以“ ”分列，按第三列排序</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ cat data2| sort -t <span class="string">" "</span> -k 3</div><div class="line">jim is a big man.</div><div class="line">bob will be successful.</div><div class="line"><span class="built_in">alias</span> is not a good gilr.</div><div class="line">david is so strong.</div></pre></td></tr></table></figure>
+<p>40.去除排序后的重复结果</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ cat data2 |cut -d <span class="string">" "</span> -f 1 | sort | uniq</div><div class="line">bob</div><div class="line">deby</div><div class="line">hui</div><div class="line">jim</div><div class="line">lily</div><div class="line"><span class="comment">#显示计数</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ cat data2 |cut -d <span class="string">" "</span> -f 1 | sort | uniq -c</div><div class="line">2 bob</div><div class="line">2 deby</div></pre></td></tr></table></figure>
+<h2 id="统计字数"><a href="#统计字数" class="headerlink" title="统计字数"></a>统计字数</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#加-l、-w和-m可分别统计行、字和字符数</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ cat data1 | wc </div><div class="line">      9      19     128   <span class="comment">#分别代表行数、关键字和字符数</span></div></pre></td></tr></table></figure>
+<h2 id="数据流双重定向"><a href="#数据流双重定向" class="headerlink" title="数据流双重定向"></a>数据流双重定向</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 将 ls的数据保存一份到 ~/homefile ，同时显示到屏幕上</span></div><div class="line">[hui@linux ~]$ ls -l /home | tee ~/homefile | more</div><div class="line">[hui@linux ~]$ ls -l / | tee -a ~/homefile | more <span class="comment">#加-a以追加的形式保存</span></div></pre></td></tr></table></figure>
+<h2 id="字符转换"><a href="#字符转换" class="headerlink" title="字符转换"></a>字符转换</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#将小写字母转换为大写</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ cat data1 | tr <span class="string">'[a-z]'</span> <span class="string">'[A-Z]'</span></div><div class="line">CLAS  TES T &#123;</div><div class="line">	PRIVATE STRING FUCKINGWORDS ; </div><div class="line">...</div><div class="line"><span class="comment">#将 /etc/passwd 输出的讯息中的“：”删除</span></div><div class="line">[hui@linux ~]$ cat /etc/passwd | tr -d <span class="string">':'</span></div><div class="line"></div><div class="line"><span class="comment">#用对等的空格替换tab</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ cat -A  data3 </div><div class="line">a^Ib^Ic^Id$                     <span class="comment">#tab以^I显示</span></div><div class="line">m n o p q$ </div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ cat data3 | col -x| cat -A</div><div class="line">i       j       k       l$</div><div class="line">m n o p q$</div><div class="line"></div><div class="line"><span class="comment">#用空格键替换tab,-t 后为空格数</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ expand data3  -t 2</div><div class="line">a b c d</div></pre></td></tr></table></figure>
+<h2 id="合并内容"><a href="#合并内容" class="headerlink" title="合并内容"></a>合并内容</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#只是单纯地合并两个文件的内容 </span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ paste pro1 pro2 </div><div class="line">name jim	name tom </div><div class="line">age 22	age 23</div><div class="line"><span class="comment">#以“：”分割文本，第一个字段相同则合成一行</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ join -t <span class="string">":"</span> pro1 pro2 </div><div class="line">name jim tom </div><div class="line">age 22 23</div><div class="line"><span class="comment">#先用cat将data2文件内容读出到标准输出（后面的‘-’），再用paste合并，读取前三行</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ cat data2|paste pro1 pro2 -|head -n 3</div><div class="line">name jim	name tom 	jim </div><div class="line">age 22	age 23	tom</div></pre></td></tr></table></figure>
+<h2 id="分割文件"><a href="#分割文件" class="headerlink" title="分割文件"></a>分割文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">[hui@linux tmp]$ split -b 300k /etc/termcap termcap <span class="comment">#加-l则按行分割</span></div><div class="line">[hui@linux tmp]$ ls -l termcap*</div><div class="line">-rw-rw-r-- 1 hui hui 307200 8 月 17 00:25 termcapaa</div><div class="line">-rw-rw-r-- 1 hui hui 307200 8 月 17 00:25 termcapab</div><div class="line">-rw-rw-r-- 1 hui hui 184848 8 月 17 00:25 termcapac</div><div class="line">[hui@linux tmp]$ cat termcap* &gt;&gt; termcapback <span class="comment">#将上面分割的三个文件合并成一个</span></div></pre></td></tr></table></figure>
+<h2 id="关于“-”"><a href="#关于“-”" class="headerlink" title="关于“-”"></a>关于“-”</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tar -cvf - /home | tar -xvf -</div></pre></td></tr></table></figure>
+<blockquote>
+<p>上述命令将/home 里面的文件给打包，但打包的数据不是保存到文件里，而是传送到stdout；<br>经过管道后，将 tar -cvf - /home 传送给后面的 tar -xvf - 。后面的这个 - 则是取用前一个<br>指令的 stdout， 因此，我们就不需要建立文件了。</p>
+</blockquote>
+<h1 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h1><h3 id="简单的使用"><a href="#简单的使用" class="headerlink" title="简单的使用"></a>简单的使用</h3><h2 id="查找某个单词"><a href="#查找某个单词" class="headerlink" title="查找某个单词"></a>查找某个单词</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#搜索指定文件内容里的the’并显示行号</span></div><div class="line">[hui@<span class="built_in">test</span> hui]$ grep -n <span class="string">'the'</span> regular_express.txt</div><div class="line"><span class="comment">#反向选择，显示出不含‘the’的行</span></div><div class="line">[hui@<span class="built_in">test</span> hui]$ grep -vn <span class="string">'the'</span> regular_express.txt</div><div class="line"><span class="comment">#忽视大小写</span></div><div class="line">grep -<span class="keyword">in</span> <span class="string">'the'</span> regular_express.txt</div></pre></td></tr></table></figure>
+<h2 id="搜索指定字符"><a href="#搜索指定字符" class="headerlink" title="搜索指定字符"></a>搜索指定字符</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#搜索‘taste’和‘test’</span></div><div class="line">[hui@<span class="built_in">test</span> hui]$ grep -n <span class="string">'t[ae]st'</span> regular_express.txt</div><div class="line"><span class="comment">#查找2个o及两个以上的go....g</span></div><div class="line">[hui@<span class="built_in">test</span> root]<span class="comment"># grep -n 'go\&#123;2,\&#125;g' regular_express.txt</span></div><div class="line"><span class="comment">#查找以‘d’开头的文件</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ ls | grep -n <span class="string">'^d.*'</span></div><div class="line">1:data1</div><div class="line">2:data2</div></pre></td></tr></table></figure>
+<h2 id="找出空白行"><a href="#找出空白行" class="headerlink" title="找出空白行"></a>找出空白行</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[hui@<span class="built_in">test</span> hui]<span class="comment"># grep -n '^$' regular_express.txt</span></div></pre></td></tr></table></figure>
+<h3 id="特殊字符"><a href="#特殊字符" class="headerlink" title="特殊字符"></a>特殊字符</h3><table>
+<thead>
+<tr>
+<th style="text-align:center">特殊字符</th>
+<th style="text-align:left">作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">$</td>
+<td style="text-align:left">匹配输入字符串的结尾位置。如果设置了 RegExp 对象的 Multiline 属性，则 $ 也匹配 ‘\n’ 或 ‘\r’。要匹配 $ 字符本身，请使用 \$</td>
+</tr>
+<tr>
+<td style="text-align:center">( )</td>
+<td style="text-align:left">标记一个子表达式的开始和结束位置。子表达式可以获取供以后使用。要匹配这些字符，请使用 ( 和 )</td>
+</tr>
+<tr>
+<td style="text-align:center">*</td>
+<td style="text-align:left">匹配前面的子表达式零次或多次。要匹配 <em> 字符，请使用 \</em></td>
+</tr>
+<tr>
+<td style="text-align:center">+</td>
+<td style="text-align:left">匹配前面的子表达式一次或多次。要匹配 + 字符，请使用 +</td>
+</tr>
+<tr>
+<td style="text-align:center">.</td>
+<td style="text-align:left">匹配除换行符 \n 之外的任何单字符。要匹配 . ，请使用 .</td>
+</tr>
+<tr>
+<td style="text-align:center">[</td>
+<td style="text-align:left">标记一个中括号表达式的开始。要匹配 [，请使用 [</td>
+</tr>
+<tr>
+<td style="text-align:center">?</td>
+<td style="text-align:left">匹配前面的子表达式零次或一次，或指明一个非贪婪限定符。要匹配 ? 字符，请使用 \?</td>
+</tr>
+<tr>
+<td style="text-align:center">^</td>
+<td style="text-align:left">匹配输入字符串的开始位置，除非在方括号表达式中使用，此时它表示不接受该字符集合。要匹配 ^ 字符本身，请使用 \^</td>
+</tr>
+<tr>
+<td style="text-align:center">{</td>
+<td style="text-align:left">标记限定符表达式的开始。要匹配 {，请使用 {</td>
+</tr>
+<tr>
+<td style="text-align:center">竖线</td>
+<td style="text-align:left">指明两项之间的一个选择。要匹配 竖线，请使用 竖线</td>
+</tr>
+<tr>
+<td style="text-align:center">反斜线</td>
+<td style="text-align:left">将下一个字符标记为或特殊字符、或原义字符、或向后引用、或八进制转义符。例如， ‘n’ 匹配字符 ‘n’。’\n’ 匹配换行符。序列 ‘\‘ 匹配 “\”，而 ‘(‘ 则匹配 “(“。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="限定符"><a href="#限定符" class="headerlink" title="限定符"></a>限定符</h3><p>限定符用来指定正则表达式的一个给定组件必须要出现多少次才能满足匹配。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">限定符</th>
+<th style="text-align:left">作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">*</td>
+<td style="text-align:left">匹配前面的子表达式零次或多次。例如，zo<em> 能匹配 “z” 以及 “zoo”。</em> 等价于{0,}</td>
+</tr>
+<tr>
+<td style="text-align:center">+</td>
+<td style="text-align:left">匹配前面的子表达式一次或多次。例如，’zo+’ 能匹配 “zo” 以及 “zoo”，但不能匹配 “z”。+ 等价于 {1,}</td>
+</tr>
+<tr>
+<td style="text-align:center">?</td>
+<td style="text-align:left">匹配前面的子表达式零次或一次。例如，”do(es)?” 可以匹配 “do” 或 “does” 中的”do” 。? 等价于 {0,1}</td>
+</tr>
+<tr>
+<td style="text-align:center">{n}</td>
+<td style="text-align:left">n 是一个非负整数。匹配确定的 n 次。例如，’o{2}’ 不能匹配 “Bob” 中的 ‘o’，但是能匹配 “food” 中的两个</td>
+</tr>
+<tr>
+<td style="text-align:center">{n,}</td>
+<td style="text-align:left">m 和 n 均为非负整数，其中n &lt;= m。最少匹配 n 次且最多匹配 m 次。例如，”o{1,3}” 将匹配 “fooooood” 中的前三个 o。’o{0,1}’ 等价于 ‘o?’。请注意在逗号和两个数之间不能有空格</td>
+</tr>
+</tbody>
+</table>
+<h3 id="定位符"><a href="#定位符" class="headerlink" title="定位符"></a>定位符</h3><p>定位符使你能够将正则表达式固定到行首或行尾。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">定位符</th>
+<th style="text-align:left">作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">^</td>
+<td style="text-align:left">匹配输入字符串开始的位置。如果设置了 RegExp 对象的 Multiline 属性，^ 还会与 \n 或 \r 之后的位置匹配</td>
+</tr>
+<tr>
+<td style="text-align:center">$</td>
+<td style="text-align:left">匹配输入字符串结尾的位置。如果设置了 RegExp 对象的 Multiline 属性，$ 还会与 \n 或 \r 之前的位置匹配</td>
+</tr>
+<tr>
+<td style="text-align:center">\b</td>
+<td style="text-align:left">匹配一个字边界，即字与空格间的位置</td>
+</tr>
+<tr>
+<td style="text-align:center">\B</td>
+<td style="text-align:left">非字边界匹配</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>不能将限定符与定位点一起使用。由于在紧靠换行或者字边界的前面或后面不能有一个以上位置，因此不允许诸如 ^* 之类的表达式。若要匹配一行文本开始处的文本，请在正则表达式的开始使用 ^ 字符。不要将 ^ 的这种用法与中括号表达式内的用法混淆。<br>若要匹配一行文本的结束处的文本，请在正则表达式的结束处使用 $ 字符。</p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux/" rel="tag"># linux</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/04/24/linux-learn-1/" rel="next" title="Linxu学习札记（一）：常用命令">
+                <i class="fa fa-chevron-left"></i> Linxu学习札记（一）：常用命令
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/04/28/linux-learn-3/" rel="prev" title="Linux学习札记（三）：shell的使用和系统管理命令">
+                Linux学习札记（三）：shell的使用和系统管理命令 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#压缩与备份"><span class="nav-number">1.</span> <span class="nav-text">压缩与备份</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#压缩与解压文件"><span class="nav-number">1.1.</span> <span class="nav-text">压缩与解压文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#备份文件"><span class="nav-number">1.2.</span> <span class="nav-text">备份文件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#vim"><span class="nav-number">2.</span> <span class="nav-text">vim</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#vim-1"><span class="nav-number">2.1.</span> <span class="nav-text">vim</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#bash"><span class="nav-number">3.</span> <span class="nav-text">bash</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#变量赋值"><span class="nav-number">3.1.</span> <span class="nav-text">变量赋值</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#别名"><span class="nav-number">3.2.</span> <span class="nav-text">别名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看历史命令"><span class="nav-number">3.3.</span> <span class="nav-text">查看历史命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#执行当前目录内的要执行文件"><span class="nav-number">3.4.</span> <span class="nav-text">执行当前目录内的要执行文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#登录信息"><span class="nav-number">3.5.</span> <span class="nav-text">登录信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义系统配置"><span class="nav-number">3.6.</span> <span class="nav-text">自定义系统配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#更新配置文件"><span class="nav-number">3.7.</span> <span class="nav-text">更新配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#设置预设信息"><span class="nav-number">3.8.</span> <span class="nav-text">设置预设信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据流重定向"><span class="nav-number">3.9.</span> <span class="nav-text">数据流重定向</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#管道"><span class="nav-number">3.10.</span> <span class="nav-text">管道</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#排序"><span class="nav-number">3.11.</span> <span class="nav-text">排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#统计字数"><span class="nav-number">3.12.</span> <span class="nav-text">统计字数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据流双重定向"><span class="nav-number">3.13.</span> <span class="nav-text">数据流双重定向</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#字符转换"><span class="nav-number">3.14.</span> <span class="nav-text">字符转换</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#合并内容"><span class="nav-number">3.15.</span> <span class="nav-text">合并内容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分割文件"><span class="nav-number">3.16.</span> <span class="nav-text">分割文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于“-”"><span class="nav-number">3.17.</span> <span class="nav-text">关于“-”</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#正则表达式"><span class="nav-number">4.</span> <span class="nav-text">正则表达式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简单的使用"><span class="nav-number">4.0.1.</span> <span class="nav-text">简单的使用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查找某个单词"><span class="nav-number">4.1.</span> <span class="nav-text">查找某个单词</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#搜索指定字符"><span class="nav-number">4.2.</span> <span class="nav-text">搜索指定字符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#找出空白行"><span class="nav-number">4.3.</span> <span class="nav-text">找出空白行</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#特殊字符"><span class="nav-number">4.3.1.</span> <span class="nav-text">特殊字符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#限定符"><span class="nav-number">4.3.2.</span> <span class="nav-text">限定符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定位符"><span class="nav-number">4.3.3.</span> <span class="nav-text">定位符</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

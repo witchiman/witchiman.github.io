@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="algorithm," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="在项目开发过程中，当我们利用数据库存储一些关于用户的隐私信息，诸如密码、帐户密钥等数据时，需要加密后才向数据库写入。这时，我们需要一些高效地、简单易用的加密算法，当我们向数据库写数据时加密数据，然后把加密后的数据存入数据库；当需要读取数据时，从数据库把加密后的数据取出来，再通过算法解密。 常用的加密算法有Base64、MD5、AES和DES。">
+<meta name="keywords" content="algorithm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="常见的加密算法">
+<meta property="og:url" content="http://witchiman.github.io/2017/06/20/common-encrypt-algorithms/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="在项目开发过程中，当我们利用数据库存储一些关于用户的隐私信息，诸如密码、帐户密钥等数据时，需要加密后才向数据库写入。这时，我们需要一些高效地、简单易用的加密算法，当我们向数据库写数据时加密数据，然后把加密后的数据存入数据库；当需要读取数据时，从数据库把加密后的数据取出来，再通过算法解密。 常用的加密算法有Base64、MD5、AES和DES。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.404Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="常见的加密算法">
+<meta name="twitter:description" content="在项目开发过程中，当我们利用数据库存储一些关于用户的隐私信息，诸如密码、帐户密钥等数据时，需要加密后才向数据库写入。这时，我们需要一些高效地、简单易用的加密算法，当我们向数据库写数据时加密数据，然后把加密后的数据存入数据库；当需要读取数据时，从数据库把加密后的数据取出来，再通过算法解密。 常用的加密算法有Base64、MD5、AES和DES。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2017/06/20/common-encrypt-algorithms/"/>
+
+
+
+
+
+  <title>常见的加密算法 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2017/06/20/common-encrypt-algorithms/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">常见的加密算法</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-20T11:16:32+08:00">
+                2017-06-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在项目开发过程中，当我们利用数据库存储一些关于用户的隐私信息，诸如密码、帐户密钥等数据时，需要加密后才向数据库写入。这时，我们需要一些高效地、简单易用的加密算法，当我们向数据库写数据时加密数据，然后把加密后的数据存入数据库；当需要读取数据时，从数据库把加密后的数据取出来，再通过算法解密。</p>
+<p>常用的加密算法有Base64、MD5、AES和DES。</p>
+<a id="more"></a>
+<h3 id="Base64"><a href="#Base64" class="headerlink" title="Base64"></a>Base64</h3><p>Base64是一种任意二进制到文本字符串的编码方法，常用于在URL、Cookie、网页中传输少量二进制数据。</p>
+<p>首先使用Base64编码需要一个含有64个字符的表，这个表由大小写字母、数字、+和/组成。采用Base64编码处理数据时，会把每三个字节共24位作为一个处理单元，再分为四组，每组6位，查表后获得相应的字符即编码后的字符串。编码后的字符串长32位，这样，经Base64编码后，原字符串增长1/3。如果要编码的数据不是3的倍数，最后会剩下一到两个字节，Base64编码中会采用\x00在处理单元后补全，编码后的字符串最后会加上一到两个 <strong>=</strong> 表示补了几个字节。</p>
+<p>Base64表</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">BASE64Table = <span class="string">"IJjkKLMNO567PQX12RVW3YZaDEFGbcdefghiABCHlSTUmnopqrxyz04stuvw89+/"</span></div></pre></td></tr></table></figure>
+<p>加密。函数里的第二行的代码可以把一个输入的字符串转换成一个字节数组。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Encode</span><span class="params">(data <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</div><div class="line">	content := *(*[]<span class="keyword">byte</span>)(unsafe.Pointer((*reflect.SliceHeader)(unsafe.Pointer(&amp;data))))</div><div class="line">	coder := base64.NewEncoding(BASE64Table)</div><div class="line">	<span class="keyword">return</span> coder.EncodeToString(content)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>解密。函数返回处的代码可以把一个 字节数组转换成一个字符串。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Decode</span><span class="params">(data <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</div><div class="line">	coder := base64.NewEncoding(BASE64Table)</div><div class="line">	result, _ := coder.DecodeString(data)</div><div class="line">	<span class="keyword">return</span> *(*<span class="keyword">string</span>)(unsafe.Pointer(&amp;result))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>测试。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">	<span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span>&#123;</div><div class="line">      strTest := <span class="string">"I love this beautiful world!"</span></div><div class="line">      strEncrypt := Encode(strTest)</div><div class="line">      strDecrypt := Decode(strEncrypt)</div><div class="line">      fmt.Println(<span class="string">"Encrypted:"</span>,strEncrypt)</div><div class="line">      fmt.Println(<span class="string">"Decrypted:"</span>,strDecrypt)</div><div class="line">	&#125;</div><div class="line"><span class="comment">//Output:</span></div><div class="line"><span class="comment">//Encrypted: VVJmGsEBONRlFaPfDCYgcaRSEHYmONcpbCrAO2==</span></div><div class="line"><span class="comment">//Decrypted: I love this beautiful world!</span></div></pre></td></tr></table></figure>
+<h3 id="MD5"><a href="#MD5" class="headerlink" title="MD5"></a>MD5</h3><p>MD5的全称是Message-DigestAlgorithm 5，它可以把一个任意长度的字节数组转换成一个定长的整数，并且这种转换是不可逆的。对于任意长度的数据，转换后的MD5值长度是固定的，而且MD5的转换操作很容易，只要原数据有一点点改动，转换后结果就会有很大的差异。正是由于MD5算法的这些特性，它经常用于对于一段信息产生信息摘要，以防止其被篡改。其还广泛就于操作系统的登录过程中的安全验证，比如Unix操作系统的密码就是经过MD5加密后存储到文件系统中，当用户登录时输入密码后， 对用户输入的数据经过MD5加密后与原来存储的密文信息比对，如果相同说明密码正确，否则输入的密码就是错误的。</p>
+<p>MD5以512位为一个计算单位对数据进行分组，每一分组又被划分为16个32位的小组，经过一系列处理后，输出4个32位的小组，最后组成一个128位的哈希值。对处理的数据进行512求余得到N和一个余数，如果余数不为448,填充1和若干个0直到448位为止，最后再加上一个64位用来保存数据的长度，这样经过预处理后，数据变成（N+1）x 512位。</p>
+<p>加密。Encode 函数用来加密数据，Check函数传入一个未加密的字符串和与加密后的数据，进行对比，如果正确就返回true。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Check</span><span class="params">(content, encrypted <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> strings.EqualFold(Encode(content), encrypted)</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Encode</span><span class="params">(data <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</div><div class="line">	h := md5.New()</div><div class="line">	h.Write([]<span class="keyword">byte</span>(data))</div><div class="line">	<span class="keyword">return</span> hex.EncodeToString(h.Sum(<span class="literal">nil</span>))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>测试。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line"> 	strTest := <span class="string">"I love this beautiful world!"</span></div><div class="line">	strEncrypted := <span class="string">"98b4fc4538115c4980a8b859ff3d27e1"</span></div><div class="line">	fmt.Println(Check(strTest, strEncrypted))</div><div class="line">&#125;</div><div class="line"><span class="comment">//Output:</span></div><div class="line"><span class="comment">//true</span></div></pre></td></tr></table></figure>
+<h3 id="DES"><a href="#DES" class="headerlink" title="DES"></a>DES</h3><p>DES是一种对称加密算法，又称为美国数据加密标准。DES加密时以64位分组对数据进行加密，加密和解密都使用的是同一个长度为64位的密钥，实际上只用到了其中的56位，密钥中的第8、16…64位用来作奇偶校验。DES有ECB（电子密码本）和CBC（加密块）等加密模式。</p>
+<p>DES算法的安全性很高，目前除了穷举搜索破解外， 尚无更好的的办法来破解。其密钥长度越长，破解难度就越大。</p>
+<p>填充和去填充函数。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">ZeroPadding</span><span class="params">(ciphertext []<span class="keyword">byte</span>, blockSize <span class="keyword">int</span>)</span> []<span class="title">byte</span></span> &#123;</div><div class="line">	padding := blockSize - <span class="built_in">len</span>(ciphertext)%blockSize</div><div class="line">	padtext := bytes.Repeat([]<span class="keyword">byte</span>&#123;<span class="number">0</span>&#125;, padding)</div><div class="line">	<span class="keyword">return</span> <span class="built_in">append</span>(ciphertext, padtext...)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">ZeroUnPadding</span><span class="params">(origData []<span class="keyword">byte</span>)</span> []<span class="title">byte</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> bytes.TrimFunc(origData,</div><div class="line">		<span class="function"><span class="keyword">func</span><span class="params">(r <span class="keyword">rune</span>)</span> <span class="title">bool</span></span> &#123;</div><div class="line">			<span class="keyword">return</span> r == <span class="keyword">rune</span>(<span class="number">0</span>)</div><div class="line">		&#125;)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>加密。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Encrypt</span><span class="params">(text <span class="keyword">string</span>, key []<span class="keyword">byte</span>)</span> <span class="params">(<span class="keyword">string</span>, error)</span></span> &#123;</div><div class="line">	src := []<span class="keyword">byte</span>(text)</div><div class="line">	block, err := des.NewCipher(key)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="string">""</span>, err</div><div class="line">	&#125;</div><div class="line">	bs := block.BlockSize()</div><div class="line">	src = ZeroPadding(src, bs)</div><div class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(src)%bs != <span class="number">0</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="string">""</span>, errors.New(<span class="string">"Need a multiple of the blocksize"</span>)</div><div class="line">	&#125;</div><div class="line">	out := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="built_in">len</span>(src))</div><div class="line">	dst := out</div><div class="line">	<span class="keyword">for</span> <span class="built_in">len</span>(src) &gt; <span class="number">0</span> &#123;</div><div class="line">		block.Encrypt(dst, src[:bs])</div><div class="line">		src = src[bs:]</div><div class="line">		dst = dst[bs:]</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> hex.EncodeToString(out), <span class="literal">nil</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>解密。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Decrypt</span><span class="params">(decrypted <span class="keyword">string</span> , key []<span class="keyword">byte</span>)</span> <span class="params">(<span class="keyword">string</span>, error)</span></span> &#123;</div><div class="line">	src, err := hex.DecodeString(decrypted)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="string">""</span>, err</div><div class="line">	&#125;</div><div class="line">	block, err := des.NewCipher(key)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="string">""</span>, err</div><div class="line">	&#125;</div><div class="line">	out := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="built_in">len</span>(src))</div><div class="line">	dst := out</div><div class="line">	bs := block.BlockSize()</div><div class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(src)%bs != <span class="number">0</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="string">""</span>, errors.New(<span class="string">"crypto/cipher: input not full blocks"</span>)</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">for</span> <span class="built_in">len</span>(src) &gt; <span class="number">0</span> &#123;</div><div class="line">		block.Decrypt(dst, src[:bs])</div><div class="line">		src = src[bs:]</div><div class="line">		dst = dst[bs:]</div><div class="line">	&#125;</div><div class="line">	out = ZeroUnPadding(out)</div><div class="line">	<span class="keyword">return</span> <span class="keyword">string</span>(out), <span class="literal">nil</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>测试。在这里，DES中使用的密钥key只能为8位。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">    key := []<span class="keyword">byte</span>(<span class="string">"2fa6c1e9"</span>)</div><div class="line">	str :=<span class="string">"I love this beautiful world!"</span></div><div class="line">	strEncrypted, err := Encrypt(str, key)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Fatal(err)</div><div class="line">	&#125;</div><div class="line">	fmt.Println(<span class="string">"Encrypted:"</span>, strEncrypted)</div><div class="line">	strDecrypted, err := Decrypt(strEncrypted, key)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Fatal(err)</div><div class="line">	&#125;</div><div class="line">	fmt.Println(<span class="string">"Decrypted:"</span>, strDecrypted)</div><div class="line">&#125;</div><div class="line"><span class="comment">//Output:</span></div><div class="line"><span class="comment">//Encrypted: 5d2333b9fbbe5892379e6bcc25ffd1f3a51b6ffe4dc7af62beb28e1270d5daa1</span></div><div class="line"><span class="comment">//Decrypted: I love this beautiful world!</span></div></pre></td></tr></table></figure>
+<h3 id="AES"><a href="#AES" class="headerlink" title="AES"></a>AES</h3><p>AES，即高级加密标准（Advanced Encryption Standard），是一个对称分组密码算法，旨在取代DES成为广泛使用的标准。AES中常见的有三种解决方案，分别为AES-128、AES-192和AES-256。</p>
+<p>AES加密过程涉及到4种操作：字节替代（SubBytes）、行移位（ShiftRows）、列混淆（MixColumns）和轮密钥加（AddRoundKey）。解密过程分别为对应的逆操作。由于每一步操作都是可逆的，按照相反的顺序进行解密即可恢复明文。加解密中每轮的密钥分别由初始密钥扩展得到。算法中16字节的明文、密文和轮密钥都以一个4x4的矩阵表示。</p>
+<p>AES 有五种加密模式：电码本模式（Electronic Codebook Book (ECB)）、密码分组链接模式（Cipher Block Chaining (CBC)）、计算器模式（Counter (CTR)）、密码反馈模式（Cipher FeedBack (CFB)）和输出反馈模式（Output FeedBack (OFB)）。下面以CFB为例。</p>
+<p>加密。iv即初始向量，这里取密钥的前16位作为初始向量。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Encrypt</span><span class="params">(text <span class="keyword">string</span>, key []<span class="keyword">byte</span>)</span> <span class="params">(<span class="keyword">string</span>, error)</span></span> &#123;</div><div class="line"> 	<span class="keyword">var</span> iv = key[:aes.BlockSize]</div><div class="line">	encrypted := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="built_in">len</span>(text))</div><div class="line">	block, err := aes.NewCipher(key)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="string">""</span>, err</div><div class="line">	&#125;</div><div class="line">	encrypter := cipher.NewCFBEncrypter(block, iv)</div><div class="line">	encrypter.XORKeyStream(encrypted, []<span class="keyword">byte</span>(text))</div><div class="line">	<span class="keyword">return</span> hex.EncodeToString(encrypted), <span class="literal">nil</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>解密。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Decrypt</span><span class="params">(encrypted <span class="keyword">string</span>, key []<span class="keyword">byte</span>)</span> <span class="params">(<span class="keyword">string</span>, error)</span></span> &#123;</div><div class="line">	<span class="keyword">var</span> err error</div><div class="line">	<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		<span class="keyword">if</span> e := <span class="built_in">recover</span>(); e != <span class="literal">nil</span> &#123;</div><div class="line">			err = e.(error)</div><div class="line">		&#125;</div><div class="line">	&#125;()</div><div class="line">	src, err := hex.DecodeString(encrypted)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="string">""</span>, err</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">var</span> iv = key[:aes.BlockSize]</div><div class="line">	decrypted := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="built_in">len</span>(src))</div><div class="line">	<span class="keyword">var</span> block cipher.Block</div><div class="line">	block, err = aes.NewCipher([]<span class="keyword">byte</span>(key))</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="string">""</span>, err</div><div class="line">	&#125;</div><div class="line">	decrypter := cipher.NewCFBDecrypter(block, iv)</div><div class="line">	decrypter.XORKeyStream(decrypted, src)</div><div class="line">	<span class="keyword">return</span> <span class="keyword">string</span>(decrypted), <span class="literal">nil</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>测试。密钥key只能为16位、24位或32位，分别对应AES-128, AES-192和 AES-256。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span>&#123;</div><div class="line">    str := <span class="string">"I love this beautiful world!"</span></div><div class="line">	key := []<span class="keyword">byte</span>&#123;<span class="number">0xBA</span>, <span class="number">0x37</span>, <span class="number">0x2F</span>, <span class="number">0x02</span>, <span class="number">0xC3</span>, <span class="number">0x92</span>, <span class="number">0x1F</span>, <span class="number">0x7D</span>,</div><div class="line">		<span class="number">0x7A</span>, <span class="number">0x3D</span>, <span class="number">0x5F</span>, <span class="number">0x06</span>, <span class="number">0x41</span>, <span class="number">0x9B</span>, <span class="number">0x3F</span>, <span class="number">0x2D</span>,</div><div class="line">		<span class="number">0xBA</span>, <span class="number">0x37</span>, <span class="number">0x2F</span>, <span class="number">0x02</span>, <span class="number">0xC3</span>, <span class="number">0x92</span>, <span class="number">0x1F</span>, <span class="number">0x7D</span>,</div><div class="line">		<span class="number">0x7A</span>, <span class="number">0x3D</span>, <span class="number">0x5F</span>, <span class="number">0x06</span>, <span class="number">0x41</span>, <span class="number">0x9B</span>, <span class="number">0x3F</span>, <span class="number">0x2D</span>,</div><div class="line">		&#125;</div><div class="line">	strEncrypted,err := Encrypt(str, key)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Error(<span class="string">"Encrypted err:"</span>,err)</div><div class="line">	&#125;</div><div class="line">	fmt.Println(<span class="string">"Encrypted:"</span>,strEncrypted)</div><div class="line">	strDecrypted,err := Decrypt(strEncrypted, key)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Error(<span class="string">"Decrypted err:"</span>,err)</div><div class="line">	&#125;</div><div class="line">	fmt.Println(<span class="string">"Decrypted:"</span>,strDecrypted)</div><div class="line">&#125;</div><div class="line"><span class="comment">//Output:</span></div><div class="line"><span class="comment">//Encrypted: f866bfe2a36d5a43186a790b41dc2396234dd51241f8f2d4a08fa5dc</span></div><div class="line"><span class="comment">//Decrypted: I love this beautiful world!</span></div></pre></td></tr></table></figure>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
+<li><a href="http://www.100hack.com/2014/04/14/golang%E4%B8%AD%E7%9A%84des%E5%8A%A0%E5%AF%86ecb%E6%A8%A1%E5%BC%8F/" target="_blank" rel="external">Golang中的DES加密ECB模式</a></li>
+<li><a href="http://www.cnblogs.com/starwolf/p/3365834.html" target="_blank" rel="external">AES五种加密模式（CBC、ECB、CTR、OCF、CFB)</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/algorithm/" rel="tag"># algorithm</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/15/multi-develop/" rel="next" title="多人协作开发代码提交流程">
+                <i class="fa fa-chevron-left"></i> 多人协作开发代码提交流程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/09/seven-sort-algorithm1/" rel="prev" title="常见的查找算法（上）">
+                常见的查找算法（上） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Base64"><span class="nav-number">1.</span> <span class="nav-text">Base64</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MD5"><span class="nav-number">2.</span> <span class="nav-text">MD5</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DES"><span class="nav-number">3.</span> <span class="nav-text">DES</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AES"><span class="nav-number">4.</span> <span class="nav-text">AES</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="linux,web," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="《UNIX网络编程》是一本关于UNIX系统和类UNIX系统网络编程方面的书，详尽地介绍了关于网络API的调用以及相关的系统调用方面的知识，还有不少关于C/S架构设计的讨论，如果想了解学习socket方面的知识，这本书是不二之选。">
+<meta name="keywords" content="linux,web">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《UNIX网络编程》读书笔记">
+<meta property="og:url" content="http://witchiman.github.io/2016/09/05/unix-network-programming/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="《UNIX网络编程》是一本关于UNIX系统和类UNIX系统网络编程方面的书，详尽地介绍了关于网络API的调用以及相关的系统调用方面的知识，还有不少关于C/S架构设计的讨论，如果想了解学习socket方面的知识，这本书是不二之选。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.981Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="《UNIX网络编程》读书笔记">
+<meta name="twitter:description" content="《UNIX网络编程》是一本关于UNIX系统和类UNIX系统网络编程方面的书，详尽地介绍了关于网络API的调用以及相关的系统调用方面的知识，还有不少关于C/S架构设计的讨论，如果想了解学习socket方面的知识，这本书是不二之选。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2016/09/05/unix-network-programming/"/>
+
+
+
+
+
+  <title>《UNIX网络编程》读书笔记 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2016/09/05/unix-network-programming/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">《UNIX网络编程》读书笔记</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-09-05T12:38:15+08:00">
+                2016-09-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>《UNIX网络编程》是一本关于UNIX系统和类UNIX系统网络编程方面的书，详尽地介绍了关于网络API的调用以及相关的系统调用方面的知识，还有不少关于C/S架构设计的讨论，如果想了解学习socket方面的知识，这本书是不二之选。<br><a id="more"></a></p>
+<h2 id="基础部分"><a href="#基础部分" class="headerlink" title="基础部分"></a>基础部分</h2><h3 id="动态链接库"><a href="#动态链接库" class="headerlink" title="动态链接库"></a>动态链接库</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#生成so文件</span></div><div class="line">hui@linux:~/<span class="built_in">test</span>$ gcc hello.c -fPIC -shared -o libhello.so</div><div class="line"><span class="comment">#移动到库目录</span></div><div class="line">hui@linux:~ mv libhello.so /usr/lib</div><div class="line"><span class="comment">#链接库文件  </span></div><div class="line">hui@linux:~ gcc -o <span class="built_in">test</span> test.c -L. -lhello</div><div class="line"><span class="comment">#运行 </span></div><div class="line">hui@linux:~ ./<span class="built_in">test</span></div></pre></td></tr></table></figure>
+<h3 id="动态加载库"><a href="#动态加载库" class="headerlink" title="动态加载库"></a>动态加载库</h3><p>动态加载库可用程序加载的方式控制什么时候加载链接库</p>
+<ul>
+<li><p>dlopen()，打开动态链接库。flag为打开方式，一般为RTLD_LASY</p>
+<p>  <strong>void<em> dlopen(const char</em> filename,int flag )</strong></p>
+</li>
+</ul>
+<ul>
+<li><p>dlsym()，获得函数打针。  </p>
+<p>  <strong>void<em> dlsym(void</em> handle, char* symbol)</strong></p>
+</li>
+</ul>
+<h3 id="进程的产生方式"><a href="#进程的产生方式" class="headerlink" title="进程的产生方式"></a>进程的产生方式</h3><ul>
+<li><p>fork()，以复制方式产生，除内存等与父进程不同，其它与父进程一样。</p>
+</li>
+<li><p>system()，调用shell的外部命令在当前进程开始另外一个进程，执行特定命令时阻塞当前进程，直到其执行完成。它会调用fork、execve和waitpid等函数，其中<br>任意整一个调用失败将导致system()调用失败。</p>
+</li>
+<li><p>exec族函数（execl()、execlp()、execle()、execv()和execvp()），产生的新进程会替代原来的进程，其PID与原来的进程相同，只有execve()是真正的系统调用。</p>
+</li>
+</ul>
+<h3 id="数据链路层"><a href="#数据链路层" class="headerlink" title="数据链路层"></a>数据链路层</h3><ul>
+<li><p>数据帧里，目的地址和源地址各占6字节（MAC地址）</p>
+</li>
+<li><p>数据段的大小为46~1500字节，1500为MTU（最大传输单元）</p>
+</li>
+<li><p>数据帧尾部为校验和，采用CRC16的校验方式</p>
+</li>
+</ul>
+<h3 id="网络层"><a href="#网络层" class="headerlink" title="网络层"></a>网络层</h3><ul>
+<li><p>IP数据报的头部最短为20字节，最长为60字节，以字（32位）为增量变化</p>
+</li>
+<li><p>总长度字段为16位，所以IP数据段最大可达65536字节</p>
+</li>
+<li><p>TTL(Time To Live)，生存时间字段表示数据报文最多可以经过的路由数量。每经过一个路由TTL的值减1，当为0时，路由器丢弃此包</p>
+</li>
+</ul>
+<h2 id="协议报文"><a href="#协议报文" class="headerlink" title="协议报文"></a>协议报文</h2><h3 id="TCP"><a href="#TCP" class="headerlink" title="TCP"></a>TCP</h3><ul>
+<li><p>头部为20个字节，其中源端口号和目的端口号各占2字节</p>
+</li>
+<li><p>序列号长度为32位，表示分配给TCP包的编号。连接成功后生成一个ISN（Initial Sequence Number），此后按字节的大小进行递增 </p>
+</li>
+</ul>
+<h3 id="UDP"><a href="#UDP" class="headerlink" title="UDP"></a>UDP</h3><ul>
+<li><p>UDP的校验和字段是可选的，不像TCP那样，可以不进行CRC校验</p>
+</li>
+<li><p>UDP协议比TCP协议执行的速度快得多</p>
+</li>
+</ul>
+<h3 id="ARP，地址解析协议"><a href="#ARP，地址解析协议" class="headerlink" title="ARP，地址解析协议"></a>ARP，地址解析协议</h3><ul>
+<li><p>ARP协议为IP地址到硬件地址提供动态的映射关系</p>
+</li>
+<li><p>ARP缓存的高速缓存维持这种映射关系，存放着最近IP到硬件地址的映射记录，bash命令arp -a，查看ARP高速缓存</p>
+</li>
+<li><p>ARP的实现方式在以太网上做广播，查询目的IP，当数据帧头部的目的地址全为1时为广播帧</p>
+</li>
+</ul>
+<h2 id="套接字"><a href="#套接字" class="headerlink" title="套接字"></a>套接字</h2><h3 id="查看文件状态"><a href="#查看文件状态" class="headerlink" title="查看文件状态"></a>查看文件状态</h3><p>查看文件的所有者，文件的修改时间和文件的大小等，通过函数把文件信息保存到结构stat里。</p>
+<ul>
+<li><p>int stat(const char <em>path, struct stat </em>buf)</p>
+</li>
+<li><p>int fstat(int filedes, struct stat *buf)</p>
+</li>
+<li><p>int lstat(const char <em>path, struct stat </em>buf) </p>
+</li>
+</ul>
+<h3 id="套接字描述符判定函数issockettype"><a href="#套接字描述符判定函数issockettype" class="headerlink" title="套接字描述符判定函数issockettype()"></a>套接字描述符判定函数issockettype()</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> s = socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</div><div class="line"><span class="keyword">int</span> ret  = issockettype(s);  <span class="comment">//返回1，说明是套接字</span></div></pre></td></tr></table></figure>
+<h3 id="查看主机信息"><a href="#查看主机信息" class="headerlink" title="查看主机信息"></a>查看主机信息</h3><p>通过gethostbyname()和gethostbyaddr()函数可获取主机信息，并保存在结构体hostent里。由于非线程安全，建议使用替代函数getaddrinfo和getnameinfo</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;netdb.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></div><div class="line">...</div><div class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">hostent</span> *<span class="title">ht</span> = <span class="title">NULL</span>;</span></div><div class="line">    ht = gethostbyname(host);   <span class="comment">//为不可重入函数，返回值后应立即将结果取出</span></div><div class="line">    </div><div class="line">    <span class="keyword">if</span>(ht)</div><div class="line">    &#123;  </div><div class="line">        <span class="keyword">int</span> i;</div><div class="line">        <span class="keyword">for</span>(i=<span class="number">0</span>;;i++)</div><div class="line">        &#123;   <span class="comment">//通过一个循环查看主机的别名</span></div><div class="line">            <span class="keyword">if</span>(ht-&gt;h_aliases[i]!=<span class="literal">NULL</span>)                    </div><div class="line">                <span class="built_in">printf</span>(<span class="string">"alis[%d], %s\n"</span>,i,ht-&gt;h_aliases[i]);</div><div class="line">            <span class="keyword">else</span> </div><div class="line">                <span class="keyword">break</span>;</div><div class="line">            </div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<h3 id="IO模型："><a href="#IO模型：" class="headerlink" title="IO模型："></a>IO模型：</h3><p>阻塞、非阻塞（fcntl）、IO复用（select和pselect、poll和ppoll）、信号驱动（sigaction）和异步(aio_read)。</p>
+<blockquote>
+<p>Linux平台下内核调度的精度为10毫秒级。</p>
+</blockquote>
+<h3 id="UDP乱序"><a href="#UDP乱序" class="headerlink" title="UDP乱序"></a>UDP乱序</h3><p>原因</p>
+<ul>
+<li>路由器存储转发造成的顺序更改</li>
+<li>路由器路径不同造成的顺序更改</li>
+</ul>
+<blockquote>
+<p>解决办法 发送端在数据段加入数据报序号，这样接收端对接收到的数据进行简单的处理就可以重新获取到原始顺序的数据。</p>
+</blockquote>
+<h3 id="UDP中使用connect-函数"><a href="#UDP中使用connect-函数" class="headerlink" title="UDP中使用connect()函数"></a>UDP中使用connect()函数</h3><p>仅仅表示确定了另一方的地址，没有别的作用</p>
+<ul>
+<li><p>发送操作不能再使用sendto()，要使用write(),直接使用套接字文件描述符，不再指定目的地址和端口号</p>
+</li>
+<li><p>接收操作不能再使用recvfrom()，要使用read()</p>
+</li>
+<li><p>多次使用会改变原来的目的地址和端口号</p>
+</li>
+</ul>
+<h3 id="Unix域套接字"><a href="#Unix域套接字" class="headerlink" title="Unix域套接字"></a>Unix域套接字</h3><p>Unix域套接字有字节流套接字和数据报套接字。前者类似于TCP，后者类似于UDP</p>
+<ul>
+<li><p>与TCP套接字相比，在同一台主机的传输速度是后者的两倍</p>
+</li>
+<li><p>Unix域套接字可以在同一台主机的各进程之间传递描述符</p>
+</li>
+<li><p>Unix域套接字与传统套接字的区别是用路径名来表示协议族的描述</p>
+</li>
+<li><p>Unix域字节流套接字的connect() 函数发现监听的队列满了返回ECONNREFUSED错误，TCP会忽略到来的SYS</p>
+</li>
+</ul>
+<h2 id="广播、多播"><a href="#广播、多播" class="headerlink" title="广播、多播"></a>广播、多播</h2><h3 id="多播"><a href="#多播" class="headerlink" title="多播"></a>多播</h3><p><strong>优点</strong></p>
+<ul>
+<li><p>具有共同业务的主机加入同一数据流，共享同一通道</p>
+</li>
+<li><p>服务器的总带宽不受客户端带宽的限制</p>
+</li>
+<li><p>与单播一样，多播是允许在广域网即Internet上进行传输的，而广播只能在同一局域网进行</p>
+</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li><p>与单播相比没有纠错机制，但可在应用层实现</p>
+</li>
+<li><p>网络支持存在缺陷，需要路由器及网络协议栈的支持</p>
+</li>
+</ul>
+<p><strong>类别</strong></p>
+<ul>
+<li><p>局部多播地址，在224.0.0.0~224.0.0.255之间，这是为路由协议和其他用途保留的地址，路由器不转发属于此范围的IP包</p>
+</li>
+<li><p>预留多播地址，224.0.1.0~238.255.255.255之间，可用于全球范围或网络协议</p>
+</li>
+<li><p>管理权限多播地址，在239.0.0.0~239.255.255.255之间，可供组织内部使用，类似于私有IP地址，不能用于Internet,可限制多播范围</p>
+</li>
+</ul>
+<h2 id="原始套接字"><a href="#原始套接字" class="headerlink" title="原始套接字"></a>原始套接字</h2><h3 id="套接字选项-SOL-SOCKET"><a href="#套接字选项-SOL-SOCKET" class="headerlink" title="套接字选项(SOL_SOCKET)"></a>套接字选项(SOL_SOCKET)</h3><p>在进行网络编程的时候，经常需要查看或者设置套接字的某些特性，如地址复用、读写数据的超时时间、对读缓冲区的大小调整等操作，可通过setsockopt()和getsockopt()函数进行相关设置和查看。SOL_SOCKET为通用类型的套接字选项。</p>
+<p><strong>SO_KEEPALIVE</strong></p>
+<p>使用场景主要是可能发送长时间无数据响应的TCP连接。设置后，TCP会自动发送报文，对方必须进行回应。有三种情况：</p>
+<ul>
+<li><p>TCP连接正常，发送一个ACK响应，这个过程应用层是不知道的</p>
+</li>
+<li><p>对方发送RST响应，对方在2个小时内进行了重启或者崩溃</p>
+</li>
+<li><p>如果对方没有任何响应，则本机会发送另外8个活动探测报文，第一个报文无响应，发生ETIMEOUT错误；收到ICMP报文响应，主机不可达，发生EHOSTUNERACH错误</p>
+</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> optval = <span class="number">1</span>;  <span class="comment">//设置有效</span></div><div class="line"><span class="keyword">int</span> s = socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</div><div class="line"><span class="keyword">int</span> err = setsockopt(s, SOL_SOCKET, SO_KEEPALIVE, &amp;optval, <span class="keyword">sizeof</span>(optval));</div></pre></td></tr></table></figure>
+<p><strong>SO_LINGER</strong></p>
+<p>直接调用close函数关闭连接，缓冲区剩余数据的处理是不可知的，设置SO_LINGER可阻塞close函数，直到剩余数据全部发送给对方，保证了TCP连接两端的正常关闭。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">struct</span> <span class="title">linger</span> <span class="title">optval</span>;</span>  <span class="comment">//通过此结构进行SO_LINGER操作</span></div><div class="line">optval.l_onoff =  <span class="number">1</span>;  </div><div class="line">optval.l_linger = <span class="number">60</span>;  <span class="comment">//设置超时时间</span></div><div class="line">err = setsockopt(s, SOL_SOCKET, SO_LINGER, &amp;optval, <span class="keyword">sizeof</span>(optval));</div></pre></td></tr></table></figure>
+<blockquote>
+<p>optval.l_onoff值为0时，使用系统默认的关闭行为，对剩余数据的处理情况未知；其值为1时，在设定的超时时间内发送数据，发送成功返回0，发送失败返回-1；其值为1，l_linger为0，表示立刻关闭，调用close函数立即返回，缓冲区数据被丢弃。</p>
+</blockquote>
+<p><strong>SO_OOBINLINE</strong></p>
+<p>有时，发送的数据可能会超过所限制的数据量，可设置该选项接收带外数据，带外数据和一般数据一起接收，相当于增加了带宽。</p>
+<p><strong>SO_RECBUF和 SO_SNDBUF</strong></p>
+<p>设置发送和接收缓冲区的大小。UDP连接里，如果接收方缓冲区过小，可能会导致缓冲区溢出，新的数据覆盖旧的数据。</p>
+<p>对于TCP,客户端接收缓冲区是在connect()前设置的，服务器接收缓冲区是在listen()前设置的。实际设定值并非用户输入的大小，根据其大小，最终设定值可能为输入值的2倍，也可能为其它值。<br><strong>SO_RECTIMEO和 SO_SNDTIMEO</strong></p>
+<p>设置发送和接收数据的超时时间，通过struct timeval来实现。</p>
+<p><strong>SO_REUSEADDR</strong></p>
+<p>地址重用，防止服务器因多个程序侦听同一端口发生错误。比如有的服务器程序非正常退出时，占用的某一端口，可能要过一段时间才允许其它程序使用，不设置地址重用将不能使用此端口。这与SO_EXCLUSIVEADDRUSE端口独占相反。</p>
+<p><strong>SO_TYPE</strong></p>
+<p>获取套接字类型。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> s = socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</div><div class="line"><span class="keyword">int</span> type;</div><div class="line"><span class="keyword">int</span> length = <span class="number">4</span>;</div><div class="line"><span class="keyword">int</span> err = getsockopt(s, SOL_SOCKET, SO_TYPE, &amp;type, &amp;length);</div><div class="line"><span class="keyword">if</span>(type == SOCK_STREAM)</div><div class="line">    <span class="built_in">printf</span>(<span class="string">"This is a TCP socket!\n"</span>);</div></pre></td></tr></table></figure>
+<p><strong>SO_BINDTODEVICE</strong></p>
+<p>将套接字与某个网络设备绑定。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">char</span> ifname[] = <span class="string">"eth0"</span>;</div><div class="line">err = setsockopt(s, SOL_SOCKET, SO_BINDTODEVICE, ifname, <span class="built_in">strlen</span>(ifname));</div></pre></td></tr></table></figure>
+<p><strong>SO_PRIORITY</strong></p>
+<p>设置发送报文的优先级，范围为0~6。</p>
+<h3 id="套接字选项（IPPROTO-IP和IPPROTO-TCP）"><a href="#套接字选项（IPPROTO-IP和IPPROTO-TCP）" class="headerlink" title="套接字选项（IPPROTO_IP和IPPROTO_TCP）"></a>套接字选项（IPPROTO_IP和IPPROTO_TCP）</h3><p><strong>IP_TTL</strong></p>
+<p>设置发送报文的生存时间（TTL），一般情况下为64，对于原始套接字为255。</p>
+<p><strong>TCP_KEEPALIVE</strong></p>
+<p>设置存活探测的时间间隔，在SO_KEEPALIVE开启的情况下才有效。默认情况下时间时隔为7200s，即两个小时进行一次存活探测。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> alive_time = <span class="number">60</span>;</div><div class="line"><span class="keyword">int</span> s = socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</div><div class="line"><span class="keyword">int</span> err = setsockopt(s, IPPROTO_ICP, TCP_KEEPALIVE, &amp;alive_time, <span class="keyword">sizeof</span>(<span class="keyword">int</span>));</div></pre></td></tr></table></figure>
+<p><strong>TCP_MAXRT</strong></p>
+<p>最大重传时间，以秒为单位，0表示系统默认值，-1表示永远重传。</p>
+<p><strong>TCP_NODELAY和TCP_CORK</strong></p>
+<p>针对Nagle算法的关闭而设置的。Nagle算法将将小于最大分段大小（MSS）的分段组成成更大的帧进行发送。</p>
+<ul>
+<li><p>使用TCP_NODELAY时，客户端的请求不会与其他分段合并，会尽快地发送到服务器端，提高了交互性应用程序的响应速度。HTTPD使用了TCP_NODELAY来发送大块数据，用于提高性能。</p>
+</li>
+<li><p>使用TCP_CORK时，当发送的数据量达到最大时，才一次性发送全部数据，充分利用网络的带宽，提高数据传输的通信性能。</p>
+</li>
+</ul>
+<h3 id="ioctl-函数和fcntl-函数"><a href="#ioctl-函数和fcntl-函数" class="headerlink" title="ioctl()函数和fcntl()函数"></a>ioctl()函数和fcntl()函数</h3><ul>
+<li>ioctl()，可以用对于套接字的IO操作（如查TCP连接是否有带外数据）、文件请求、网络接口请求、对ARP高速缓存进行操作和发送路由表请求</li>
+<li>fcntl()，对套接字进行的部分操作可由ioctl()函数取代，其它的作用还有修改套接字非阻塞属性和设置信号的绑定进程等</li>
+</ul>
+<h3 id="原始套接字-1"><a href="#原始套接字-1" class="headerlink" title="原始套接字"></a>原始套接字</h3><p><strong>作用</strong></p>
+<ul>
+<li><p>读写ICMP、IGMP分组。如ping程序和mrouted</p>
+</li>
+<li><p>读写特殊的IP数据报，内核不处理其数据报的协议字段</p>
+</li>
+<li><p>通过函数setsockopt()函数设置选项IP_HDRINGCL可以对IP头部进行操作，修改IP数据和IP层之上的各层数据，构造自己的TCP和UDP分段</p>
+</li>
+</ul>
+<p><strong>发送/接收</strong></p>
+<ul>
+<li><p>可以不使用bind()函数，然后使用sendto()和recvfrom()函数时指定IP。使用bind()后才可以使用send()、recv()等其它不需要指定IP的函数</p>
+</li>
+<li><p>IP_RINCL </p>
+<ul>
+<li>使用setsockopt()函数设置IP_RINCL后，发送的数据缓冲区指向IP头部第一个字节的头部，则发送的数据包含IP头部和其后的所有数据，这时需要用户自己填写IP头部和计算校验和，<br>并对所包含数据进行处理和计算；此时，接收的缓冲区也指向IP头部的第一个字节。</li>
+<li>如果没有设置，则缓冲区指向IP数据区域的第一个字节，不需要填写IP头部。</li>
+</ul>
+</li>
+<li><p>UDP和TCP协议的数据不会传给原始套接字接口，这些协议的数据需要通过数据链路层获得。</p>
+</li>
+<li><p>如果IP以分段形式达到，则所有分段都已接收并重组后才传给原始套接字</p>
+</li>
+<li><p>内核不能识别的协议、格式等传给原始套接字，所以可用原始套接字定义用户自己的协议格式</p>
+</li>
+</ul>
+<h3 id="洪水攻击"><a href="#洪水攻击" class="headerlink" title="洪水攻击"></a>洪水攻击</h3><ul>
+<li><p>ICMP回显攻击：利用原始套接字向目标机发送大量的回显请求或者回显响应数据，由于此数据协议栈默认是必须处理的，<br>因此可以对目标机造成影响。</p>
+<ul>
+<li>直接洪水攻击，采用多线程方法一次性地发送多个ICMP报文，让目标主机宕机。容易泄露源IP地址。</li>
+<li>伪装IP攻击，在直接洪水攻击的基础上将发送方的IP地址用伪装后的IP地址代替。</li>
+<li>反射攻击，让一群主机认为目标机在向他们发送ICMP请求，一群主机向目标机发送ICMP应答包。</li>
+</ul>
+</li>
+<li><p>UDP攻击：向目标机服务端口发送UDP报文，由此目标机需要对端口进行处理，如果知道目标机的基本数据格式，<br>则可以构建十分有效的代码来对目标机造成很大伤害。</p>
+</li>
+<li><p>SYN攻击：利用TCP连接中的三次握手，在发送了一个SYN原始报文后，目标机需要对发送的报文进行处理并等待超时。</p>
+</li>
+</ul>
+<h2 id="C-S程序设计范式"><a href="#C-S程序设计范式" class="headerlink" title="C/S程序设计范式"></a>C/S程序设计范式</h2><h3 id="套接字服务器类型"><a href="#套接字服务器类型" class="headerlink" title="套接字服务器类型"></a>套接字服务器类型</h3><ul>
+<li><p>循环服务器，又叫迭代服务器。</p>
+</li>
+<li><p>并发服务器</p>
+</li>
+<li><p>IO复用服务器 </p>
+</li>
+</ul>
+<h3 id="TCP并发服务器"><a href="#TCP并发服务器" class="headerlink" title="TCP并发服务器"></a>TCP并发服务器</h3><ul>
+<li>统一accept()，单客户端单进程</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">while</span>(<span class="number">1</span>)</div><div class="line">&#123;    </div><div class="line">    s_c = accept(s_s, (struct sockaddr*)&amp;from, &amp;len);</div><div class="line">    <span class="keyword">if</span>(s_c &gt; <span class="number">0</span>)             <span class="comment">//若连接成功</span></div><div class="line">    &#123;</div><div class="line">        <span class="keyword">int</span> pid = fork();</div><div class="line">        <span class="keyword">if</span>(pid &gt; <span class="number">0</span>)          </div><div class="line">        &#123;</div><div class="line">            close(s_c);      <span class="comment">//关闭父进程的客户端连接套接字</span></div><div class="line">        &#125;</div><div class="line">        <span class="keyword">else</span> </div><div class="line">        &#123;</div><div class="line">            handle_request(s_c);   <span class="comment">//在子进程处理连接请求</span></div><div class="line">            <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>统一accept()，单客户端单线程</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">while</span>(<span class="number">1</span>)</div><div class="line">&#123;    </div><div class="line">    s_c = accept(s_s, (struct sockaddr*)&amp;from, &amp;len);</div><div class="line">    <span class="keyword">if</span>(s_c &gt; <span class="number">0</span>)             <span class="comment">//若连接成功</span></div><div class="line">    &#123; </div><div class="line">        <span class="keyword">int</span> err = pthread_create(&amp;thread, <span class="literal">NULL</span>, handle_request, (<span class="keyword">void</span>*)&amp;s_c); </div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>各客户端独自accept()，单客户端单线程，使用互斥锁</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">pthread_mutex_t</span> mutex = PTHREAD_MUTEX_INITIALIZER; <span class="comment">//静态初始化或使用函数p_pthread_mutex(&amp;mutex, NULL)</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> *<span class="title">handle_request</span><span class="params">(<span class="keyword">void</span> *arg)</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    <span class="keyword">int</span> s_s =*((<span class="keyword">int</span>*)arg);</div><div class="line">    ...</div><div class="line">    <span class="keyword">while</span>(<span class="number">1</span>)</div><div class="line">    &#123;</div><div class="line">        ...</div><div class="line">        pthread_mutex_lock(&amp;mutex);  <span class="comment">//进入互斥区</span></div><div class="line">        s_c = accept(s_s, (struct sockaddr*)&amp;from, &amp;len);</div><div class="line">        pthread_mutex_unlock(&amp;mutex); <span class="comment">//离开互斥区</span></div><div class="line">        ...</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/*主函数*/</span></div><div class="line">...</div><div class="line"><span class="keyword">for</span>(i=<span class="number">0</span>; i&lt;NUM; i++) <span class="comment">//建立线程池</span></div><div class="line">&#123;</div><div class="line">    pthread_create(&amp;thread[i], <span class="literal">NULL</span>, handle_request, (<span class="keyword">void</span>*)&amp;s_s);</div><div class="line">&#125;</div><div class="line"><span class="keyword">for</span>(i=<span class="number">0</span>; i&lt;NUM; i++)</div><div class="line">    pthread_join(thread[i], <span class="literal">NULL</span>); <span class="comment">//等待线程结束</span></div><div class="line"></div><div class="line">close(s_s);</div></pre></td></tr></table></figure>
+<h3 id="IO复用循环服务器"><a href="#IO复用循环服务器" class="headerlink" title="IO复用循环服务器"></a>IO复用循环服务器</h3><blockquote>
+<p>降低了系统切换的不必要的开支，将主要的系统处理能力集中在核心的业务上。这种服务器模型，在系统开始的时候，<br>建立多个不同工作类型的处理单元。在客户端连接到来的时候，将客户端的连接放到一个状态池中，对所有客户端的连接状态在一个处理单元中进行轮询处理。</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*主函数*/</span></div><div class="line">...</div><div class="line"><span class="keyword">pthread_t</span> thread[<span class="number">2</span>];</div><div class="line">pthread_create(thread[<span class="number">0</span>], <span class="literal">NULL</span>, handle_connect, (<span class="keyword">void</span>*)&amp;s_c); <span class="comment">//处理客户端连接</span></div><div class="line">pthread_create(thread[<span class="number">1</span>], <span class="literal">NULL</span>, handle_request, <span class="literal">NULL</span>); <span class="comment">//处理客户端请求</span></div><div class="line"></div><div class="line"><span class="keyword">for</span>(i=<span class="number">0</span>; i&lt;<span class="number">2</span>; i++)</div><div class="line">    pthread_join(thread[i], <span class="literal">NULL</span>);  <span class="comment">//等待线程结束</span></div><div class="line">close(s_s);</div><div class="line"></div><div class="line"><span class="comment">/*处理客户端连接*/</span></div><div class="line"><span class="keyword">int</span> connect_host[CLIENTNUM];</div><div class="line"><span class="keyword">int</span> connect_number;</div><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span>* <span class="title">handle_connect</span><span class="params">(<span class="keyword">void</span> *arg)</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    ...</div><div class="line">    <span class="keyword">while</span>(<span class="number">1</span>)</div><div class="line">    &#123;</div><div class="line">        <span class="keyword">int</span> s_c = accept(s_s, (struct sockaddr*)&amp;from, &amp;len);</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"A client connect from %s!\n"</span>, inet_ntoa(from.sin_addr));</div><div class="line">        <span class="comment">/*查找合适的位置，将客户端的文件描述符放入*/</span></div><div class="line">        <span class="keyword">int</span> i;</div><div class="line">        <span class="keyword">for</span>(i=<span class="number">0</span>; i&lt;CLIENTNUM; i++)</div><div class="line">        &#123;</div><div class="line">            <span class="keyword">if</span>(connect_host[i] == <span class="number">-1</span>)</div><div class="line">            &#123;</div><div class="line">                connect_host[i] = s_c;</div><div class="line">                connect_number++;</div><div class="line">                <span class="keyword">break</span>;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/*处理客户端请求*/</span></div><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span>* <span class="title">handle_request</span><span class="params">()</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    ...</div><div class="line">    fd_set scanfd; <span class="comment">//侦听描述符集合</span></div><div class="line">    <span class="keyword">int</span> maxfd = <span class="number">-1</span>; <span class="comment">//最大文件描述符</span></div><div class="line">    <span class="keyword">while</span>(<span class="number">1</span>)</div><div class="line">    &#123;</div><div class="line">        FD_ZERO(&amp;scanfd);</div><div class="line">        <span class="keyword">for</span>(i=<span class="number">0</span>; i&lt;CLIENTNUM; i++)</div><div class="line">        &#123;</div><div class="line">            <span class="keyword">if</span>(connect_host[i] != <span class="number">-1</span>)</div><div class="line">            &#123;</div><div class="line">                FD_SET(connect_host[i], &amp;scanfd);  <span class="comment">//将文件描述符放入集合</span></div><div class="line">                <span class="keyword">if</span>(connect_host[i] &gt; maxfd)      <span class="comment">//更新最大文件描述符</span></div><div class="line">                    maxfd = connect_host[i];</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">int</span> ret = select(maxfd+<span class="number">1</span>, &amp;scanfd, <span class="literal">NULL</span>, <span class="literal">NULL</span>, &amp;<span class="keyword">timeval_t</span>);</div><div class="line">        <span class="keyword">switch</span>(ret)</div><div class="line">        &#123;</div><div class="line">            <span class="keyword">case</span> <span class="number">0</span>:      <span class="comment">//超时</span></div><div class="line">                <span class="keyword">break</span>;</div><div class="line">            <span class="keyword">case</span> <span class="number">-1</span>：    <span class="comment">//错误发生</span></div><div class="line">                <span class="keyword">break</span>;</div><div class="line">            <span class="keyword">default</span>:</div><div class="line">                <span class="keyword">if</span>(connect_number &lt;= <span class="number">0</span>)</div><div class="line">                    <span class="keyword">break</span>;</div><div class="line">                <span class="keyword">for</span>(i=<span class="number">0</span>; i&lt;CLIENTNUM; i++)</div><div class="line">                &#123;</div><div class="line">                    <span class="keyword">if</span>(connect_host[i] != <span class="number">-1</span>)</div><div class="line">                        <span class="keyword">if</span>(FD_ISSET(connect_host[i], &amp;scanfd))</div><div class="line">                        &#123;</div><div class="line">                            <span class="comment">/*接收处理数据*/</span></div><div class="line">                        &#125;</div><div class="line">                    connect_host[i]=<span class="number">-1</span>;  <span class="comment">//更新文件描述符在状态表中的值</span></div><div class="line">                    connect_number--;   </div><div class="line">                    close(connect_host[i]);</div><div class="line">                &#125;</div><div class="line">                <span class="keyword">break</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="地址转换"><a href="#地址转换" class="headerlink" title="地址转换"></a>地址转换</h2><h3 id="IPV6"><a href="#IPV6" class="headerlink" title="IPV6"></a>IPV6</h3><ul>
+<li><p>单播地址</p>
+<ul>
+<li>全局可聚集单播地址</li>
+<li>站点本地地址</li>
+<li>链路本地地址</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>单播地址“::1”和“0:0:0:0:0:0:0:1”称为回环地址，节点向自己发送数据包时采用回环地址。</p>
+</blockquote>
+<ul>
+<li><p>多播地址</p>
+</li>
+<li><p>任播地址，发给一个组内的任意设备而不是所有设备</p>
+</li>
+</ul>
+<h2 id="数据包过滤"><a href="#数据包过滤" class="headerlink" title="数据包过滤"></a>数据包过滤</h2><h3 id="netfilter"><a href="#netfilter" class="headerlink" title="netfilter"></a>netfilter</h3><p><strong>nf_hook_ops构建钩子</strong></p>
+<p>nf_hook_ops是netfilter架构中的常用结构</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">nf_hook_ops</span> <span class="title">show_ops</span> = (&#123;</span><span class="literal">NULL</span>, <span class="literal">NULL</span>&#125;, </div><div class="line">        show_someinfo, PF_INET, NF_IP_POST_ROUTING, <span class="number">0</span>);</div></pre></td></tr></table></figure>
+<p>第一个参数标明是不是链表头，初始化值为{NULL, NULL}；第二个参数是回调函数,自定义原型如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="title">uf_hook_test</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">int</span> hooknum,</span></span></div><div class="line"><span class="function"><span class="params">    struct sk_buff *skb,</span></span></div><div class="line"><span class="function"><span class="params">    <span class="keyword">const</span> struct net_device *in,</span></span></div><div class="line"><span class="function"><span class="params">    <span class="keyword">const</span> struct net_device *out,</span></span></div><div class="line">    int (*okfn)(struct sk_buff *))</div><div class="line">&#123;</div><div class="line">    printk(KERN_ALERT <span class="string">"Hello hook!\n"</span>);</div><div class="line">    <span class="keyword">return</span> NF_ACCEPT;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>第三个是协议族；<br>第四个是钩子的挂接点，有五个，分别为：</p>
+<ul>
+<li><p>NF_IP_PRE_ROUTING 进入网络层而没有进行路由</p>
+</li>
+<li><p>NF_IP_FORWARD 接收到的数据向另一个网卡进行转发之前</p>
+</li>
+<li><p>NF_IP_POST_ROUTING 通过网络设备转发出去的包经过此点</p>
+</li>
+<li><p>NF_IP_LOCAL_IN 经过路由后，确定是本地报文时经过</p>
+</li>
+<li><p>NF_IP_LOCAL_OUT 本地报文做发送路由之前</p>
+</li>
+</ul>
+<p>第五个参数为优先级，值越小优先级越高，默认为继承,0值即NF_IP_PRI_FILTER</p>
+<p><strong>注册钩子函数</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="keyword">int</span> __<span class="function">init <span class="title">init</span><span class="params">()</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    <span class="keyword">return</span> nf_register_hook(&amp;show_ops);</div><div class="line">&#125;</div><div class="line">module_init(init);</div></pre></td></tr></table></figure>
+<p><strong>注销钩子函数</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="keyword">void</span> __<span class="function"><span class="built_in">exit</span> <span class="title">exit</span><span class="params">()</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    nf_unregister_hook(&amp;show_ops);</div><div class="line">&#125;</div><div class="line">module_exit(<span class="built_in">exit</span>);</div></pre></td></tr></table></figure>
+<blockquote>
+<p>通过数组可注册或注销多个钩子函数</p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux/" rel="tag"># linux</a>
+          
+            <a href="/tags/web/" rel="tag"># web</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/30/databinding-in-recyclerview/" rel="next" title="Data Binding在RecyclerView里的应用">
+                <i class="fa fa-chevron-left"></i> Data Binding在RecyclerView里的应用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/10/01/stack-min-o1/" rel="prev" title="设计一个操作时间复杂度为O(1)的栈">
+                设计一个操作时间复杂度为O(1)的栈 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基础部分"><span class="nav-number">1.</span> <span class="nav-text">基础部分</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#动态链接库"><span class="nav-number">1.1.</span> <span class="nav-text">动态链接库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动态加载库"><span class="nav-number">1.2.</span> <span class="nav-text">动态加载库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进程的产生方式"><span class="nav-number">1.3.</span> <span class="nav-text">进程的产生方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据链路层"><span class="nav-number">1.4.</span> <span class="nav-text">数据链路层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#网络层"><span class="nav-number">1.5.</span> <span class="nav-text">网络层</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#协议报文"><span class="nav-number">2.</span> <span class="nav-text">协议报文</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP"><span class="nav-number">2.1.</span> <span class="nav-text">TCP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UDP"><span class="nav-number">2.2.</span> <span class="nav-text">UDP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ARP，地址解析协议"><span class="nav-number">2.3.</span> <span class="nav-text">ARP，地址解析协议</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#套接字"><span class="nav-number">3.</span> <span class="nav-text">套接字</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#查看文件状态"><span class="nav-number">3.1.</span> <span class="nav-text">查看文件状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#套接字描述符判定函数issockettype"><span class="nav-number">3.2.</span> <span class="nav-text">套接字描述符判定函数issockettype()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看主机信息"><span class="nav-number">3.3.</span> <span class="nav-text">查看主机信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IO模型："><span class="nav-number">3.4.</span> <span class="nav-text">IO模型：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UDP乱序"><span class="nav-number">3.5.</span> <span class="nav-text">UDP乱序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UDP中使用connect-函数"><span class="nav-number">3.6.</span> <span class="nav-text">UDP中使用connect()函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Unix域套接字"><span class="nav-number">3.7.</span> <span class="nav-text">Unix域套接字</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#广播、多播"><span class="nav-number">4.</span> <span class="nav-text">广播、多播</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#多播"><span class="nav-number">4.1.</span> <span class="nav-text">多播</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原始套接字"><span class="nav-number">5.</span> <span class="nav-text">原始套接字</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#套接字选项-SOL-SOCKET"><span class="nav-number">5.1.</span> <span class="nav-text">套接字选项(SOL_SOCKET)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#套接字选项（IPPROTO-IP和IPPROTO-TCP）"><span class="nav-number">5.2.</span> <span class="nav-text">套接字选项（IPPROTO_IP和IPPROTO_TCP）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ioctl-函数和fcntl-函数"><span class="nav-number">5.3.</span> <span class="nav-text">ioctl()函数和fcntl()函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#原始套接字-1"><span class="nav-number">5.4.</span> <span class="nav-text">原始套接字</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#洪水攻击"><span class="nav-number">5.5.</span> <span class="nav-text">洪水攻击</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C-S程序设计范式"><span class="nav-number">6.</span> <span class="nav-text">C/S程序设计范式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#套接字服务器类型"><span class="nav-number">6.1.</span> <span class="nav-text">套接字服务器类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP并发服务器"><span class="nav-number">6.2.</span> <span class="nav-text">TCP并发服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IO复用循环服务器"><span class="nav-number">6.3.</span> <span class="nav-text">IO复用循环服务器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#地址转换"><span class="nav-number">7.</span> <span class="nav-text">地址转换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IPV6"><span class="nav-number">7.1.</span> <span class="nav-text">IPV6</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据包过滤"><span class="nav-number">8.</span> <span class="nav-text">数据包过滤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#netfilter"><span class="nav-number">8.1.</span> <span class="nav-text">netfilter</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="databinding,recyclerview," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="关于Data BindingData Binding 是谷歌发布的一个MVVM的框架，使用它可以避免许多“findviewbyid”这样的冗余代码，大大提高了编码效率。大家都知道，MVVM即Model-View-ViewModel，Model的作用是提供数据，而View负责显示数据，ViewModel作为桥梁把前面进行双向绑定。当然，它的使用有对IDE有一定的要求，Android Studio的g">
+<meta name="keywords" content="databinding,recyclerview">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Data Binding在RecyclerView里的应用">
+<meta property="og:url" content="http://witchiman.github.io/2016/08/30/databinding-in-recyclerview/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="关于Data BindingData Binding 是谷歌发布的一个MVVM的框架，使用它可以避免许多“findviewbyid”这样的冗余代码，大大提高了编码效率。大家都知道，MVVM即Model-View-ViewModel，Model的作用是提供数据，而View负责显示数据，ViewModel作为桥梁把前面进行双向绑定。当然，它的使用有对IDE有一定的要求，Android Studio的g">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.404Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Data Binding在RecyclerView里的应用">
+<meta name="twitter:description" content="关于Data BindingData Binding 是谷歌发布的一个MVVM的框架，使用它可以避免许多“findviewbyid”这样的冗余代码，大大提高了编码效率。大家都知道，MVVM即Model-View-ViewModel，Model的作用是提供数据，而View负责显示数据，ViewModel作为桥梁把前面进行双向绑定。当然，它的使用有对IDE有一定的要求，Android Studio的g">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2016/08/30/databinding-in-recyclerview/"/>
+
+
+
+
+
+  <title>Data Binding在RecyclerView里的应用 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2016/08/30/databinding-in-recyclerview/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Data Binding在RecyclerView里的应用</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-08-30T15:19:08+08:00">
+                2016-08-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="关于Data-Binding"><a href="#关于Data-Binding" class="headerlink" title="关于Data Binding"></a>关于Data Binding</h2><p>Data Binding 是谷歌发布的一个MVVM的框架，使用它可以避免许多“findviewbyid”这样的冗余代码，大大提高了编码效率。大家都知道，MVVM即Model-View-ViewModel，Model的作用是提供数据，而View负责显示数据，ViewModel作为桥梁把前面进行双向绑定。当然，它的使用有对IDE有一定的要求，Android Studio的gradle版本不低于1.5.0-alpha1，系统版本要大于2.1。</p>
+<p>RecyclerView是谷歌官方推出的用来取代ListView的一个组件，有着比后者更灵活和可控的特性。本文主要讲解Data Binding在到RecyclerView里的具体应用。</p>
+<a id="more"></a>
+<h2 id="预备工作"><a href="#预备工作" class="headerlink" title="预备工作"></a>预备工作</h2><p>build.gradle里加入如下代码，起用Android对Data Binding的支持 </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">android &#123;</div><div class="line">    ...</div><div class="line">    dataBinding &#123;</div><div class="line">        enabled = <span class="keyword">true</span></div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>同样在build.gradle里添加对RecyclerView的依赖</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">dependencies &#123;</div><div class="line">    compile <span class="string">'com.android.support:recyclerview-v7:24.1.1'</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="新建一个POJO"><a href="#新建一个POJO" class="headerlink" title="新建一个POJO"></a>新建一个POJO</h2><p>让新建的People类继承BaseObservable后，不用再写各个属性的setter()和getter()。当然，如果你不嫌累，更喜欢用传统的方法，<br>那就不用继承BaseObservable，按照原来的方法写代码就行。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">People</span> <span class="keyword">extends</span> <span class="title">BaseObservable</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">final</span> ObservableField&lt;String&gt; name = <span class="keyword">new</span> ObservableField&lt;&gt;();</div><div class="line">    <span class="keyword">public</span> <span class="keyword">final</span> ObservableField&lt;String&gt; gender = <span class="keyword">new</span> ObservableField&lt;&gt;();</div><div class="line">    <span class="keyword">public</span> <span class="keyword">final</span> ObservableInt age = <span class="keyword">new</span> ObservableInt();</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="布局文件"><a href="#布局文件" class="headerlink" title="布局文件"></a>布局文件</h2><ul>
+<li>item_people</li>
+</ul>
+<p>LinearLayout里的代码和原来的一样，只不过使用Data Binding，需要在外面加上&lt; layout &gt; 标签，在&lt; data &gt;里定义变量，可以使用import引入包。<br>type后跟包名。在TextView可以这样使用变量值 <em>android:text=”@{people.name}”</em> 。当引入包有类名冲突时，可以加alias以区分。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version="1.0" encoding="utf-8"?&gt;</div><div class="line"><span class="tag">&lt;<span class="name">layout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">data</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">import</span> <span class="attr">type</span>=<span class="string">"com.hui.databingding_recyclerview.People"</span>/&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">variable</span> <span class="attr">name</span>=<span class="string">"people"</span> <span class="attr">type</span>=<span class="string">"People"</span>/&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">data</span>&gt;</span></div><div class="line"></div><div class="line">    <span class="tag">&lt;<span class="name">LinearLayout</span></span></div><div class="line"><span class="tag">        <span class="attr">android:orientation</span>=<span class="string">"vertical"</span></span></div><div class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></div><div class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">TextView</span></span></div><div class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></div><div class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></div><div class="line"><span class="tag">            <span class="attr">android:text</span>=<span class="string">"@&#123;people.name&#125;"</span></span></div><div class="line"><span class="tag">            <span class="attr">android:textColor</span>=<span class="string">"#000"</span></span></div><div class="line"><span class="tag">            <span class="attr">android:layout_marginLeft</span>=<span class="string">"15dp"</span></span></div><div class="line"><span class="tag">            <span class="attr">android:textSize</span>=<span class="string">"16sp"</span>/&gt;</span></div><div class="line">      ...</div><div class="line">    <span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></div><div class="line"></div><div class="line"><span class="tag">&lt;/<span class="name">layout</span>&gt;</span></div></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>注</strong>：控件引用变量值时，变量后面的属性要保证类型正确，非String类型要转换成String类型。比如People的age属性为int类型，如果代码这样写<em>android:text=”@{people.age}”</em>,会引起类似<em>android.content.res.Resources$NotFoundException: String resource ID #0x19 </em>的异常。<br>正确的代码应为<em>android:text=’@{“”+people.age}’</em>。</p>
+</blockquote>
+<ul>
+<li>activity_main</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version="1.0" encoding="utf-8"?&gt;</div><div class="line"><span class="tag">&lt;<span class="name">layout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></div><div class="line"><span class="tag">    <span class="attr">xmlns:tools</span>=<span class="string">"http://schemas.android.com/tools"</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">data</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">import</span> <span class="attr">type</span>=<span class="string">"com.hui.databingding_recyclerview.MainActivity"</span>/&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">data</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">RelativeLayout</span> </span></div><div class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></div><div class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span> </span></div><div class="line"><span class="tag">        <span class="attr">tools:context</span>=<span class="string">"com.hui.databingding_recyclerview.MainActivity"</span>&gt;</span></div><div class="line"></div><div class="line">        <span class="tag">&lt;<span class="name">android.support.v7.widget.RecyclerView</span></span></div><div class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">"@+id/rv_people"</span></span></div><div class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></div><div class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span>&gt;</span><span class="tag">&lt;/<span class="name">android.support.v7.widget.RecyclerView</span>&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">layout</span>&gt;</span></div></pre></td></tr></table></figure>
+<h2 id="自定义Adapter"><a href="#自定义Adapter" class="headerlink" title="自定义Adapter"></a>自定义Adapter</h2><p>建新一个MyAdapter类，继承<em>RecyclerView.Adapter</em>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyAdapter</span> <span class="keyword">extends</span> <span class="title">RecyclerView</span>.<span class="title">Adapter</span>&lt;<span class="title">MyAdapter</span>.<span class="title">ViewHolder</span>&gt; </span>&#123;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>建新内部类ViewHolder。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">...</div><div class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">ViewHolder</span> <span class="keyword">extends</span> <span class="title">RecyclerView</span>.<span class="title">ViewHolder</span></span>&#123;</div><div class="line">        ItemPeopleBinding binding = <span class="keyword">null</span>;</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="title">ViewHolder</span><span class="params">(ItemPeopleBinding binding)</span> </span>&#123;</div><div class="line">            <span class="keyword">super</span>(binding.getRoot());</div><div class="line">            <span class="keyword">this</span>.binding = binding;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">bindto</span><span class="params">(People people)</span> </span>&#123;</div><div class="line">            binding.setPeople(people);</div><div class="line">            binding.executePendingBindings();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">...</div></pre></td></tr></table></figure>
+<p>实现<em>RecyclerView.Adapter </em>的onCreateViewHolder()、onBindViewHolder()和getItemCount()方法。<br><em>ItemPeopleBinding</em>是由系统根据itemt_people的xml文件自动生成的。通过<em>bind.getRoot() </em>可获取对应的View对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyAdapter</span> <span class="keyword">extends</span> <span class="title">RecyclerView</span>.<span class="title">Adapter</span>&lt;<span class="title">MyAdapter</span>.<span class="title">ViewHolder</span>&gt; </span>&#123;</div><div class="line"> ...</div><div class="line"> <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> ViewHolder <span class="title">onCreateViewHolder</span><span class="params">(ViewGroup parent, <span class="keyword">int</span> viewType)</span> </span>&#123;</div><div class="line">        LayoutInflater inflater = LayoutInflater.from(parent.getContext());</div><div class="line"></div><div class="line">        ItemPeopleBinding binding = ItemPeopleBinding.inflate(inflater,parent,<span class="keyword">false</span>);</div><div class="line">        binding.getRoot().setOnClickListener(<span class="keyword">this</span>);  <span class="comment">//监听点击事件</span></div><div class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ViewHolder(binding);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onBindViewHolder</span><span class="params">(ViewHolder holder, <span class="keyword">int</span> position)</span> </span>&#123;</div><div class="line">        holder.bindto(peoples.get(position));</div><div class="line">        holder.binding.getRoot().setTag(peoples.get(position));  <span class="comment">//方便在别的地方调用</span></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getItemCount</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (peoples == <span class="keyword">null</span>)</div><div class="line">            <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">        <span class="keyword">return</span> peoples.size();</div><div class="line">    &#125;</div><div class="line">    ...</div></pre></td></tr></table></figure>
+<h2 id="自定义点击事件"><a href="#自定义点击事件" class="headerlink" title="自定义点击事件"></a>自定义点击事件</h2><p>首先，定义一个接口用来回调。由于RecyclerView没有提供点击事件的接口，需要自己实现，这里让MyAdapter类实现<em>View.OnclickListener</em>用来添加自定义的点击事件。通过View的SetOnClickListner()传入this，因为MyAdapter已经实现了OnClickListener接口，在MyAdapter中的OnClick()方法里调用自定义接口的方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyAdapter</span> <span class="keyword">extends</span> <span class="title">RecyclerView</span>.<span class="title">Adapter</span>&lt;<span class="title">MyAdapter</span>.<span class="title">ViewHolder</span>&gt; <span class="keyword">implements</span> <span class="title">View</span>.<span class="title">OnClickListener</span></span>&#123;</div><div class="line">    ...</div><div class="line">    <span class="keyword">private</span> OnRecyclerViewItemClickListener mOnItemClickListener = <span class="keyword">null</span>;</div><div class="line">     </div><div class="line">    <span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">OnRecyclerViewItemClickListener</span> </span>&#123;</div><div class="line">        <span class="function"><span class="keyword">void</span> <span class="title">OnItemClick</span><span class="params">(View view, People people)</span></span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">     <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View v)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span>(<span class="keyword">this</span>.mOnItemClickListener != <span class="keyword">null</span>) &#123;</div><div class="line">            mOnItemClickListener.OnItemClick(v,((People) v.getTag()));</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setOnItemClickListener</span><span class="params">(OnRecyclerViewItemClickListener onItemClickListener)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.mOnItemClickListener = onItemClickListener;</div><div class="line">    &#125;</div><div class="line">    ...</div></pre></td></tr></table></figure>
+<h2 id="MainActivity"><a href="#MainActivity" class="headerlink" title="MainActivity"></a>MainActivity</h2><p>先获取ActivityMainbinding对象，它是系统根据activity_main.xml生成的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line">   <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</div><div class="line">       <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line">       ActivityMainBinding binding = DataBindingUtil.setContentView(<span class="keyword">this</span>, R.layout.activity_main);</div><div class="line">       ...</div></pre></td></tr></table></figure>
+<p>初始化一个队列</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> List&lt;People&gt; peoples = <span class="keyword">new</span> ArrayList&lt;People&gt;();</div><div class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;=<span class="number">10</span>; i++) &#123;</div><div class="line">           People people = <span class="keyword">new</span> People();</div><div class="line">           people.name.set(<span class="string">"Jim"</span> + i);</div><div class="line">           Random random = <span class="keyword">new</span> Random();</div><div class="line">           people.gender.set(random.nextBoolean() ? <span class="string">"male"</span>:<span class="string">"female"</span> );</div><div class="line">           people.age.set(<span class="number">20</span> + random.nextInt(<span class="number">10</span>));</div><div class="line">           peoples.add(people);</div><div class="line">       &#125;</div></pre></td></tr></table></figure>
+<p>建新一个MyAdapter对象，并实现OnRecyclerViewItemClickListener()</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> MyAdapter adapter = <span class="keyword">new</span> MyAdapter(peoples);</div><div class="line"></div><div class="line">adapter.setOnItemClickListener(<span class="keyword">new</span> MyAdapter.OnRecyclerViewItemClickListener() &#123;</div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">OnItemClick</span><span class="params">(View view, People people)</span> </span>&#123;</div><div class="line">        Toast.makeText(MainActivity.<span class="keyword">this</span>, <span class="string">"你点击的是："</span> + people.name.get(), Toast.LENGTH_SHORT).show();</div><div class="line">    &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<p>设置adapter</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"> LinearLayoutManager layoutManager = <span class="keyword">new</span> LinearLayoutManager(<span class="keyword">this</span>,LinearLayoutManager.VERTICAL,</div><div class="line">            <span class="keyword">false</span>);</div><div class="line">binding.recyclerView.setLayoutManager(layoutManager);</div><div class="line">binding.recyclerView.setAdapter(adapter);</div></pre></td></tr></table></figure>
+<blockquote>
+<p>Model通过ViewModel（自定义的类，这里是People）与View绑定后，每次数据发生变动后，View会自动地同步更新。这样，即使在主线程以外的线程里更新数据，不必通知主线程，View也能接收到通知自动更新。</p>
+</blockquote>
+<p><a href="https://github.com/witchiman/GitDemo/tree/master/Android/Others/DataBingding_RecyclerView" target="_blank" rel="external">源码</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/databinding/" rel="tag"># databinding</a>
+          
+            <a href="/tags/recyclerview/" rel="tag"># recyclerview</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/25/poem-yaanxing/" rel="next" title="雅安实践行">
+                <i class="fa fa-chevron-left"></i> 雅安实践行
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/09/05/unix-network-programming/" rel="prev" title="《UNIX网络编程》读书笔记">
+                《UNIX网络编程》读书笔记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#关于Data-Binding"><span class="nav-number">1.</span> <span class="nav-text">关于Data Binding</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#预备工作"><span class="nav-number">2.</span> <span class="nav-text">预备工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#新建一个POJO"><span class="nav-number">3.</span> <span class="nav-text">新建一个POJO</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#布局文件"><span class="nav-number">4.</span> <span class="nav-text">布局文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义Adapter"><span class="nav-number">5.</span> <span class="nav-text">自定义Adapter</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义点击事件"><span class="nav-number">6.</span> <span class="nav-text">自定义点击事件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MainActivity"><span class="nav-number">7.</span> <span class="nav-text">MainActivity</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

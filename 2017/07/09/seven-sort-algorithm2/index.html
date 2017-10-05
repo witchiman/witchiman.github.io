@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="algorithm," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="树表查找是对树型存储结构所做的查找。树型存储结构是一种多链表，该表中的每个结点包含有一个数据域和多个指针域，每个指针域指向一个后继结点。">
+<meta name="keywords" content="algorithm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="常见的查找算法（中）树表查找">
+<meta property="og:url" content="http://witchiman.github.io/2017/07/09/seven-sort-algorithm2/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="树表查找是对树型存储结构所做的查找。树型存储结构是一种多链表，该表中的每个结点包含有一个数据域和多个指针域，每个指针域指向一个后继结点。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://my.csdn.net/uploads/201204/06/1333691114_6839.jpg">
+<meta property="og:image" content="http://images.cnitblog.com/blog/94031/201403/242110240767812.png">
+<meta property="og:image" content="http://images.cnitblog.com/blog/94031/201403/252248450292152.png">
+<meta property="og:image" content="http://images.cnitblog.com/blog/94031/201403/252249082017906.png">
+<meta property="og:image" content="http://images.cnitblog.com/blog/94031/201403/252249104513019.png">
+<meta property="og:image" content="http://images.cnitblog.com/blog/94031/201403/270024368439888.png">
+<meta property="og:image" content="http://images.cnitblog.com/blog/94031/201403/270024403113529.png">
+<meta property="og:image" content="http://images.cnitblog.com/blog/94031/201403/270027368747653.png">
+<meta property="og:image" content="http://images.cnitblog.com/blog/94031/201403/270027378905711.png">
+<meta property="og:image" content="http://images.cnitblog.com/blog/94031/201403/290047034539184.png">
+<meta property="og:image" content="http://files.cnblogs.com/yangecnu/btreebuild.gif">
+<meta property="og:image" content="http://images.cnitblog.com/blog/94031/201403/290050048129679.png">
+<meta property="og:image" content="http://files.cnblogs.com/yangecnu/Bplustreebuild.gif">
+<meta property="og:image" content="http://images.cnitblog.com/blog/94031/201403/290050088914733.png">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.903Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="常见的查找算法（中）树表查找">
+<meta name="twitter:description" content="树表查找是对树型存储结构所做的查找。树型存储结构是一种多链表，该表中的每个结点包含有一个数据域和多个指针域，每个指针域指向一个后继结点。">
+<meta name="twitter:image" content="http://my.csdn.net/uploads/201204/06/1333691114_6839.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2017/07/09/seven-sort-algorithm2/"/>
+
+
+
+
+
+  <title>常见的查找算法（中）树表查找 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2017/07/09/seven-sort-algorithm2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">常见的查找算法（中）树表查找</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-09T09:06:02+08:00">
+                2017-07-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>树表查找是对树型存储结构所做的查找。树型存储结构是一种多链表，该表中的每个结点包含有一个数据域和多个指针域，每个指针域指向一个后继结点。</p>
+<a id="more"></a>
+<blockquote>
+<p>原文：<a href="http://www.cnblogs.com/maybe2030/p/4715035.html，这里在原文基础上加以补充修改。" target="_blank" rel="external">http://www.cnblogs.com/maybe2030/p/4715035.html，这里在原文基础上加以补充修改。</a></p>
+</blockquote>
+<h3 id="最简单的树表查找算法——二叉树查找算法"><a href="#最简单的树表查找算法——二叉树查找算法" class="headerlink" title="最简单的树表查找算法——二叉树查找算法"></a>最简单的树表查找算法——二叉树查找算法</h3><p><strong>基本思想：</strong>二叉查找树是先对待查找的数据进行生成树，确保树的左分支的值小于右分支的值，然后在就行和每个节点的父节点比较大小，查找最适合的范围。 这个算法的查找效率很高，但是如果使用这种查找方法要首先创建树。 </p>
+<p><strong>二叉查找树</strong>（BinarySearch Tree，也叫二叉搜索树，或称二叉排序树Binary Sort Tree）或者是一棵空树，或者是具有下列性质的二叉树：</p>
+<ul>
+<li>若任意节点的左子树不空，则左子树上所有结点的值均小于它的根结点的值；</li>
+<li>若任意节点的右子树不空，则右子树上所有结点的值均大于它的根结点的值；</li>
+<li>任意节点的左、右子树也分别为二叉查找树。</li>
+</ul>
+<p><strong>二叉查找树性质</strong>：<strong>对二叉查找树进行中序遍历，即可得到有序的数列。</strong></p>
+<p>不同形态的二叉查找树如下图所示：</p>
+<p><img src="http://my.csdn.net/uploads/201204/06/1333691114_6839.jpg" alt="img"></p>
+<p>有关二叉查找树的查找、插入、删除等操作的详细讲解，请移步<a href="http://www.cnblogs.com/yangecnu/p/Introduce-Binary-Search-Tree.html" target="_blank" rel="external">浅谈算法和数据结构: 七 二叉查找树</a>。</p>
+<p><strong>复杂度分析：它和二分查找一样，插入和查找的时间复杂度均为O(logn)，但是在最坏的情况下仍然会有O(n)的时间复杂度。原因在于插入和删除元素的时候，树没有保持平衡（比如，我们查找上图（b）中的“93”，我们需要进行n次查找操作）。我们追求的是在最坏的情况下仍然有较好的时间复杂度，这就是平衡查找树设计的初衷。</strong></p>
+<p>下图为二叉树查找和顺序查找以及二分查找性能的对比图：</p>
+<p><strong><img src="http://images.cnitblog.com/blog/94031/201403/242110240767812.png" alt="img"></strong></p>
+<p>基于二叉查找树进行优化，进而可以得到其他的树表查找算法，如平衡树、红黑树等高效算法。</p>
+<h3 id="平衡查找树之2-3查找树（2-3-Tree）"><a href="#平衡查找树之2-3查找树（2-3-Tree）" class="headerlink" title="平衡查找树之2-3查找树（2-3 Tree）"></a>平衡查找树之2-3查找树（2-3 Tree）</h3><p>一棵标准的二叉查找树中的结点称为2-结点（含有一个键和两条链接），现在引入3-结点，它含有两个键和三条链接。2-结点和3-结点中的每条链接都对应其中保存的键所产生的一个区间。</p>
+<p><strong>2-3查找树定义</strong>： 一棵2-3查找树或为一棵空树，或由以下结点组成：</p>
+<ul>
+<li>2-结点，含有一个键（及其对应的值）和两条链接，左链接指向2-3树中的键都小于该结点，右链接指向的2-3树中的键都大于该结点。</li>
+<li>3-结点，含有两个键（及其对应的值）和三条链接，左链接指向2-3对中的键都小于该结点，中链接指向的2-3树中的键都位于该结点的两个键之间，右链接指向的2-3树中的键都大于该结点。</li>
+</ul>
+<p>一棵完美平衡的2-3查找树中的所有空链接到根结点的距离都应该是相同的。</p>
+<p><a href="http://images.cnitblog.com/blog/94031/201403/252248421868855.png" target="_blank" rel="external"><img src="http://images.cnitblog.com/blog/94031/201403/252248450292152.png" alt="Definition of 2-3 tree"></a></p>
+<p><strong>2-3查找树的性质：</strong></p>
+<ul>
+<li>如果中序遍历2-3查找树，就可以得到排好序的序列；</li>
+<li>在一个完全平衡的2-3查找树中，根节点到每一个为空节点的距离都相同。（这也是平衡树中“平衡”一词的概念，根节点到叶节点的最长距离对应于查找算法的最坏情况，而平衡树中根节点到叶节点的距离都一样，最坏情况也具有对数复杂度。）</li>
+</ul>
+<p>第二个性质如下图所示：</p>
+<p><img src="http://images.cnitblog.com/blog/94031/201403/252249082017906.png" alt="img"></p>
+<p><strong>复杂度分析：</strong></p>
+<p>2-3树的查找效率与树的高度是息息相关的。</p>
+<ul>
+<li>在最坏的情况下，也就是所有的节点都是2-node节点，查找效率为lgN</li>
+</ul>
+<ul>
+<li>在最好的情况下，所有的节点都是3-node节点，查找效率为log3N约等于0.631lgN</li>
+</ul>
+<p>距离来说，对于1百万个节点的2-3树，树的高度为12-20之间，对于10亿个节点的2-3树，树的高度为18-30之间。</p>
+<p>对于插入来说，只需要常数次操作即可完成，因为他只需要修改与该节点关联的节点即可，不需要检查其他节点，所以效率和查找类似。下面是2-3查找树的效率：</p>
+<p><a href="http://images.cnitblog.com/blog/94031/201403/252249087649035.png" target="_blank" rel="external"><img src="http://images.cnitblog.com/blog/94031/201403/252249104513019.png" alt="analysis of 2-3 tree"></a></p>
+<h3 id="平衡查找树之红黑树（Red-Black-Tree"><a href="#平衡查找树之红黑树（Red-Black-Tree" class="headerlink" title="平衡查找树之红黑树（Red-Black Tree)"></a>平衡查找树之红黑树（Red-Black Tree)</h3><p>2-3查找树能保证在插入元素之后能保持树的平衡状态，最坏情况下即所有的子节点都是2-node，树的高度为lgn，从而保证了最坏情况下的时间复杂度。但是2-3树实现起来比较复杂，于是就有了一种简单实现2-3树的数据结构，即红黑树（Red-Black Tree）。</p>
+<p><strong>基本思想：</strong>红黑树的思想就是对2-3查找树进行编码，尤其是对2-3查找树中的3-nodes节点添加额外的信息。红黑树中将节点之间的链接分为两种不同类型，红色链接，他用来链接两个2-nodes节点来表示一个3-nodes节点。黑色链接用来链接普通的2-3节点。特别的，使用红色链接的两个2-nodes来表示一个3-nodes节点，并且向左倾斜，即一个2-node是另一个2-node的左子节点。这种做法的好处是查找的时候不用做任何修改，和普通的二叉查找树相同。</p>
+<p><img src="http://images.cnitblog.com/blog/94031/201403/270024368439888.png" alt="Red black tree"></p>
+<p><strong>红黑树的定义：</strong></p>
+<p>红黑树是一种具有红色和黑色链接的平衡查找树，同时满足：</p>
+<ul>
+<li>红色节点向左倾斜</li>
+<li>一个节点不可能有两个红色链接</li>
+<li>整个树完全黑色平衡，即从根节点到所以叶子结点的路径上，黑色链接的个数都相同。</li>
+</ul>
+<p>下图可以看到红黑树其实是2-3树的另外一种表现形式：如果我们将红色的连线水平绘制，那么他链接的两个2-node节点就是2-3树中的一个3-node节点了。</p>
+<p><a href="http://images.cnitblog.com/blog/94031/201403/270024386864059.png" target="_blank" rel="external"><img src="http://images.cnitblog.com/blog/94031/201403/270024403113529.png" alt="1-1 correspondence between 2-3 and LLRB"></a></p>
+<p><strong>红黑树的性质</strong>：<strong>整个树完全黑色平衡，即从根节点到所以叶子结点的路径上，黑色链接的个数都相同（2-3树的第2）性质，从根节点到叶子节点的距离都相等）。</strong></p>
+<p><strong>复杂度分析：</strong>最坏的情况就是，红黑树中除了最左侧路径全部是由3-node节点组成，即红黑相间的路径长度是全黑路径长度的2倍。</p>
+<p>下图是一个典型的红黑树，从中可以看到最长的路径(红黑相间的路径)是最短路径的2倍：</p>
+<p><a href="http://images.cnitblog.com/blog/94031/201403/270027354528654.png" target="_blank" rel="external"><img src="http://images.cnitblog.com/blog/94031/201403/270027368747653.png" alt="a typic red black tree"></a></p>
+<blockquote>
+<p> 红黑树的平均高度大约为logn。</p>
+</blockquote>
+<p>下图是红黑树在各种情况下的时间复杂度，可以看出红黑树是2-3查找树的一种实现，它能保证最坏情况下仍然具有对数的时间复杂度。</p>
+<p><img src="http://images.cnitblog.com/blog/94031/201403/270027378905711.png" alt="img"></p>
+<p>红黑树这种数据结构应用十分广泛，在多种编程语言中被用作符号表的实现，如：</p>
+<ul>
+<li>Java中的java.util.TreeMap,java.util.TreeSet；</li>
+<li>C++ STL中的：map,multimap,multiset；</li>
+<li>.NET中的：SortedDictionary,SortedSet 等。</li>
+</ul>
+<h3 id="B树和B-树（B-Tree-B-Tree）"><a href="#B树和B-树（B-Tree-B-Tree）" class="headerlink" title="B树和B+树（B Tree/B+ Tree）"></a>B树和B+树（B Tree/B+ Tree）</h3><p>平衡查找树中的2-3树以及其实现红黑树。2-3树种，一个节点最多有2个key，而红黑树则使用染色的方式来标识这两个key。</p>
+<p>维基百科对B树的定义为“在计算机科学中，B树（B-tree）是一种树状数据结构，它能够存储数据、对其进行排序并允许以O(log n)的时间复杂度运行进行查找、顺序读取、插入和删除的数据结构。B树，概括来说是一个节点可以拥有多于2个子节点的二叉查找树。与自平衡二叉查找树不同，B树为系统最优化<strong>大块数据的读和写操作</strong>。B-tree算法减少定位记录时所经历的中间过程，从而加快存取速度。普遍运用在<strong>数据库</strong>和<strong>文件系统</strong>。</p>
+<p><strong>B树定义：</strong></p>
+<p><strong>B树</strong>可以看作是对2-3查找树的一种扩展，即他允许每个节点有M-1个子节点。</p>
+<ul>
+<li>根节点至少有两个子节点</li>
+<li>每个节点有M-1个key，并且以升序排列</li>
+<li>位于M-1和M key的子节点的值位于M-1 和M key对应的Value之间</li>
+<li>其它节点至少有M/2个子节点</li>
+</ul>
+<p>下图是一个M=4 阶的B树:</p>
+<p><img src="http://images.cnitblog.com/blog/94031/201403/290047034539184.png" alt="img"></p>
+<p>可以看到B树是2-3树的一种扩展，他允许一个节点有多于2个的元素。B树的插入及平衡化操作和2-3树很相似，这里就不介绍了。下面是往B树中依次插入</p>
+<p><strong>6 10 4 14 5 11 15 3 2 12 1 7 8 8 6 3 6 21 5 15 15 6 32 23 45 65 7 8 6 5 4</strong></p>
+<p>的演示动画：</p>
+<p><img src="http://files.cnblogs.com/yangecnu/btreebuild.gif" alt="img"></p>
+<p><strong>B+树定义：</strong></p>
+<p><strong>B+</strong>树是对B树的一种变形树，它与B树的差异在于：</p>
+<ul>
+<li>有k个子结点的结点必然有k个关键码；</li>
+<li>非叶结点仅具有索引作用，跟记录有关的信息均存放在叶结点中。</li>
+<li>树的所有叶结点构成一个有序链表，可以按照关键码排序的次序遍历全部记录。</li>
+</ul>
+<p>如下图，是一个B+树:</p>
+<p><img src="http://images.cnitblog.com/blog/94031/201403/290050048129679.png" alt="B Plus tree"></p>
+<p>下图是B+树的插入动画：</p>
+<p> <img src="http://files.cnblogs.com/yangecnu/Bplustreebuild.gif" alt="img"></p>
+<p><strong>B和B+树的区别在于，B+树的非叶子结点只包含导航信息，不包含实际的值，所有的叶子结点和相连的节点使用链表相连，便于区间查找和遍历。</strong></p>
+<p>B+ 树的优点在于：</p>
+<ul>
+<li>由于B+树在内部节点上不好含数据信息，因此在内存页中能够存放更多的key。 数据存放的更加紧密，具有更好的空间局部性。因此访问叶子几点上关联的数据也具有更好的缓存命中率。</li>
+<li>B+树的叶子结点都是相链的，因此对整棵树的便利只需要一次线性遍历叶子结点即可。而且由于数据顺序排列并且相连，所以便于区间查找和搜索。而B树则需要进行每一层的递归遍历。相邻的元素可能在内存中不相邻，所以缓存命中性没有B+树好。</li>
+</ul>
+<p><strong>但是B树也有优点，其优点在于，由于B树的每一个节点都包含key和value，因此经常访问的元素可能离根节点更近，因此访问也更迅速。</strong></p>
+<p>下面是B 树和B+树的区别图：</p>
+<p><img src="http://images.cnitblog.com/blog/94031/201403/290050088914733.png" alt="Different between B tree and B plus tree"></p>
+<p>B/B+树常用于文件系统和数据库系统中，它通过对每个节点存储个数的扩展，使得对连续的数据能够进行较快的定位和访问，能够有效减少查找时间，提高存储的空间局部性从而减少IO操作。它广泛用于文件系统及数据库中，如：</p>
+<ul>
+<li>Windows：HPFS文件系统；</li>
+<li>Mac：HFS，HFS+文件系统；</li>
+<li>Linux：ResiserFS，XFS，Ext3FS，JFS文件系统；</li>
+<li>数据库：ORACLE，MYSQL，SQLSERVER等中。</li>
+</ul>
+<p>有关B/B+树在数据库索引中的应用，请看张洋的<a href="http://blog.codinglabs.org/articles/theory-of-mysql-index.html" target="_blank" rel="external">MySQL索引背后的数据结构及算法原理</a>这篇文章，这篇文章对MySQL中的如何使用B+树进行索引有比较详细的介绍，推荐阅读。</p>
+<p><strong>树表查找总结：</strong></p>
+<p>二叉查找树平均查找性能不错，为O(logn)，但是最坏情况会退化为O(n)。在二叉查找树的基础上进行优化，我们可以使用平衡查找树。平衡查找树中的2-3查找树，这种数据结构在插入之后能够进行自平衡操作，从而保证了树的高度在一定的范围内进而能够保证最坏情况下的时间复杂度。但是2-3查找树实现起来比较困难，红黑树是2-3树的一种简单高效的实现，他巧妙地使用颜色标记来替代2-3树中比较难处理的3-node节点问题。红黑树是一种比较高效的平衡查找树，应用非常广泛，很多编程语言的内部实现都或多或少的采用了红黑树。</p>
+<p>除此之外，2-3查找树的另一个扩展——B/B+平衡树，在文件系统和数据库系统中有着广泛的应用。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/algorithm/" rel="tag"># algorithm</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/09/seven-sort-algorithm1/" rel="next" title="常见的查找算法（上）">
+                <i class="fa fa-chevron-left"></i> 常见的查找算法（上）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/09/seven-sort-algorithm3/" rel="prev" title="常见的查找算法（下）哈希查找">
+                常见的查找算法（下）哈希查找 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#最简单的树表查找算法——二叉树查找算法"><span class="nav-number">1.</span> <span class="nav-text">最简单的树表查找算法——二叉树查找算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#平衡查找树之2-3查找树（2-3-Tree）"><span class="nav-number">2.</span> <span class="nav-text">平衡查找树之2-3查找树（2-3 Tree）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#平衡查找树之红黑树（Red-Black-Tree"><span class="nav-number">3.</span> <span class="nav-text">平衡查找树之红黑树（Red-Black Tree)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B树和B-树（B-Tree-B-Tree）"><span class="nav-number">4.</span> <span class="nav-text">B树和B+树（B Tree/B+ Tree）</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

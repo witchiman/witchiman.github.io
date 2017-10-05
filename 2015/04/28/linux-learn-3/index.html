@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="linux," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="本篇主要归纳总结Shell脚本的编写和系统管理部分的知识点。">
+<meta name="keywords" content="linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux学习札记（三）：shell的使用和系统管理命令">
+<meta property="og:url" content="http://witchiman.github.io/2015/04/28/linux-learn-3/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="本篇主要归纳总结Shell脚本的编写和系统管理部分的知识点。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-09-17T04:58:31.700Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux学习札记（三）：shell的使用和系统管理命令">
+<meta name="twitter:description" content="本篇主要归纳总结Shell脚本的编写和系统管理部分的知识点。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2015/04/28/linux-learn-3/"/>
+
+
+
+
+
+  <title>Linux学习札记（三）：shell的使用和系统管理命令 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2015/04/28/linux-learn-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Linux学习札记（三）：shell的使用和系统管理命令</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-28T22:09:20+08:00">
+                2015-04-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本篇主要归纳总结Shell脚本的编写和系统管理部分的知识点。</p>
+<a id="more"></a>
+<h1 id="shell-scripts"><a href="#shell-scripts" class="headerlink" title="shell scripts"></a>shell scripts</h1><h2 id="根据提示输入"><a href="#根据提示输入" class="headerlink" title="根据提示输入"></a>根据提示输入</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">read</span> -p <span class="string">"first number: "</span> firstnu</div></pre></td></tr></table></figure>
+<h2 id="数值计算"><a href="#数值计算" class="headerlink" title="数值计算"></a>数值计算</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">value1=12</div><div class="line">value2=24</div><div class="line">value3=$((<span class="variable">$value1</span>*value2))</div></pre></td></tr></table></figure>
+<h2 id="文件目录的查看、判断操作"><a href="#文件目录的查看、判断操作" class="headerlink" title="文件目录的查看、判断操作"></a>文件目录的查看、判断操作</h2><blockquote>
+<p>test 后加“！”为取反操作即值为“true”时返回“false” </p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">test</span> -e /dmtsai &amp;&amp; <span class="built_in">echo</span> <span class="string">"exist"</span> || <span class="built_in">echo</span> <span class="string">"Not exist"</span> <span class="comment">#查看是否存在</span></div><div class="line"><span class="built_in">test</span> -f file1  <span class="comment">#判断是否为文件</span></div><div class="line"><span class="built_in">test</span> -d dir1  <span class="comment">#判断是否为目录</span></div><div class="line"><span class="built_in">test</span> -z string  <span class="comment">#判断字符串是否为空</span></div><div class="line">``` </div><div class="line"></div><div class="line"><span class="comment">##  使用"[]"进行判断 </span></div><div class="line"></div><div class="line">```bash</div><div class="line"><span class="comment">#判断name是否为“jim”，每个空格不能少</span></div><div class="line">[ <span class="string">"<span class="variable">$name</span>"</span> = <span class="string">"jim"</span> ]</div><div class="line"></div><div class="line"><span class="comment">#根据输入‘y’或‘n’进行后继操作，忽略大小写</span></div><div class="line"><span class="built_in">read</span> -p <span class="string">"Please input (Y/N): "</span> yn</div><div class="line">[ <span class="string">"<span class="variable">$yn</span>"</span> == <span class="string">"Y"</span> -o <span class="string">"<span class="variable">$yn</span>"</span> == <span class="string">"y"</span> ] &amp;&amp; <span class="built_in">echo</span> <span class="string">"OK, continue"</span> &amp;&amp; <span class="built_in">exit</span> 0</div><div class="line">[ <span class="string">"<span class="variable">$yn</span>"</span> == <span class="string">"N"</span> -o <span class="string">"<span class="variable">$yn</span>"</span> == <span class="string">"n"</span> ] &amp;&amp; <span class="built_in">echo</span> <span class="string">"Oh, interrupt!"</span> &amp;&amp; <span class="built_in">exit</span> 0</div><div class="line">``` </div><div class="line"></div><div class="line"><span class="comment">##  判断可执行文件后的参数</span></div><div class="line"></div><div class="line">```bash</div><div class="line"><span class="keyword">if</span> [ <span class="string">"<span class="variable">$1</span>"</span> == <span class="string">"hello"</span> ]; <span class="keyword">then</span></div><div class="line">    <span class="built_in">echo</span> <span class="string">"Hello, how are you ?"</span></div><div class="line"><span class="keyword">elif</span> [ <span class="string">"<span class="variable">$1</span>"</span> == <span class="string">""</span> ]; <span class="keyword">then</span></div><div class="line">    <span class="built_in">echo</span> <span class="string">"You MUST input parameters, ex&gt; <span class="variable">$0</span> someword"</span></div><div class="line"><span class="keyword">else</span></div><div class="line">    <span class="built_in">echo</span> <span class="string">"The only parameter is 'hello'"</span></div><div class="line"><span class="keyword">fi</span></div></pre></td></tr></table></figure>
+<h2 id="计算退伍日期"><a href="#计算退伍日期" class="headerlink" title="计算退伍日期"></a>计算退伍日期</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 1. 告知使用者这支程序的用途，并且告知应该如何输入日期格式？</span></div><div class="line"><span class="built_in">echo</span> <span class="string">"这是用来计算退伍日期的 :"</span></div><div class="line"><span class="built_in">read</span> -p <span class="string">"请输入日期(YYYYMMDD ex&gt;20050401): "</span> date1</div><div class="line"><span class="comment"># 2. 测试一下，这个输入的内容是否正确？利用正规表示法啰～</span></div><div class="line">date_d=`<span class="built_in">echo</span> <span class="variable">$date1</span> |grep <span class="string">'[0-9]\&#123;8\&#125;'</span>`</div><div class="line"><span class="keyword">if</span> [ <span class="string">"<span class="variable">$date_d</span>"</span> == <span class="string">""</span> ]; <span class="keyword">then</span></div><div class="line">    <span class="built_in">echo</span> <span class="string">"You input the wrong format of date...."</span></div><div class="line"><span class="built_in">exit</span> 1</div><div class="line"><span class="keyword">fi</span></div><div class="line"><span class="comment"># 3. 开始计算日期. declare -i 声明一个变量为数字类型</span></div><div class="line"><span class="built_in">declare</span> -i date_dem=`date --date=<span class="string">"<span class="variable">$date2</span>"</span> +%s`</div><div class="line"><span class="built_in">declare</span> -i date_now=`date +%s`</div><div class="line"><span class="built_in">declare</span> -i date_total_s=$((<span class="variable">$date_dem</span>-<span class="variable">$date_now</span>))</div><div class="line"><span class="built_in">declare</span> -i date_d=$((<span class="variable">$date_total_s</span>/60/60/24))</div><div class="line"><span class="keyword">if</span> [ <span class="string">"<span class="variable">$date_total_s</span>"</span> -lt <span class="string">"0"</span> ]; <span class="keyword">then</span></div><div class="line">    <span class="built_in">echo</span> <span class="string">"You had been demobilization before: "</span> $((-1*<span class="variable">$date_d</span>)) <span class="string">" ago"</span></div><div class="line"><span class="keyword">else</span></div><div class="line">    <span class="built_in">declare</span> -i date_h=$(($((<span class="variable">$date_total_s</span>-<span class="variable">$date_d</span>*60*60*24))/60/60))</div><div class="line">    <span class="built_in">echo</span> <span class="string">"You will be demobilized after <span class="variable">$date_d</span> days and <span class="variable">$date_h</span> hours."</span></div><div class="line"><span class="keyword">fi</span></div></pre></td></tr></table></figure>
+<h2 id="case语句"><a href="#case语句" class="headerlink" title="case语句"></a>case语句</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">case</span> <span class="variable">$1</span> <span class="keyword">in</span></div><div class="line">  <span class="string">"one"</span>)</div><div class="line">      <span class="built_in">echo</span> <span class="string">"Your choice is ONE"</span></div><div class="line">      ;;</div><div class="line">  <span class="string">"two"</span>)</div><div class="line">      <span class="built_in">echo</span> <span class="string">"Your choice is TWO"</span></div><div class="line">      ;;</div><div class="line">  <span class="string">"three"</span>)</div><div class="line">      <span class="built_in">echo</span> <span class="string">"Your choice is THREE"</span></div><div class="line">      ;;</div><div class="line">  *)</div><div class="line">      <span class="built_in">echo</span> <span class="string">"Usage &#123;one|two|three&#125;"</span></div><div class="line">      ;;</div><div class="line"><span class="keyword">esac</span></div></pre></td></tr></table></figure>
+<h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><blockquote>
+<p>函数声明要放在程序前面</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">function</span> <span class="function"><span class="title">printit</span></span>()&#123;</div><div class="line">    <span class="built_in">echo</span> -n <span class="string">"Your choice is "</span></div><div class="line">&#125;</div><div class="line"><span class="built_in">echo</span> <span class="string">"This program will print your selection !"</span></div><div class="line"><span class="keyword">case</span> <span class="variable">$1</span> <span class="keyword">in</span></div><div class="line">    <span class="string">"one"</span>)</div><div class="line">        printit; <span class="built_in">echo</span> <span class="variable">$1</span> | tr <span class="string">'a-z'</span> <span class="string">'A-Z'</span></div><div class="line">        ;;</div><div class="line">    <span class="string">"two"</span>)</div><div class="line">        printit; <span class="built_in">echo</span> <span class="variable">$1</span> | tr <span class="string">'a-z'</span> <span class="string">'A-Z'</span></div><div class="line">        ;;</div><div class="line">    <span class="string">"three"</span>)</div><div class="line">        printit; <span class="built_in">echo</span> <span class="variable">$1</span> | tr <span class="string">'a-z'</span> <span class="string">'A-Z'</span></div><div class="line">        ;;</div><div class="line">    *)</div><div class="line">         <span class="built_in">echo</span> <span class="string">"Usage &#123;one|two|three&#125;"</span></div><div class="line">         ;;</div><div class="line"><span class="keyword">esac</span></div></pre></td></tr></table></figure>
+<h2 id="循环"><a href="#循环" class="headerlink" title="循环"></a>循环</h2><p>while语句</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">while</span> [ <span class="string">"<span class="variable">$yn</span>"</span> != <span class="string">"yes"</span> ] &amp;&amp; [ <span class="string">"<span class="variable">$yn</span>"</span> != <span class="string">"YES"</span> ]</div><div class="line"><span class="keyword">do</span></div><div class="line">    <span class="built_in">read</span> -p <span class="string">"Please input yes/YES to stop this program: "</span> yn</div><div class="line"><span class="keyword">done</span></div></pre></td></tr></table></figure>
+<p>util语句<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">until [ <span class="string">"<span class="variable">$yn</span>"</span> == <span class="string">"yes"</span> ] || [ <span class="string">"<span class="variable">$yn</span>"</span> == <span class="string">"YES"</span> ]</div><div class="line"><span class="keyword">do</span></div><div class="line">    <span class="built_in">read</span> -p <span class="string">"Please input yes/YES to stop this program: "</span> yn</div><div class="line"><span class="keyword">done</span></div></pre></td></tr></table></figure></p>
+<h2 id="for语句"><a href="#for语句" class="headerlink" title="for语句"></a>for语句</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span> animal <span class="keyword">in</span> dog cat elephant</div><div class="line"><span class="keyword">do</span></div><div class="line">    <span class="built_in">echo</span> <span class="string">"There are "</span><span class="string">"<span class="variable">$animal</span>"</span><span class="string">"s.... "</span></div><div class="line"><span class="keyword">done</span></div></pre></td></tr></table></figure>
+<h2 id="计算1-…-100的和"><a href="#计算1-…-100的和" class="headerlink" title="计算1+…+100的和"></a>计算1+…+100的和</h2><p>while语句</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">s=0</div><div class="line">i=0</div><div class="line"><span class="keyword">while</span> [ <span class="string">"<span class="variable">$i</span>"</span> != <span class="string">"100"</span> ]</div><div class="line"><span class="keyword">do</span></div><div class="line">    i=$((<span class="variable">$i</span>+1))</div><div class="line">    s=$((<span class="variable">$s</span>+<span class="variable">$i</span>))</div><div class="line"><span class="keyword">done</span></div><div class="line"><span class="built_in">echo</span> <span class="string">"The result of '1+2+3+...+100' is ==&gt; <span class="variable">$s</span>"</span></div></pre></td></tr></table></figure>
+<p>for语句</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">s=0</div><div class="line"><span class="keyword">for</span> (( i=1; i&lt;=100; i=i+1 ))</div><div class="line"><span class="keyword">do</span></div><div class="line">    s=$((<span class="variable">$s</span>+<span class="variable">$i</span>))</div><div class="line"><span class="keyword">done</span></div><div class="line"><span class="built_in">echo</span> <span class="string">"The result of '1+2+3+...+100' is ==&gt; <span class="variable">$s</span>"</span></div></pre></td></tr></table></figure>
+<h2 id="判断文件或目录是否存在"><a href="#判断文件或目录是否存在" class="headerlink" title="判断文件或目录是否存在"></a>判断文件或目录是否存在</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#!/bin/bash</span></div><div class="line"><span class="keyword">if</span> [ ! -e <span class="built_in">test</span> ]; <span class="keyword">then</span></div><div class="line">    touch <span class="built_in">test</span></div><div class="line">    <span class="built_in">echo</span> <span class="string">"Just make a file test"</span></div><div class="line">    <span class="built_in">exit</span> 1</div><div class="line"><span class="keyword">elif</span> [ -e <span class="built_in">test</span> ] &amp;&amp; [ -f <span class="built_in">test</span> ]; <span class="keyword">then</span></div><div class="line">    rm <span class="built_in">test</span></div><div class="line">    mkdir <span class="built_in">test</span></div><div class="line">    <span class="built_in">echo</span> <span class="string">"remove file ==&gt; test"</span></div><div class="line">    <span class="built_in">echo</span> <span class="string">"and make directory test"</span></div><div class="line">    <span class="built_in">exit</span> 1</div><div class="line"><span class="keyword">elif</span> [ -e <span class="built_in">test</span> ] &amp;&amp; [ -d <span class="built_in">test</span> ]; <span class="keyword">then</span></div><div class="line">    rm -rf <span class="built_in">test</span></div><div class="line">    <span class="built_in">echo</span> <span class="string">"remove directory ==&gt; test"</span></div><div class="line">    <span class="built_in">exit</span> 1</div><div class="line"><span class="keyword">else</span></div><div class="line">    <span class="built_in">echo</span> <span class="string">"Does here have anything?"</span></div><div class="line"><span class="keyword">fi</span></div></pre></td></tr></table></figure>
+<h2 id="取出第一列内容，输入每一行及行号"><a href="#取出第一列内容，输入每一行及行号" class="headerlink" title="取出第一列内容，输入每一行及行号"></a>取出第一列内容，输入每一行及行号</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#!/bin/bash</span></div><div class="line">accounts=`cat /etc/passwd | cut -d<span class="string">':'</span> -f1`</div><div class="line"><span class="keyword">for</span> account <span class="keyword">in</span> <span class="variable">$accounts</span></div><div class="line"><span class="keyword">do</span></div><div class="line">    <span class="built_in">declare</span> -i i=<span class="variable">$i</span>+1</div><div class="line">    <span class="built_in">echo</span> <span class="string">"The <span class="variable">$i</span> account is \"<span class="variable">$account</span>\" "</span></div><div class="line"><span class="keyword">done</span></div></pre></td></tr></table></figure>
+<h2 id="debug"><a href="#debug" class="headerlink" title="debug"></a>debug</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[hui@linux ~]$ sh -x sh15.sh  <span class="comment">#加-x，代码在执行前显示出来</span></div><div class="line">+ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/<span class="built_in">local</span>/bin:/usr/<span class="built_in">local</span>/sbin:/home/vbird/bin</div><div class="line">+ <span class="built_in">export</span> PATH</div><div class="line">+ <span class="keyword">for</span> animal <span class="keyword">in</span> dog cat elephant</div><div class="line">+ <span class="built_in">echo</span> <span class="string">'There are dogs.... '</span></div><div class="line">There are dogs....</div><div class="line">...</div></pre></td></tr></table></figure>
+<h1 id="系统管理"><a href="#系统管理" class="headerlink" title="系统管理"></a>系统管理</h1><h2 id="切换身份"><a href="#切换身份" class="headerlink" title="切换身份"></a>切换身份</h2><ul>
+<li>su 直接切换成root</li>
+<li>su - 切换root后，相关设置也发生变化</li>
+</ul>
+<h2 id="查看最近登录"><a href="#查看最近登录" class="headerlink" title="查看最近登录"></a>查看最近登录</h2><ul>
+<li>lastlog 读取 /var/log/lastlog 文件，显示登录信息</li>
+</ul>
+<h2 id="多用户通信"><a href="#多用户通信" class="headerlink" title="多用户通信"></a>多用户通信</h2><ul>
+<li>talk</li>
+<li>write user #使用命令后，可发送文字内容</li>
+<li>mesg n  禁止其它用户使用write命令发信息时打断自己，使用mesg y重新启动</li>
+<li>wall “words” 与其它所有的用户通信，如果没有使用mesg n关掉服务，则收到</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">[vbird@linux ~]$ mail dmtsai -s <span class="string">"nice to meet you"</span>  admin@linux.net </div><div class="line">Hello, D.M. Tsai</div><div class="line">Nice to meet you <span class="keyword">in</span> the network.</div><div class="line">You are so nice. byebye!</div><div class="line">. <span class="comment">#这里很重要喔，结束时，最后一行输入小数点 . 即可！</span></div><div class="line">Cc: <span class="comment">#这里是所谓的『副本』，不需要寄给其它人，所以直接 [Enter]</span></div><div class="line"></div><div class="line">[vbird@linux ~]$ mail dmtsai -s <span class="string">"nice to meet you"</span> &lt; filename <span class="comment">#使用数据流</span></div></pre></td></tr></table></figure>
+<ul>
+<li>mail 可用来查看邮件</li>
+</ul>
+<h2 id="df命令，用于显示磁盘分区上的可使用的磁盘空间。"><a href="#df命令，用于显示磁盘分区上的可使用的磁盘空间。" class="headerlink" title="df命令，用于显示磁盘分区上的可使用的磁盘空间。"></a><strong>df命令</strong>，用于显示磁盘分区上的可使用的磁盘空间。</h2><ul>
+<li>-h，选项以KB以上的单位来显示，可读性高  </li>
+<li>-a ，查看全部文件系统</li>
+</ul>
+<h2 id="at命令"><a href="#at命令" class="headerlink" title="at命令"></a>at命令</h2><blockquote>
+<p>在指定时间执行一次命令。可在/etc/at.deny里面设置无法使用此命令的账户。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#再过五分钟后，将 /root/.bashrc 寄给 dmtsai 这个使用者</span></div><div class="line">[hui@linux ~]$ at now + 5 minutes</div><div class="line">at&gt; /bin/mail dmtsai -s <span class="string">"testing at job"</span> &lt; /root/.bashrc</div><div class="line">at&gt; &lt;EOT&gt; &lt;==这里输入 <span class="comment">#[ctrl] + d 就会出现 &lt;EOF&gt; ,代表结束！</span></div><div class="line"></div><div class="line"><span class="comment">#在 2005/09/15 23:00 关机</span></div><div class="line">[hui@linux ~]$ at 23:00 2005-09-15</div><div class="line">at&gt; /bin/sync</div><div class="line">at&gt; /bin/sync</div><div class="line">at&gt; /sbin/shutdown -h now</div><div class="line">at&gt; &lt;EOT&gt;</div><div class="line"></div><div class="line">[hui@linux ~]$ atq  <span class="comment">#查询当前有多少个工作安排  </span></div><div class="line">[hui@linux ~]$ atrm 10   <span class="comment">#将第2个移除</span></div></pre></td></tr></table></figure>
+<h2 id="crontab命令"><a href="#crontab命令" class="headerlink" title="crontab命令"></a>crontab命令</h2><blockquote>
+<p>用以循环执行任务crontab 是读到内存当中的，所以在你修改完/etc/crontab 之后，可能并不会马上执行， 这个时候请重新启动<br>crond，输入/etc/init.d/crond restart </p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#用账户每天12:00发邮件给自己，前五个数字依次为分钟、时、日、月、周</span></div><div class="line">[hui@linux ~]$ crontab -e</div><div class="line">0 12 * * * mail hui -s <span class="string">"at 12:00"</span> &lt; /home/dmtsai/.bashrc</div><div class="line"></div><div class="line"><span class="comment">#每五分钟需要执行 /home/dmtsai/test.sh </span></div><div class="line">[hui@linux ~]$ crontab -e  </div><div class="line">*/5 * * * *  /home/dmtsai/test.sh  <span class="comment">#最好使用绝对路径</span></div><div class="line"></div><div class="line"><span class="comment">#每个星期五下午 4:30 告诉你朋友星期六的约会不要忘记</span></div><div class="line">[hui@linux ~]$ crontab -e  </div><div class="line">30 16 * * 5 mail friend@his.server.name &lt; /home/dmtsai/friend.txt</div><div class="line"></div><div class="line">[hui@linux ~]$ crontab -l <span class="comment">#查询所有crontab任务</span></div><div class="line">[hui@linux ~]$ crontab -r <span class="comment">#删除所有crontab任务，删除某个必需使用crontab -e</span></div></pre></td></tr></table></figure>
+<h2 id="命令后加“-amp-”使程序在后台运行"><a href="#命令后加“-amp-”使程序在后台运行" class="headerlink" title="命令后加“&amp;”使程序在后台运行"></a>命令后加“&amp;”使程序在后台运行</h2><ol>
+<li>jobs命令，查看后台任务</li>
+</ol>
+<ul>
+<li>-l ：除了列出 job number 之外，同时列出 PID；</li>
+<li>-r ：仅列出正在背景 run 的任务；</li>
+<li>-s ：仅列出正在背景当中暂停 (stop) 的任务。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[hui@linux ~]<span class="comment"># fg &lt;==预设取出标记为 + 的任务</span></div><div class="line">[hui@linux ~]<span class="comment"># fg %n &lt;==取出指定任务到前台，n job号！</span></div></pre></td></tr></table></figure>
+<h2 id="kill和killall，杀死进程"><a href="#kill和killall，杀死进程" class="headerlink" title="kill和killall，杀死进程"></a>kill和killall，杀死进程</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">hui@linux ~]$ <span class="built_in">kill</span> -l <span class="comment">#列出所有的signal,比如SIGKILL（-9）</span></div><div class="line"></div><div class="line"><span class="comment">#杀死某个后台任务</span></div><div class="line"><span class="comment">#-1是重启该进程，-9是强制停止任务，-15是用正常方式停止（默认），生成的临时文件会自动删除</span></div><div class="line">hui@linux ~]$ <span class="built_in">jobs</span></div><div class="line">[1]   Stopped                 vim jv.*</div><div class="line">[2]   Stopped                 vim data1</div><div class="line">hui@linux ~]$ <span class="built_in">kill</span> -9 %1</div><div class="line"></div><div class="line"><span class="comment">#强制终止所有以 httpd 启动的进程，-I忽略大小写</span></div><div class="line">[root@linux ~]<span class="comment"># killall -9 httpd</span></div></pre></td></tr></table></figure>
+<h2 id="ps，查看运行的进程"><a href="#ps，查看运行的进程" class="headerlink" title="ps，查看运行的进程"></a>ps，查看运行的进程</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#将此次登录的PID与相关信息显示出来</span></div><div class="line"><span class="comment">#F flag,4代表使用者为super user;S 进程状态，含义见下条命令STAT；PID;C CPU百分比；PRI 优先级,越小越容易被执行；NI nice;</span></div><div class="line"><span class="comment">#ADDR  kernel function,如果是running用“-”表示；SZ 占用内存；WCHAN 程序是否运行，“-”表示正在运行；</span></div><div class="line"><span class="comment">#TTY 登录使用的tty;TIME 使用掉的CPU时间；CMD 下达的指令</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ ps -l </div><div class="line">F S   UID    PID   PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD</div><div class="line">0 S  1000  16508  16497  0  80   0 -  6156 <span class="built_in">wait</span>   pts/3    00:00:00 bash</div><div class="line">...</div><div class="line"><span class="comment">#显示出正在内存中运行的进程</span></div><div class="line"><span class="comment">#VSZ 使用掉的虚拟内存；RSS 占用的固定内存；STAT R 运行中或可运行，S 睡眠，T 正在侦测或停止，</span></div><div class="line"><span class="comment">#Z zombie僵尸进程，已经停止，但其父进程无法终止 </span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ ps aux</div><div class="line">USER        PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND</div><div class="line">root          1  0.0  0.2 182488  4476 ?        Ss    8月20   0:09 /sbin/init splash</div><div class="line">root          2  0.0  0.0      0     0 ?        S     8月20   0:00 [kthreadd]</div><div class="line"><span class="comment">#以第一条命令的形式列出所有运行中的进程</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ ps -al</div><div class="line"><span class="comment">#以进程树的形式显示 </span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ ps -axjf</div><div class="line"></div><div class="line"><span class="comment">#找出与 cron 与 syslog 这两个服务有关的 PID 号码</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ ps aux|egrep <span class="string">'(cron|syslog)'</span></div><div class="line">syslog      824  0.0  0.1 255896  2800 ?        Ssl   8月20   0:02 /usr/sbin/rsyslogd -n</div><div class="line">root        831  0.0  0.1  30612  2364 ?        Ss    8月20   0:00 /usr/sbin/cron -f</div><div class="line">hui        1769  0.0  0.3 435756  7832 ?        Sl    8月20   0:14 /usr/bin/pulseaudio --start --<span class="built_in">log</span>-target=syslog</div></pre></td></tr></table></figure>
+<h2 id="top命令，查看系统运行情况"><a href="#top命令，查看系统运行情况" class="headerlink" title="top命令，查看系统运行情况"></a><strong>top命令</strong>，查看系统运行情况</h2><blockquote>
+<p>top交互按键</p>
+</blockquote>
+<ul>
+<li>h：显示帮助画面，给出一些简短的命令总结说明； </li>
+<li>k：终止一个进程； </li>
+<li>i：忽略闲置和僵死进程，这是一个开关式命令； </li>
+<li>q：退出程序； </li>
+<li>r：重新安排一个进程的优先级别； </li>
+<li>S：切换到累计模式； </li>
+<li>s：改变两次刷新之间的延迟时间（单位为s），如果有小数，就换算成ms。输入0值则系统将不断刷新，默认值是5s； </li>
+<li>f或者F：从当前显示中添加或者删除项目； </li>
+<li>o或者O：改变显示项目的顺序； </li>
+<li>l：切换显示平均负载和启动时间信息； </li>
+<li>m：切换显示内存信息； </li>
+<li>t：切换显示进程和CPU状态信息； </li>
+<li>c：切换显示命令名称和完整命令行； </li>
+<li>M：根据驻留内存大小进行排序； </li>
+<li>P：根据CPU使用百分比大小进行排序； </li>
+<li>T：根据时间/累计时间进行排序； </li>
+<li>w：将当前设置写入~/.toprc文件中。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#每两秒更新一次top，观察整体信息</span></div><div class="line"> hui@hui-virtual-machine:~/<span class="built_in">test</span>$ top -d 2</div><div class="line"></div><div class="line">top - 21:14:34 up 2 days, 11:02,  2 users,  load average: 0.00, 0.01, 0.05</div><div class="line">Tasks: 265 total,   1 running, 263 sleeping,   0 stopped,   1 zombie</div><div class="line">%Cpu(s):  2.0 us,  1.0 sy,  0.0 ni, 97.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st</div><div class="line">KiB Mem:   2032280 total,  1798160 used,   234120 free,   109944 buffers</div><div class="line">KiB Swap:  2094076 total,   188336 used,  1905740 free.   349904 cached Mem</div><div class="line"></div><div class="line">   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND                                                                   </div><div class="line"> 16497 hui       20   0  635352  40012  25708 S   3.0  2.0   2:08.62 gnome-terminal-</div><div class="line"> ...    </div><div class="line"></div><div class="line"><span class="comment">#将 top 的信息进行 2 次，然后将结果输出到 /tmp/top.txt</span></div><div class="line">[hui@linux ~]$ top -b -n 2 &gt; /tmp/top.txt</div><div class="line"><span class="comment">#查看某一PID的进程 </span></div><div class="line">[hui@linux ~]$ top -d 2 -p10604</div></pre></td></tr></table></figure>
+<h2 id="pstree命令以树状图的方式展现进程之间的派生关系"><a href="#pstree命令以树状图的方式展现进程之间的派生关系" class="headerlink" title="pstree命令以树状图的方式展现进程之间的派生关系"></a><strong>pstree命令</strong>以树状图的方式展现进程之间的派生关系</h2> <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#以进程树形式查看进程的相关性</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ pstree -A</div><div class="line"><span class="comment">#同时显示PID和users</span></div><div class="line">hui@hui-virtual-machine:~/<span class="built_in">test</span>$ pstree -Aup</div></pre></td></tr></table></figure>
+<h2 id="free命令可以显示当前系统未使用的和已使用的内存数目，还可以显示被内核使用的内存缓冲区。"><a href="#free命令可以显示当前系统未使用的和已使用的内存数目，还可以显示被内核使用的内存缓冲区。" class="headerlink" title="free命令可以显示当前系统未使用的和已使用的内存数目，还可以显示被内核使用的内存缓冲区。"></a><strong>free命令</strong>可以显示当前系统未使用的和已使用的内存数目，还可以显示被内核使用的内存缓冲区。</h2><p>free [-b|-k|-m|-g] [-t]</p>
+<blockquote>
+<p>参数： </p>
+<p>-b ：直接输入 free 时，显示的单位是 Kbytes，可以使用 b(bytes), m(Mbytes),k(Kbytes), 及 g(Gbytes) 来显示单位</p>
+<p>-t ：在输出的最终结果，显示物理内存与 swap 的总量。</p>
+</blockquote>
+<h2 id="uptime-查看已开机时间"><a href="#uptime-查看已开机时间" class="headerlink" title="uptime,查看已开机时间"></a>uptime,查看已开机时间</h2><h2 id="nice和renice-调整程序优先级"><a href="#nice和renice-调整程序优先级" class="headerlink" title="nice和renice,调整程序优先级"></a>nice和renice,调整程序优先级</h2><blockquote>
+<p>PRI(new) = PRI(old) + nice</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[hui@linux ~]$ nice [-n] <span class="built_in">command</span> <span class="comment">#n值在-20~19之间</span></div><div class="line">[hui@linux ~]$ renice 10 18852 <span class="comment">#将 18852 那个 PID 修改 nice 为 10</span></div></pre></td></tr></table></figure>
+<h2 id="fuser-查看正在使用某文件或目录的进程"><a href="#fuser-查看正在使用某文件或目录的进程" class="headerlink" title="fuser,查看正在使用某文件或目录的进程"></a>fuser,查看正在使用某文件或目录的进程</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">[hui@linux ~]$ fuser /var/</div><div class="line">[hui@linux~]$ fuser -ki /var/spool/postfix/public/qmgr <span class="comment">#找出使用该目录的进程并杀死其PID</span></div><div class="line"> ``` </div><div class="line"></div><div class="line"><span class="comment">##  **pidof**命令，查看相关程序的PID</span></div><div class="line"></div><div class="line">```bash</div><div class="line"><span class="comment">#init 以及 syslogd 这两个程序的 PID</span></div><div class="line">[hui@linux ~]$ pidof init syslogd</div></pre></td></tr></table></figure>
+<h2 id="自定义启动开机程序"><a href="#自定义启动开机程序" class="headerlink" title="自定义启动开机程序"></a>自定义启动开机程序</h2><blockquote>
+<p>把需要开机的命令，写进/etc/rc.local文件里即可。</p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux/" rel="tag"># linux</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/04/26/linux-learn-2/" rel="next" title="Linux学习札记（二）：tar、vim的使用及正则表达式的介绍">
+                <i class="fa fa-chevron-left"></i> Linux学习札记（二）：tar、vim的使用及正则表达式的介绍
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/05/01/linux-learn-4/" rel="prev" title="Linux学习札记（四）：程序编译和安装管理">
+                Linux学习札记（四）：程序编译和安装管理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#shell-scripts"><span class="nav-number">1.</span> <span class="nav-text">shell scripts</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#根据提示输入"><span class="nav-number">1.1.</span> <span class="nav-text">根据提示输入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数值计算"><span class="nav-number">1.2.</span> <span class="nav-text">数值计算</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文件目录的查看、判断操作"><span class="nav-number">1.3.</span> <span class="nav-text">文件目录的查看、判断操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#计算退伍日期"><span class="nav-number">1.4.</span> <span class="nav-text">计算退伍日期</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#case语句"><span class="nav-number">1.5.</span> <span class="nav-text">case语句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#函数"><span class="nav-number">1.6.</span> <span class="nav-text">函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#循环"><span class="nav-number">1.7.</span> <span class="nav-text">循环</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#for语句"><span class="nav-number">1.8.</span> <span class="nav-text">for语句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#计算1-…-100的和"><span class="nav-number">1.9.</span> <span class="nav-text">计算1+…+100的和</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#判断文件或目录是否存在"><span class="nav-number">1.10.</span> <span class="nav-text">判断文件或目录是否存在</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#取出第一列内容，输入每一行及行号"><span class="nav-number">1.11.</span> <span class="nav-text">取出第一列内容，输入每一行及行号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#debug"><span class="nav-number">1.12.</span> <span class="nav-text">debug</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#系统管理"><span class="nav-number">2.</span> <span class="nav-text">系统管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#切换身份"><span class="nav-number">2.1.</span> <span class="nav-text">切换身份</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看最近登录"><span class="nav-number">2.2.</span> <span class="nav-text">查看最近登录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多用户通信"><span class="nav-number">2.3.</span> <span class="nav-text">多用户通信</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#df命令，用于显示磁盘分区上的可使用的磁盘空间。"><span class="nav-number">2.4.</span> <span class="nav-text">df命令，用于显示磁盘分区上的可使用的磁盘空间。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#at命令"><span class="nav-number">2.5.</span> <span class="nav-text">at命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#crontab命令"><span class="nav-number">2.6.</span> <span class="nav-text">crontab命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#命令后加“-amp-”使程序在后台运行"><span class="nav-number">2.7.</span> <span class="nav-text">命令后加“&”使程序在后台运行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kill和killall，杀死进程"><span class="nav-number">2.8.</span> <span class="nav-text">kill和killall，杀死进程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ps，查看运行的进程"><span class="nav-number">2.9.</span> <span class="nav-text">ps，查看运行的进程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#top命令，查看系统运行情况"><span class="nav-number">2.10.</span> <span class="nav-text">top命令，查看系统运行情况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pstree命令以树状图的方式展现进程之间的派生关系"><span class="nav-number">2.11.</span> <span class="nav-text">pstree命令以树状图的方式展现进程之间的派生关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#free命令可以显示当前系统未使用的和已使用的内存数目，还可以显示被内核使用的内存缓冲区。"><span class="nav-number">2.12.</span> <span class="nav-text">free命令可以显示当前系统未使用的和已使用的内存数目，还可以显示被内核使用的内存缓冲区。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#uptime-查看已开机时间"><span class="nav-number">2.13.</span> <span class="nav-text">uptime,查看已开机时间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nice和renice-调整程序优先级"><span class="nav-number">2.14.</span> <span class="nav-text">nice和renice,调整程序优先级</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#fuser-查看正在使用某文件或目录的进程"><span class="nav-number">2.15.</span> <span class="nav-text">fuser,查看正在使用某文件或目录的进程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义启动开机程序"><span class="nav-number">2.16.</span> <span class="nav-text">自定义启动开机程序</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
