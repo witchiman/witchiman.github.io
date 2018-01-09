@@ -77,7 +77,7 @@
 <meta property="og:site_name" content="witchiman的博客">
 <meta property="og:description" content="前言蓝牙4.0分为标准蓝牙和低功耗蓝牙（BLE），标准蓝牙就是手机上用的那种，低功能耗蓝牙由于其具有最大化的待机时间、快速连接和低峰值的发送和接收特性，被广泛用于智能手表、智能手环等可穿戴设备上。在安卓4.3之前，安卓平台上的BLE开发相当难搞，好在谷歌在4.3之后发布了官方的API。在安卓5.0之后又引入了新的API，原来的API已经被废弃。在新的系统里采用旧API开发的APP仍可使用，但采用新">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-09-17T04:58:31.341Z">
+<meta property="og:updated_time" content="2017-12-15T11:25:31.606Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="基于Android 5.x的低功耗蓝牙BLE开发简介">
 <meta name="twitter:description" content="前言蓝牙4.0分为标准蓝牙和低功耗蓝牙（BLE），标准蓝牙就是手机上用的那种，低功能耗蓝牙由于其具有最大化的待机时间、快速连接和低峰值的发送和接收特性，被广泛用于智能手表、智能手环等可穿戴设备上。在安卓4.3之前，安卓平台上的BLE开发相当难搞，好在谷歌在4.3之后发布了官方的API。在安卓5.0之后又引入了新的API，原来的API已经被废弃。在新的系统里采用旧API开发的APP仍可使用，但采用新">
@@ -310,7 +310,8 @@
       
 
       
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>蓝牙4.0分为标准蓝牙和低功耗蓝牙（BLE），标准蓝牙就是手机上用的那种，低功能耗蓝牙由于其具有最大化的待机时间、快速连接和低峰值的发送和接收特性，被广泛用于智能手表、智能手环等可穿戴设备上。在安卓4.3之前，安卓平台上的BLE开发相当难搞，好在谷歌在4.3之后发布了官方的API。在安卓5.0之后又引入了新的API，原来的API已经被废弃。在新的系统里采用旧API开发的APP仍可使用，但采用新API开发的APP只能在LOLLIPOP即安卓5.0及其以后的版本使用。<br><a id="more"></a></p>
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>蓝牙4.0分为标准蓝牙和低功耗蓝牙（BLE），标准蓝牙就是手机上用的那种，低功能耗蓝牙由于其具有最大化的待机时间、快速连接和低峰值的发送和接收特性，被广泛用于智能手表、智能手环等可穿戴设备上。在安卓4.3之前，安卓平台上的BLE开发相当难搞，好在谷歌在4.3之后发布了官方的API。在安卓5.0之后又引入了新的API，原来的API已经被废弃。在新的系统里采用旧API开发的APP仍可使用，但采用新API开发的APP只能在LOLLIPOP即安卓5.0及其以后的版本使用。</p>
+<a id="more"></a>
 <p>标准蓝牙的的开发和BLE不同。标准蓝牙连接里有两个角色一个是客户端一个是服务器，当客户端搜索到蓝牙服务器后并与之配对后，才能通过UUID（这个是唯一的，服务器端必须与客户端一致）建立socket，然后使用流像文件读写和网络通信那样传输数据就行了。在BLE里，变成了中心设备（central）和外围设备（peripheral），中心设备就是你的手机，外围设备就是智能手环一类的东西。开发BLE的应用都得遵守Generic Attribute Profile (GATT)，一个BLE蓝牙设备包含多个service，每个service又包含多个characteristic。每个characteristic有一个value和多个descriptor，通过characteristic中心设备与外围设备进行通信。descriptor顾名思义，包含了BLE设备的一些信息。不同service、characteristic和descriptor都有各自己唯一的UUID。想要跟BLE设备通信，首先通过UUID获取目标服务，然后再通过UUID获取characteristic，charateristic起着载体的作用，通过writeCharacteristic()和readCharacteristic()，可以写入和读出信息。每个characteristic都有一些自己的属性，其中在property里，说明了该characteristic的属性，例如READ|WRITE|WRITE_NO_RESPONSE|NOTIFY。</p>
 <p>以下是关键代码：</p>
 <h2 id="修改AndroidManifest-xml"><a href="#修改AndroidManifest-xml" class="headerlink" title="修改AndroidManifest.xml"></a>修改AndroidManifest.xml</h2><p>在AndroidManifest.xml里加入</p>
@@ -547,7 +548,7 @@
         <div class="copyright" >
   
   &copy; 
-  <span itemprop="copyrightYear">2017</span>
+  <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
