@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="linux,os," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="服务器所使用的架构往往要和I/O模型相结合，才能应用到某种具体的场景上。处理客户端发送过来的请求，可以采用多进程或多线程。对于纯粹的多进程或多线程，接收到一个连接就开启一个进程或线程，阻塞直到有读写发生。在高并发的情况下，不断地开启进程和占用大量内存，还有线程上下文切换等都会对系统资源造成极大的浪费。为了减少系统的开销，非常有必要采取手段降低并发的进程或线程的数量，如I/O多路复用（I/O mul">
+<meta name="keywords" content="linux,os">
+<meta property="og:type" content="article">
+<meta property="og:title" content="常见的I&#x2F;O模型">
+<meta property="og:url" content="http://witchiman.github.io/2017/12/05/io-model/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="服务器所使用的架构往往要和I/O模型相结合，才能应用到某种具体的场景上。处理客户端发送过来的请求，可以采用多进程或多线程。对于纯粹的多进程或多线程，接收到一个连接就开启一个进程或线程，阻塞直到有读写发生。在高并发的情况下，不断地开启进程和占用大量内存，还有线程上下文切换等都会对系统资源造成极大的浪费。为了减少系统的开销，非常有必要采取手段降低并发的进程或线程的数量，如I/O多路复用（I/O mul">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/io1.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/io2.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/io3.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/io4.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/io6.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/io7.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/io8.png">
+<meta property="og:updated_time" content="2018-09-08T03:47:59.460Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="常见的I&#x2F;O模型">
+<meta name="twitter:description" content="服务器所使用的架构往往要和I/O模型相结合，才能应用到某种具体的场景上。处理客户端发送过来的请求，可以采用多进程或多线程。对于纯粹的多进程或多线程，接收到一个连接就开启一个进程或线程，阻塞直到有读写发生。在高并发的情况下，不断地开启进程和占用大量内存，还有线程上下文切换等都会对系统资源造成极大的浪费。为了减少系统的开销，非常有必要采取手段降低并发的进程或线程的数量，如I/O多路复用（I/O mul">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/io1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2017/12/05/io-model/"/>
+
+
+
+
+
+  <title>常见的I/O模型 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2017/12/05/io-model/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">常见的I/O模型</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-05T12:08:21+08:00">
+                2017-12-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>服务器所使用的架构往往要和I/O模型相结合，才能应用到某种具体的场景上。处理客户端发送过来的请求，可以采用多进程或多线程。对于纯粹的多进程或多线程，接收到一个连接就开启一个进程或线程，阻塞直到有读写发生。在高并发的情况下，不断地开启进程和占用大量内存，还有线程上下文切换等都会对系统资源造成极大的浪费。为了减少系统的开销，非常有必要采取手段降低并发的进程或线程的数量，如I/O多路复用（I/O multiplexing）就很好地解决了这个问题，通过这种技术一个线程就可以管理多个I/O数据流的读写操作。</p>
+<a id="more"></a>
+<h2 id="传统的I-O模型"><a href="#传统的I-O模型" class="headerlink" title="传统的I/O模型"></a>传统的I/O模型</h2><h3 id="阻塞I-O"><a href="#阻塞I-O" class="headerlink" title="阻塞I/O"></a>阻塞I/O</h3><p>在阻塞I/O中，速度比较慢的 I/O 操作可能引起不可预测的结果。一般情况下，系统调用执行I/O操作不能立即完成时，会直接进入睡眠状态。比如，当读取数据时，如果缓冲区中无数据或数据少于系统调用请求数据量的大小，线程就会阻塞住，直到向缓冲区写入了足够多的数据可供线程读取时，产生一个中断把正在睡眠的线程唤醒，开始读取数据；当写入数据时，如果缓冲区没有足够的空间或者空间小于待写入的数据量所要求的大小时，线程也会阻塞住，直到缓冲区有了足够大的空间可供线程写入时，也会产生一个中断把正在睡眠的线程唤醒，开始写入数据。当线程完成数据的读取或写入操作后，其执行的系统调用才会返回。调用过程如图1所示。 </p>
+<p><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/io1.png" alt="img"></p>
+<center>图1 阻塞I/O</center>
+
+<h3 id="非阻塞I-O"><a href="#非阻塞I-O" class="headerlink" title="非阻塞I/O"></a>非阻塞I/O</h3><p>使用非阻塞型I/O时，应用程序可以在执行一个比较慢速的I/O操作时，立即就可以得到一个结果。如果得到的结果是I/O操作还没有完成，再次执行系统调用去查看I/O操作的结果。非阻塞 I/O 的问题也在于此，尽管应用程序可以在执行一个慢速的I/O 操作立即返回，但是却无法知道什么时候I/O操作才能完成。这就需要应用程序不得不每过一段时间轮询I/O操作是否完成，严重地浪费了CPU 资源。当操作系统内核的缓冲区没有可读数据时，系统调用recvfrom()执行后会立即返回一个错误，然后重复执行，直到缓冲区有可读数据，就会把这些数据从内核复制到用户空间中。但是每次轮询的时间长短是无法事先知道的，时间过短的话，recvfrom()执行太过频繁；过长的话，影响服务器的吞吐性能。调用过程如图2所示。</p>
+<p><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/io2.png" alt="img"></p>
+<center>图2 非阻塞I/O</center>
+
+<h3 id="异步I-O"><a href="#异步I-O" class="headerlink" title="异步I/O"></a>异步I/O</h3><p>在异步I/O中，由操作系统负责数据具体的读写操作，应用程序不需要处理数据，也不需要时刻去轮询读写操作是否完成。应用程序只需要将文件描述符、缓冲区的地址等一些I/O需要的数据传递给内核，就可以去处理其它的事件。操作系统会负责具体数据的I/O，缓冲区之间的复制操作也不再需要应用程序关心。当数据的I/O完成时，应用程序接收到操作系统发给应用程序I/O完成的通知，接下来可以再决定后续的操作。Linux操作系统在2.6版本时才正式引入了异步I/O，虽然经过了几年的发展但是还是不够成熟。调用过程如图3所示。</p>
+<p><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/io3.png" alt="img"></p>
+<center>图3 异步I/O</center>
+
+<h4 id="信号驱动I-O"><a href="#信号驱动I-O" class="headerlink" title="信号驱动I/O"></a>信号驱动I/O</h4><p>在信号驱动I/O中，当指定的文件描述符上有事件发生时，操作系统通过信号的方式把通知传递给该应用程序，弥补了传统的非阻塞I/O使用轮询造成的额外的系统开销的不足[17]。当应用程序开始执行一个I/O操作时，先执行读或写的系统调用告知操作系统的内核启动具体的I/O操作，I/O操作启动后会马上返回。当I/O操作在执行完后或者在执行过程中发生错误时，操作系统内核会按照应用程序进程事先约定好的某种方式通知进程。</p>
+<p>但是，信号驱动I/O的一些设计上存在缺陷，导致它并不适于服务器应用程序的网络通信中。首先，信号是不排队的。一个进程中如果已经有一个信号产生了并被挂起时。此时，如果同一个信号再次发生，就会被忽略。这样并不能保证进程中每一个事件触发的信号都会被处理。而且，应用程序无法通过信号驱动I/O得知有多少事件发生、发生了什么事件，所以需要对所有的文件描述符进行检查。调用过程如图4所示。</p>
+<p><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/io4.png" alt="img"></p>
+<center>图4 信号驱动I/O</center>
+
+<h3 id="I-O多路复用"><a href="#I-O多路复用" class="headerlink" title="I/O多路复用"></a>I/O多路复用</h3><p>在I/O多路复用中，主线程可以通过监听多个描述符等待I/O事件的就绪，如数据可读或可写，这其实是通过阻塞I/O实现的。调用过程如图4所示。</p>
+<p><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/io6.png" alt="img"></p>
+<center>图5 I/O多路复用</center>
+
+<p>在I/O多路复用中，应用程序事先会告诉操作系统需要监听哪一个事件，然后事件就绪后由操作系统通知应用程序。使用I/O利用技术后服务器可以监听多个端口，能同时处理多个连接，使服务器处理高并发请求的能力大为提高。虽然通过这种方式可以对多个文件描述符进行监听，但是它本身还是通过阻塞I/O实现的。当I/O操作准备就绪后，还需要结合多线程技术实现真正意义上的并发。在Linux类操作系统中，提供的I/O多路复用方案主要有select、poll和epoll有三种，分别提供了三个系统调用。</p>
+<ul>
+<li><p>select。系统调用select同时处理的文件描述符数量存在最大值的限制，而且在轮询地检测I/O操作是否就绪时，需要在内核的缓冲区和用户空间之间复制文件描述符集。</p>
+</li>
+<li><p>poll。系统调用poll只需要传递一个文件描述符集的参数，也是采用轮询的试去检测I/O事件是否就绪。</p>
+</li>
+<li><p>epoll。epoll是对前两种方案的改进，除了ET工作模式，它还有另外一种工作模式LT(Level Trigger)，默认的工作模式为LT。在LT工作模式下，epoll比较类似于poll，也是采用轮询的方式去检测I/O事件是否就绪。在LT模式下，epoll可以支持阻塞I/O和非阻塞I/O。当内核通知应用程序后，若应用程序没有采取任何处理，依然会不断地发送通知给应用程序。在另外一种工作模式ET下，epoll通过一个事件表来管理文件描述符集，只有当事件的状态发生变化时，应用程序才会收到通知。epoll是针对前两种方案的不足而设计的，引入eventpollfs后以共享内存的方式传递参数，在以后的轮询时减少了数据复制的次数。</p>
+</li>
+</ul>
+<h2 id="网络I-O模型"><a href="#网络I-O模型" class="headerlink" title="网络I/O模型"></a>网络I/O模型</h2><p>在网络编程中，有两种事件：一种是I/O事件，即数据的读写操作；另一种是非I/O事件，如编码、解码等业务相关的复杂的计算操作。所以有了事件处理这一网络设计模式，并且有两种高效的事件处理模式Reactor和Proactor专门用于处理网络I/O。</p>
+<h4 id="Reactor模型"><a href="#Reactor模型" class="headerlink" title="Reactor模型"></a>Reactor模型</h4><p>在Reactor中，事件被关注后，将被同步地从事件源进行分离和分配[19]。I/O事件只有当I/O操作准备好之后才可以处理，而非I/O事件可以单独地去处理。应用程序只会关心监听的文件描述符上事件的状态有没有改变，当事件状态发生变化后，它会马上对这个事件进行处理。它不会做任何有关业务的工作，对于数据的读写和编码解码等工作均安排给其它线程完成。 </p>
+<p>在Linux操作系统设计的Reactor模式，一般的工作流程如图5所示。</p>
+<p><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/io7.png" alt="img"></p>
+<center>图6 Reactor模型</center>
+
+<ul>
+<li>应用程序的主线程注册读就绪事件并通过epoll_wait()关注，之后不断地查看是否有数据可读；</li>
+<li>当可以读取数据时，操作系统会通知应用程序，由应用程序的主线程将此事件放到任务队列中去；</li>
+<li>然后，某个从睡眠状态下被唤醒的线程从队列头部把最先放进去的事件取出来，开始处理读事件，并向操作系统注册写事件；</li>
+<li>接着，应用程序的主线程再次调用epoll_wait()，后续的处理程序与读事件的处理类似。</li>
+</ul>
+<p>相比传统的网络模型，Reactor不再为每一个客户端的请求连接分配一个线程，通过I/O多路复用技术，使已经建立好的线程达到复用的目的，数据的I/O操作完成后，再选择线程池中的工作线程来处理非I/O事件。在这种模式中，节省了等待I/O操作完成就绪的时间，提高了多线程的利用率。通过线程池技术，也减少了使用多线程带来的上下文切换等造成的系统开销。</p>
+<h4 id="Proactor模型"><a href="#Proactor模型" class="headerlink" title="Proactor模型"></a>Proactor模型</h4><p>在Proactor中，工作线程只需要专注于业务逻辑的处理。当一个I/O操作发起时，操作系统将来自于网络中的I/O数据由内核的缓冲区复制到用户空间，当事件处理器监听到I/O操作读写完成的消息后，通知工作线程来处理数据读取后的工作，所有的I/O操作都是交给操作系统来完成的[20]。<br>在Linux操作系统设计的Proactor一般的工作流程如图6所示。</p>
+<p><img src="https://raw.githubusercontent.com/witchiman/GitDemo/master/images/io8.png" alt="img"></p>
+<center>图7 Proactor模型</center>
+
+<ul>
+<li>应用程序线程通过aio_read()向操作系统注册读完成事件，然后，返回继续执行其它操作。</li>
+<li>当数据读写完成后，操作系统会传递一个信号给应用程序，告诉事件读写已经完成，由应用程序的主线程完成善后工作。</li>
+<li>主线程会选择一个工作线程来处理来自客户端请求的数据。完成处理后，再通过aio_write()注册一个写完成事件，之后，继续执行其它操作。</li>
+<li>当数据写入后事件完成，操作系统发送一个信号通知应用程序，由其选择一个工作线程来完成最后的工作。</li>
+</ul>
+<p>Reactor和Proactor都有各自的应用场景。在Reactor中需要工作线程完成I/O操作，而在Proactor中，具体的I/O是由系统完成的。但是Proactor设计更为复杂，实现起来难度大，而且也不方便错误追踪。 </p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux/" rel="tag"># linux</a>
+          
+            <a href="/tags/os/" rel="tag"># os</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/09/15/java-concurrent/" rel="next" title="【转】Java并发编程：CountDownLatch、CyclicBarrier和Semaphore">
+                <i class="fa fa-chevron-left"></i> 【转】Java并发编程：CountDownLatch、CyclicBarrier和Semaphore
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">42</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#传统的I-O模型"><span class="nav-number">1.</span> <span class="nav-text">传统的I/O模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#阻塞I-O"><span class="nav-number">1.1.</span> <span class="nav-text">阻塞I/O</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#非阻塞I-O"><span class="nav-number">1.2.</span> <span class="nav-text">非阻塞I/O</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#异步I-O"><span class="nav-number">1.3.</span> <span class="nav-text">异步I/O</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#信号驱动I-O"><span class="nav-number">1.3.1.</span> <span class="nav-text">信号驱动I/O</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#I-O多路复用"><span class="nav-number">1.4.</span> <span class="nav-text">I/O多路复用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#网络I-O模型"><span class="nav-number">2.</span> <span class="nav-text">网络I/O模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Reactor模型"><span class="nav-number">2.0.1.</span> <span class="nav-text">Reactor模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Proactor模型"><span class="nav-number">2.0.2.</span> <span class="nav-text">Proactor模型</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
