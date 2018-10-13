@@ -53,7 +53,7 @@
 <link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="hbase,大数据," />
+  <meta name="keywords" content="Hexo, NexT" />
 
 
 
@@ -69,18 +69,17 @@
 
 
 
-<meta name="description" content="memstore 概念region server的内存用于读写缓存主要有memstore和blockcache，其中memstore是写缓存。region server收的到写请求，实际上访问的是该server的region。每个region包含多个store,一个store对应着一个列族。每个store中又包含一个memstore和多个Hfile文件。memstore位于region serve">
-<meta name="keywords" content="hbase,大数据">
+<meta name="description" content="title: hbase memstore 的flushdate: 2018-10-13 11:48:14tags: - hbase - 大数据  region server的内存用于读写缓存主要有memstore和blockcache，其中memstore是写缓存。region server收的到写请求，实际上访问的是该server的region。每个region包含多个store,一个sto">
 <meta property="og:type" content="article">
-<meta property="og:title" content="hbase memstore 的flush">
+<meta property="og:title" content="witchiman的博客">
 <meta property="og:url" content="http://witchiman.github.io/2018/10/13/hbase-memstore-flush/index.html">
 <meta property="og:site_name" content="witchiman的博客">
-<meta property="og:description" content="memstore 概念region server的内存用于读写缓存主要有memstore和blockcache，其中memstore是写缓存。region server收的到写请求，实际上访问的是该server的region。每个region包含多个store,一个store对应着一个列族。每个store中又包含一个memstore和多个Hfile文件。memstore位于region serve">
+<meta property="og:description" content="title: hbase memstore 的flushdate: 2018-10-13 11:48:14tags: - hbase - 大数据  region server的内存用于读写缓存主要有memstore和blockcache，其中memstore是写缓存。region server收的到写请求，实际上访问的是该server的region。每个region包含多个store,一个sto">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-10-13T04:28:07.003Z">
+<meta property="og:updated_time" content="2018-10-13T04:46:51.151Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="hbase memstore 的flush">
-<meta name="twitter:description" content="memstore 概念region server的内存用于读写缓存主要有memstore和blockcache，其中memstore是写缓存。region server收的到写请求，实际上访问的是该server的region。每个region包含多个store,一个store对应着一个列族。每个store中又包含一个memstore和多个Hfile文件。memstore位于region serve">
+<meta name="twitter:title" content="witchiman的博客">
+<meta name="twitter:description" content="title: hbase memstore 的flushdate: 2018-10-13 11:48:14tags: - hbase - 大数据  region server的内存用于读写缓存主要有memstore和blockcache，其中memstore是写缓存。region server收的到写请求，实际上访问的是该server的region。每个region包含多个store,一个sto">
 
 
 
@@ -116,7 +115,7 @@
 
 
 
-  <title>hbase memstore 的flush | witchiman的博客</title>
+  <title> | witchiman的博客</title>
   
 
 
@@ -260,7 +259,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">hbase memstore 的flush</h1>
+          <h1 class="post-title" itemprop="name headline"></h1>
         
 
         <div class="post-meta">
@@ -310,7 +309,13 @@
       
 
       
-        <h3 id="memstore-概念"><a href="#memstore-概念" class="headerlink" title="memstore 概念"></a>memstore 概念</h3><p>region server的内存用于读写缓存主要有memstore和blockcache，其中memstore是写缓存。region server收的到写请求，实际上访问的是该server的region。每个region包含多个store,一个store对应着一个列族。每个store中又包含一个memstore和多个Hfile文件。memstore位于region server的主内存中，而HFiles被持久化到HDFS中。当region server处理写请求的时候，数据首先写入到memstore中去，然后当到达一定的阀值的时候，memstore中的数据会被flush到HFile中，此时的数据才完成持久化。</p>
+        <hr>
+<p>title: hbase memstore 的flush<br>date: 2018-10-13 11:48:14<br>tags:</p>
+<pre><code>- hbase
+- 大数据
+</code></pre><hr>
+<p>region server的内存用于读写缓存主要有memstore和blockcache，其中memstore是写缓存。region server收的到写请求，实际上访问的是该server的region。每个region包含多个store,一个store对应着一个列族。每个store中又包含一个memstore和多个Hfile文件。memstore位于region server的主内存中，而HFiles被持久化到HDFS中。当region server处理写请求的时候，数据首先写入到memstore中去，然后当到达一定的阀值的时候，memstore中的数据会被flush到HFile中，此时的数据才完成持久化。</p>
+<a id="more"></a>
 <h3 id="memstore-flush机制"><a href="#memstore-flush机制" class="headerlink" title="memstore flush机制"></a>memstore flush机制</h3><p>为了减少flush过程对读写的影响，HBase采用了类似于两阶段提交的方式，将整个flush过程分为三个阶段：</p>
 <ul>
 <li>prepare阶段：遍历当前region中的所有memstore，将memstore中当前数据集kvset做一个快照snapshot，然后再新建一个新的kvset。后期的所有写入操作都会写入新的kvset中，而整个flush阶段读操作会首先分别遍历kvset和snapshot，如果查找不到再会到HFile中查找。prepare阶段需要加一把updateLock对写请求阻塞，结束之后会释放该锁。因为此阶段没有任何费时操作，因此持锁时间很短。</li>
@@ -353,14 +358,6 @@
     
 
     <footer class="post-footer">
-      
-        <div class="post-tags">
-          
-            <a href="/tags/hbase/" rel="tag"># hbase</a>
-          
-            <a href="/tags/大数据/" rel="tag"># 大数据</a>
-          
-        </div>
       
 
       
@@ -521,7 +518,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#memstore-概念"><span class="nav-number">1.</span> <span class="nav-text">memstore 概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#memstore-flush机制"><span class="nav-number">2.</span> <span class="nav-text">memstore flush机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#memstore刷新策略"><span class="nav-number">3.</span> <span class="nav-text">memstore刷新策略</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#memstore-flush机制"><span class="nav-number">1.</span> <span class="nav-text">memstore flush机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#memstore刷新策略"><span class="nav-number">2.</span> <span class="nav-text">memstore刷新策略</span></a></li></ol></div>
             
 
           </div>
