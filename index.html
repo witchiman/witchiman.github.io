@@ -261,7 +261,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/10/13/hbase-memstore-flush/" itemprop="url">未命名</a></h1>
+                <a class="post-title-link" href="/2018/10/13/hbase-memstore-flush/" itemprop="url">hbase memstore 的flush</a></h1>
         
 
         <div class="post-meta">
@@ -312,12 +312,7 @@
 
       
         
-          <hr>
-<p>title: hbase memstore 的flush<br>date: 2018-10-13 11:48:14<br>tags:</p>
-<pre><code>- hbase
-- 大数据
-</code></pre><hr>
-<p>region server的内存用于读写缓存主要有memstore和blockcache，其中memstore是写缓存。region server收的到写请求，实际上访问的是该server的region。每个region包含多个store,一个store对应着一个列族。每个store中又包含一个memstore和多个Hfile文件。memstore位于region server的主内存中，而HFiles被持久化到HDFS中。当region server处理写请求的时候，数据首先写入到memstore中去，然后当到达一定的阀值的时候，memstore中的数据会被flush到HFile中，此时的数据才完成持久化。</p>
+          <p>region server的内存用于读写缓存主要有memstore和blockcache，其中memstore是写缓存。region server收的到写请求，实际上访问的是该server的region。每个region包含多个store,一个store对应着一个列族。每个store中又包含一个memstore和多个Hfile文件。memstore位于region server的主内存中，而HFiles被持久化到HDFS中。当region server处理写请求的时候，数据首先写入到memstore中去，然后当到达一定的阀值的时候，memstore中的数据会被flush到HFile中，此时的数据才完成持久化。</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2018/10/13/hbase-memstore-flush/#more" rel="contents">
