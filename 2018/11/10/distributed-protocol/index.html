@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="分布式," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="在一个分布式系统中，需要一个规定来保证数据的一致性、各节点服务的容错性等等，这个规定就是一致性协议。常见的分布式协议有2PC、3PC、Paxos和raft等。">
+<meta name="keywords" content="分布式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式应用中的一致性协议">
+<meta property="og:url" content="http://witchiman.github.io/2018/11/10/distributed-protocol/index.html">
+<meta property="og:site_name" content="witchiman的博客">
+<meta property="og:description" content="在一个分布式系统中，需要一个规定来保证数据的一致性、各节点服务的容错性等等，这个规定就是一致性协议。常见的分布式协议有2PC、3PC、Paxos和raft等。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-11-10T04:42:25.644Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="分布式应用中的一致性协议">
+<meta name="twitter:description" content="在一个分布式系统中，需要一个规定来保证数据的一致性、各节点服务的容错性等等，这个规定就是一致性协议。常见的分布式协议有2PC、3PC、Paxos和raft等。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://witchiman.github.io/2018/11/10/distributed-protocol/"/>
+
+
+
+
+
+  <title>分布式应用中的一致性协议 | witchiman的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">witchiman的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吟风拔弄上弦月，卧雪酣眠连天云。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://witchiman.github.io/2018/11/10/distributed-protocol/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="witchiman">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="witchiman的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">分布式应用中的一致性协议</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-10T11:20:31+08:00">
+                2018-11-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在一个分布式系统中，需要一个规定来保证数据的一致性、各节点服务的容错性等等，这个规定就是一致性协议。常见的分布式协议有2PC、3PC、Paxos和raft等。</p>
+<a id="more"></a>
+<h2 id="2PC"><a href="#2PC" class="headerlink" title="2PC"></a>2PC</h2><p>即Two-Phase Commit，二阶段提交。目前大多数的关系型数据库都是采用2PC协议来完成分布式事务处理的。</p>
+<h3 id="执行过程"><a href="#执行过程" class="headerlink" title="执行过程"></a>执行过程</h3><p>2PC中包含两个角色协调者和参与者，其分为两个阶段：</p>
+<p>阶段一，提交事务请求，也称投票阶段。</p>
+<ul>
+<li>事务询问。协调者会向所有的参与者发送事务，询问是否可以执行事务提交操作，并开始等待各参与者的响应。</li>
+<li>执行事务。各参与者执行事务操作，并将undo和redo信息记入事务日志中。</li>
+<li>各参与者向协调者反馈事务询问的响应。如果参与者成功执行一事务操作， 反馈给协调者yes响应，表示事务可以执行；如果没有成功执行事务，就反馈no给协调者，表示事务不可执行。</li>
+</ul>
+<p>阶段二，执行事务提交。</p>
+<p>​    在阶段二，协调者会根据各参与者的反馈情况决定最终是否可以进行事务提交操作。</p>
+<ul>
+<li>发送提交请求。协调者会一一向参与者发送commit请求。</li>
+<li>事务提交请求。当参与者收到commit请求后，会执行事务提交操作，并在完成提交之后释放在整个事务执行期间占用的事务资源。</li>
+<li>反馈事务提交结果。参与者在完成事务提交之后，向协调者发送ack消息。</li>
+<li>完成事务。协调者收到所有参与者反馈的ack消息后，完成事务。</li>
+</ul>
+<p>中断事务，当参与者向协调者反馈了no响应，或者协调者在等待参与者反馈消息的过程中超时了，就会触发中断事务。</p>
+<ul>
+<li>发送回滚请求。协调者向所有参与者发出rollback请求。</li>
+<li>事务回滚。参与者收到rollback请求后，会复用在阶段一中记录的undo信息来执行回滚操作，并在完成回滚之后释放在整个事务执行期间占用的资源。</li>
+<li>反馈事务回滚结果。参与者完成事务回滚之后，向协调者发送ack消息。 </li>
+<li>中断完成。协调者接收到所有参与者反馈的ack消息后，完成事务中断。</li>
+</ul>
+<h3 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h3><p>优点：原理简单，实现方便。</p>
+<p>缺点：同步阻塞、单点问题、数据不一致和没有完善的容错机制。</p>
+<ul>
+<li>同步阻塞。在二阶段提交的执行过程中，所有参与该事务操作的逻辑都处于阻塞状态，即各个参与者在等待其他参与者响应的过程中，无法再进行其它操作。 </li>
+<li>单点问题。一旦协调者出现问题，整个二阶段的提交流程就无法正常地进行；并且其它参与者会一直处于锁定事务资源的状态中，无法继续完成事务操作。</li>
+<li>数据不一致。在阶段二中，当协调者向所有参与者发送commit请求后，如果发生了局部的网络异常或者是协调者在尚未发送完commit请求之前自己崩溃了，导致最终只有部分参与者收到了commit。最终，只有收到commit请求的参与者才会进行事务的提交，整个分布式系统就会出现数据不一致的情况。</li>
+<li>没有完善的容错机制。协调者在询问参与者事务提交的过程中，如果参与者由于种种原因没有返回消息，导致协调者不能获取 所有参与者的响应消息，协调者只能通过超时的机制来判断是否需要中断事务。2PC没有设计较为完善的容错机制 ，任意一个节点的失败都会导致整个事务的失败。</li>
+</ul>
+<h2 id="3PC"><a href="#3PC" class="headerlink" title="3PC"></a>3PC</h2><p>3PC即 Three-Phase Commit，是2PC的改进版，同样有两个角色协调者和参与者，不同的是将2PC的阶段一分成两步，所以它包含了三个阶段CanCommit、PreCommit和DoCommit。</p>
+<h3 id="CanCommit"><a href="#CanCommit" class="headerlink" title="CanCommit"></a>CanCommit</h3><ul>
+<li>事务询问。协调者向所有的参与者发送CanCommit请求，询问是否可以执行事务操作，然后等待参与者的响应。</li>
+<li>参与者响应。参与者在收到协调者的CanCommit请求后，如果没有什么问题，就反馈yes，否则反馈no。</li>
+</ul>
+<h3 id="PreCommit"><a href="#PreCommit" class="headerlink" title="PreCommit"></a>PreCommit</h3><p>如果CanCommit正常进行，那么进入执行事务提交。</p>
+<ul>
+<li>发送提交请求。协调者向所有参与者发送PreCommit请求，进入了Prepared阶段。</li>
+<li>事务预提交。参与者接到PreCommit 请求后，会执行事务操作，并将undo和redo信息记录到事务日志中去。</li>
+<li>参与者把事务执行的结果反馈给协调者。如果各参与者成功执行了事务操作，就反回ack响应，然后等待最终后Commit或abort的请求</li>
+</ul>
+<p>如果第一步中有参与者返回了no，或者发生了超时，协调者就会中断事务</p>
+<ul>
+<li>发送中断请求。协调者向所有参与者发送abort请求。</li>
+<li>中断事务。对参与者而言，不管是收到abort请求还是在等待协调者的过程中发生了超时，其都会中断事务。</li>
+</ul>
+<h3 id="DoCommit"><a href="#DoCommit" class="headerlink" title="DoCommit"></a>DoCommit</h3><p>这一阶段才开始真正的事务提交。</p>
+<p>执行提交。</p>
+<ul>
+<li>发送提交请求。如果协调者收到了所有参与者ack 响应，就会向所有的参与者再次发送DoCommit请求。</li>
+<li>事务提交。当参与者收到协调者的DoCommit请求后，开始正式执行事务的提交操作，并在完成提交之后释放在整个事务执行期间占用的事务资源。</li>
+<li>反馈事务提交结果。参与者在完成事务提交之后 ，向协调者发送ack消息。</li>
+<li>完成事务。协调者接收到所有参与者反馈的ack消息后，完成事务。</li>
+</ul>
+<p>假如协调者在等待参与者的过程中发生了超时，或者有参与者返回了no的响应，那么协调者会中断事务。</p>
+<ul>
+<li>发送中断请求。协调者向所有参与者发送abort请求。</li>
+<li>事务回滚。参与者在收到abort请求后，会利用上一步在日志中记录的undo 信息来进行事务回滚操作，并释放在执行整个事务过程中占用的资源。</li>
+<li>反馈事务回滚结果。 参与者在完成事务的回滚之后，向协调者发送ack响应。</li>
+<li>中断事务。协调者收到所有的ack消息后，中断事务。</li>
+</ul>
+<h3 id="优缺点-1"><a href="#优缺点-1" class="headerlink" title="优缺点"></a>优缺点</h3><p>3PC 相比2PC降低了参与者阻塞的范围，并能能够在出现故障后继续达到一致。</p>
+<p>不过也引入了新的问题，在阶段二，如果发生局部网络的故障，协调者与个别参与者无法进行正常的通信，仍然会造成数据不一致的现象。</p>
+<h2 id="Paxos"><a href="#Paxos" class="headerlink" title="Paxos"></a>Paxos</h2><p>2PC和3PC 都没有这样或那样的问题，Paxos的出现很好地解决了这一问题，是目前公认的解决分布式一致性问题最有效的算法之一。</p>
+<p>Paxos中有3个参与者Proposer、Acceptor和Leaner，Proposer是发起提案的人，Acceptor是接受提案的人，Learner是信使在Proposer和Acceptor之间传送议案。在Paxos中有一些条件限制：</p>
+<ul>
+<li>一个Acceptor必须批准他收到的第一个提案。</li>
+<li>每个提案会有一个编号M，这个编号是全局递增的;同样每个提案本身也有一个值 Value。如果编号为M1的Value为V1的提案即[M1，V1]被选定了，那么所有比编号M1更高的，且被选定的提案，其值必须为V1。<ul>
+<li>如果[M1，V1]被选定了，那么所以比M1更高的，那么所有比编号M1更高的，且被Acceptor选定的提案，其值必须为V1。</li>
+<li>如果[M1，V1]被选定了，往下产生的编号更高的提案，其Value都为V1。</li>
+<li>对如果[M1，V1]， 如果其被提出，肯定存在一个由半数以上的Acceptor组成的集合S,满足以下条件：S中不存在任何批准过编号大于M1的Acceptor；S中批准的所以编号小于M1的提案中，编号最大的那个的Value值也是V1。</li>
+</ul>
+</li>
+</ul>
+<h3 id="执行过程-1"><a href="#执行过程-1" class="headerlink" title="执行过程"></a>执行过程</h3><p>Paxos的执行相当于一次投票的选举过程，分为两个阶段。</p>
+<p>阶段一</p>
+<ul>
+<li>Proper选择一个提案的编号M1,然后向Acceptor发送提案。</li>
+<li>如果一个Acceptor收到提案M1，并且这个提案的编号大于自己之前处理过的所有的提案，那么它就会把它已经批准过的编号最大的提案返回给Proposer，同时该Proposer承诺不会再批准任何编号小于M1的提案。</li>
+</ul>
+<p>阶段二</p>
+<ul>
+<li>如果Proposer的提案受到半数以上的Acceptor的批准，那么他就会发送提案[M1, V1]的accept请求。V1是Proposer收到的响应中编号最大的提案的值，如果没有，则V1可以为任意值 。</li>
+<li>当Acceptor收到提案时，如果他没有批准过大于其编号M1的提案，那么就可以批准M1。</li>
+</ul>
+<p>当提案被半数Acceptror批准后，就会把这个提案发送给Learner，由Learner最后将提案传递下去，这样一个提案才算完成。</p>
+<p>这篇文章 <a href="https://www.cnblogs.com/endsock/p/3480093.html" target="_blank" rel="external">https://www.cnblogs.com/endsock/p/3480093.html</a> 中通过一个例子形象地描述了Paxos算法，在一定程度上有助于理解Paxos算法的原理。</p>
+<p>但是这里也没有提到一个问题，就是当一个Acceptor接收到一个Proposer的提案时并响应时，有另外一个Proposer提了一个编号更高的提案，然后在Accetpor响应后又有另外一个Proposer提出编号更高的提案…这样会造成一个死循环。解决这个问题的方法就是建立一个主Proposer，在一个Proposer集合中只有一个Proposer能发出提案的请求给Acceptor。</p>
+<h3 id="优缺点-2"><a href="#优缺点-2" class="headerlink" title="优缺点"></a>优缺点</h3><p>Paxos很好地解决分布式系统中的阻塞和单点故障的问题，但是Paxos的复杂性增加了它在工程实践中应用的难度。</p>
+<h2 id="raft"><a href="#raft" class="headerlink" title="raft"></a>raft</h2><p>Raft是斯坦福的Diego Ongaro、John Ousterhout两个人以易懂（Understandability）为目标设计的一致性算法，在2013年发布了论文：《In Search of an Understandable Consensus Algorithm》从2013年发布到现在不过只有两年，到现在已经有了十多种语言的Raft算法实现框架，较为出名的有etcd，Google的Kubernetes也是用了etcd作为他的服务发现框架；由此可见易懂性是多么的重要。</p>
+<p>在了解Raft之前，我们先了解Consensus一致性这个概念，它是指多个服务器在状态达成一致，但是在一个分布式系统中，因为各种意外可能，有的服务器可能会崩溃或变得不可靠，它就不能和其他服务器达成一致状态。这样就需要一种Consensus协议，一致性协议是为了确保容错性，也就是即使系统中有一两个服务器当机，也不会影响其处理过程。</p>
+<p>为了以容错方式达成一致，我们不可能要求所有服务器100%都达成一致状态，只要超过半数的大多数服务器达成一致就可以了，假设有N台服务器，N/2 +1 就超过半数，代表大多数了。</p>
+<p>Paxos和Raft都是为了实现Consensus一致性这个目标，这个过程如同选举一样，参选者需要说服大多数选民(服务器)投票给他，一旦选定后就跟随其操作。Paxos和Raft的区别在于选举的具体过程不同。</p>
+<p>在Raft中，任何时候一个服务器可以扮演下面角色之一：</p>
+<ul>
+<li>Leader: 处理所有客户端交互，日志复制等，一般一次只有一个Leader.</li>
+<li>Follower: 类似选民，完全被动</li>
+<li>Candidate候选人: 类似Proposer律师，可以被选为一个新的领导人。</li>
+</ul>
+<h3 id="执行过程-2"><a href="#执行过程-2" class="headerlink" title="执行过程"></a>执行过程</h3><p>Raft阶段分为两个，首先是选举过程，然后在选举出来的领导人带领进行正常操作，比如日志复制等。下面用图示展示这个过程：</p>
+<ul>
+<li>任何一个服务器都可以成为一个候选者Candidate，它向其他服务器Follower发出要求选举自己的请求：</li>
+<li>其他服务器同意了，发出OK。注意如果在这个过程中，有一个Follower当机，没有收到请求选举的要求，因此候选者可以自己选自己，只要达到N/2 + 1 的大多数票，候选人还是可以成为Leader的。</li>
+<li>这样这个候选者就成为了Leader领导人，它可以向选民也就是Follower们发出指令，比如进行日志复制。</li>
+<li>以后通过心跳进行日志复制的通知。</li>
+<li>如果一旦这个Leader当机崩溃了，那么Follower中有一个成为候选者，发出邀票选举。</li>
+<li>Follower同意后，其成为Leader，继续承担日志复制等指导工作：</li>
+</ul>
+<p>Splite Vote是因为如果同时有两个候选人向大家邀票，这时通过类似加时赛来解决，两个候选者在一段timeout比如300ms互相不服气的等待以后，因为双方得到的票数是一样的，一半对一半，那么在300ms以后，再由这两个候选者发出邀票，这时同时的概率大大降低，那么首先发出邀票的的候选者得到了大多数同意，成为领导者Leader，而另外一个候选者后来发出邀票时，那些Follower选民已经投票给第一个候选者，不能再投票给它，它就成为落选者了，最后这个落选者也成为普通Follower一员了。</p>
+<p>动画演示: <a href="http://thesecretlivesofdata.com/raft/" target="_blank" rel="external">http://thesecretlivesofdata.com/raft/</a></p>
+<h3 id="优缺点-3"><a href="#优缺点-3" class="headerlink" title="优缺点"></a>优缺点</h3><p>熟悉或了解分布性系统的开发者都知道一致性算法的重要性，Paxos一致性算法从90年提出到现在已经有二十几年了，而Paxos流程太过于繁杂实现起来也比较复杂，可能也是以为过于复杂 现在我听说过比较出名使用到Paxos的也就只是Chubby、libpaxos，搜了下发现Keyspace、BerkeleyDB数据库中也使用了该算法作为数据的一致性同步，虽然现在很广泛使用的Zookeeper也是基于Paxos算法来实现，但是Zookeeper使用的ZAB（Zookeeper Atomic Broadcast）协议对Paxos进行了很多的改进与优化，算法复杂我想会是制约他发展的一个重要原因；说了这么多只是为了要引出本篇文章的主角Raft一致性算法，没错Raft就是在这个背景下诞生的，文章开头也说到了Paxos最大的问题就是复杂，Raft一致性算法就是比Paxos简单又能实现Paxos所解决的问题的一致性算法。</p>
+<h2 id="参考资料："><a href="#参考资料：" class="headerlink" title="参考资料："></a>参考资料：</h2><ul>
+<li><a href="https://book.douban.com/subject/26292004/" target="_blank" rel="external">从Paxos到zookeeper分布式一致性原理与实践</a></li>
+<li><a href="https://www.jdon.com/artichect/raft.html" target="_blank" rel="external">https://www.jdon.com/artichect/raft.html</a></li>
+<li><a href="https://blog.csdn.net/xu__cg/article/details/73555161" target="_blank" rel="external">https://blog.csdn.net/xu__cg/article/details/73555161</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/分布式/" rel="tag"># 分布式</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/10/13/hbase-memstore-flush/" rel="next" title="hbase memstore 的flush">
+                <i class="fa fa-chevron-left"></i> hbase memstore 的flush
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          
+            <img class="site-author-image" itemprop="image"
+              src="/images/avatar.jpg"
+              alt="witchiman" />
+          
+            <p class="site-author-name" itemprop="name">witchiman</p>
+            <p class="site-description motion-element" itemprop="description">码农界的吟游诗人</p>
+        </div>
+
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+            
+              <a href="/archives/">
+            
+                <span class="site-state-item-count">45</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">27</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/witchiman" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>GitHub</a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/owinamimaniwo" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>Weibo</a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2PC"><span class="nav-number">1.</span> <span class="nav-text">2PC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#执行过程"><span class="nav-number">1.1.</span> <span class="nav-text">执行过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优缺点"><span class="nav-number">1.2.</span> <span class="nav-text">优缺点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3PC"><span class="nav-number">2.</span> <span class="nav-text">3PC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CanCommit"><span class="nav-number">2.1.</span> <span class="nav-text">CanCommit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PreCommit"><span class="nav-number">2.2.</span> <span class="nav-text">PreCommit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DoCommit"><span class="nav-number">2.3.</span> <span class="nav-text">DoCommit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优缺点-1"><span class="nav-number">2.4.</span> <span class="nav-text">优缺点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Paxos"><span class="nav-number">3.</span> <span class="nav-text">Paxos</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#执行过程-1"><span class="nav-number">3.1.</span> <span class="nav-text">执行过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优缺点-2"><span class="nav-number">3.2.</span> <span class="nav-text">优缺点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#raft"><span class="nav-number">4.</span> <span class="nav-text">raft</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#执行过程-2"><span class="nav-number">4.1.</span> <span class="nav-text">执行过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优缺点-3"><span class="nav-number">4.2.</span> <span class="nav-text">优缺点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料："><span class="nav-number">5.</span> <span class="nav-text">参考资料：</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">witchiman</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.2</div>
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.2"></script>
+
+
+
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
